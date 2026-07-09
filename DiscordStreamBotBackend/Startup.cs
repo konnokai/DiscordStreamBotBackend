@@ -23,10 +23,13 @@ namespace DiscordStreamBotBackend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<MainDbContext>(options =>
+            // token 儲存改走 MySQL：MySqlDataStore 每次操作用 factory 建短生命週期 context（DataStore 存活期可能跨越/併發於請求 scope，EF context 非執行緒安全）。
+            // 仍保留 scoped MainDbContext（委派 factory）供 YouTubeNotificationsController 等既有注入使用。
+            services.AddDbContextFactory<MainDbContext>(options =>
                 options
                     .UseMySql(Configuration.GetConnectionString("MySql"), ServerVersion.AutoDetect(Configuration.GetConnectionString("MySql")))
                     .UseSnakeCaseNamingConvention());
+            services.AddScoped(p => p.GetRequiredService<IDbContextFactory<MainDbContext>>().CreateDbContext());
 
             services.AddControllers().AddNewtonsoftJson(options =>
             {

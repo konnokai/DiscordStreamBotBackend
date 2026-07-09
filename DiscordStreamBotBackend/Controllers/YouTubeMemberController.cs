@@ -1,9 +1,11 @@
-﻿using DiscordStreamBotBackend.Model;
+﻿using DiscordStreamBotBackend.DataBase;
+using DiscordStreamBotBackend.Model;
 using DiscordStreamBotBackend.Services;
 using DiscordStreamBotBackend.Services.Auth;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -33,7 +35,8 @@ namespace DiscordStreamBotBackend.Controllers
             HttpClient httpClient,
             IConfiguration configuration,
             RedisService redisService,
-            TokenService tokenService)
+            TokenService tokenService,
+            IDbContextFactory<MainDbContext> dbContextFactory)
         {
             _logger = logger;
             _httpClient = httpClient;
@@ -49,7 +52,7 @@ namespace DiscordStreamBotBackend.Controllers
                     ClientSecret = _configuration["Google:ClientSecret"]
                 },
                 Scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"],
-                DataStore = new RedisDataStore(_redisService, _tokenService)
+                DataStore = new MySqlDataStore(dbContextFactory, _tokenService)
             });
         }
 

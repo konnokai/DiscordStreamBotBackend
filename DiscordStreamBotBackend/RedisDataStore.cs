@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DiscordStreamBotBackend
 {
-    public class RedisDataStore : IDataStore
+    public class RedisDataStore : ITokenDataStore
     {
         private readonly RedisService _redisService;
         private readonly TokenService _tokenService;
