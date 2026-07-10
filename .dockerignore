@@ -1,0 +1,15 @@
+**/.vs/
+**/.vscode/
+**/.idea/
+**/bin/
+**/obj/
+**/TestResults/
+**/publish/
+.git/
+.claude/
+.gitattributes
+.gitignore
+*.user
+*.suo
+*.md
+config/appsettings.Production.json
