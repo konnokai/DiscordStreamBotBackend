@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Hosting;
+Ôªøusing Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog;
@@ -28,7 +28,7 @@ namespace DiscordStreamBotBackend
 #endif
 
             var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
-            logger.Info(VERSION + " ™Ï©l§∆§§");
+            logger.Info(VERSION + " ÂàùÂßãÂåñ‰∏≠");
 
             try
             {
