@@ -15,6 +15,8 @@ RUN dotnet publish "DiscordStreamBotBackend.csproj" \
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
+# 程式與既有 MySQL 時間欄位皆以台灣本地時間運作，避免容器預設 UTC 造成排程誤判。
+ENV TZ=Asia/Taipei
 ENV ASPNETCORE_ENVIRONMENT=Production \
     DOTNET_EnableDiagnostics=0
 
