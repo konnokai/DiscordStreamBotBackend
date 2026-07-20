@@ -107,7 +107,7 @@ namespace DiscordStreamBotBackend.Services
                 await RePublishPendingAsync(cancellationToken);
         }
 
-        private async Task<bool> PublishAsync(KeyValuePair<string, string> message)
+        private async Task<bool> PublishAsync(KeyValuePair<string, string> message, bool isLogWarning = true)
         {
             try
             {
@@ -115,7 +115,8 @@ namespace DiscordStreamBotBackend.Services
                     return true;
 
                 SavePendingMessage(message);
-                _logger.LogWarning("通知訊息發送失敗，儲存到清單待命 | Channel: \"{Channel}\"", message.Key);
+                if (isLogWarning)
+                    _logger.LogWarning("通知訊息發送失敗，儲存到清單待命 | Channel: \"{Channel}\"", message.Key);
             }
             catch (Exception ex)
             {
@@ -131,13 +132,13 @@ namespace DiscordStreamBotBackend.Services
             if (_needRePublishMessageList.IsEmpty)
                 return;
 
-            _logger.LogWarning("已可重新發送通知訊息");
+            _logger.LogWarning("嘗試重新發送通知訊息: {Count} 筆", _needRePublishMessageList.Count);
             var pending = _needRePublishMessageList.ToArray();
             foreach (var item in pending)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 if (_needRePublishMessageList.TryRemove(item.Key, out var message))
-                    await PublishAsync(message);
+                    await PublishAsync(message, false);
             }
 
             if (_needRePublishMessageList.IsEmpty)
