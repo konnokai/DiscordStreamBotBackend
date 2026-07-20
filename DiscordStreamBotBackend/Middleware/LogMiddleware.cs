@@ -34,7 +34,7 @@ namespace DiscordStreamBotBackend.Middleware
 
             try
             {
-                var remoteIpAddress = context.Connection.RemoteIpAddress;
+                var remoteIpAddress = context.GetRemoteIPAddress();
                 var remoteIpText = remoteIpAddress?.ToString() ?? "unknown";
                 var requestPath = context.Request.Path.Value ?? "/";
                 string badReqRedisKey = $"server.errorcount:{remoteIpText.Replace(":", "-").Replace(".", "-")}";
