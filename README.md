@@ -80,7 +80,7 @@ Linux 會由 Compose 的 `host-gateway` 映射解析 `host.docker.internal`；Do
 
 本機前端可使用 `http://localhost:3333`；其他環境必須使用 HTTPS absolute URI。Backend 啟動時會驗證網域格式，並確認設定的 `Twitch:WebHookSecret` 與 Redis DB 0 的 `twitch:webhook_secret` 完全一致。
 
-應用層 rate limit 只使用 ASP.NET Core 正規化後的 `HttpContext.Connection.RemoteIpAddress`，不會直接信任 `CF-Connecting-IP` 或 `X-Forwarded-For`。若 Backend 位於反向代理後方，必須在程式中啟用 Forwarded Headers middleware，並以 `ForwardedHeadersOptions.KnownProxies` 或 `KnownNetworks` 明確列出可信代理；未設定可信代理前，不應啟用轉送 header。
+應用層 rate limit 與 access log 使用 ASP.NET Core Forwarded Headers middleware 正規化後的 `HttpContext.Connection.RemoteIpAddress`。預設從 Cloudflare 的 `CF-Connecting-IP` 取得原始 IP；若反向代理送的是 `CF-Real-IP` 或 `X-Forwarded-For`，請修改 `ForwardedHeaders:ForwardedForHeaderName`。只有 `ForwardedHeaders:KnownProxies` 或 `KnownNetworks` 內的可信代理能改寫 IP，Docker 預設私有網段可設定為 `172.16.0.0/12`，實際部署仍應依 `docker network inspect` 結果縮小範圍。對外發布的 Backend port 必須限制為只能由反向代理存取，否則用戶可直接連線並偽造轉送 header。
 
 `twitch_broadcaster_authorization` 的 migration 由 Bot repo 統一管理，Backend 只映射既有資料表，不會建立或更新 schema。
 

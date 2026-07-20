@@ -2,12 +2,14 @@ using DiscordStreamBotBackend.DataBase;
 using DiscordStreamBotBackend.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
 using System;
+using System.Net;
 using TwitchLib.EventSub.Webhooks.Extensions;
 
 namespace DiscordStreamBotBackend
@@ -37,6 +39,34 @@ namespace DiscordStreamBotBackend
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.UseMemberCasing();
+            });
+
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor;
+                options.ForwardedForHeaderName = Configuration["ForwardedHeaders:ForwardedForHeaderName"] ?? "CF-Connecting-IP";
+                options.ForwardLimit = 1;
+
+                foreach (var proxy in Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>())
+                {
+                    if (!IPAddress.TryParse(proxy, out var address))
+                        throw new InvalidOperationException($"ForwardedHeaders:KnownProxies contains invalid IP address '{proxy}'.");
+
+                    options.KnownProxies.Add(address);
+                }
+
+                foreach (var network in Configuration.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? Array.Empty<string>())
+                {
+                    var parts = network.Split('/', 2);
+                    if (parts.Length != 2 ||
+                        !IPAddress.TryParse(parts[0], out var prefix) ||
+                        !int.TryParse(parts[1], out var prefixLength))
+                    {
+                        throw new InvalidOperationException($"ForwardedHeaders:KnownNetworks contains invalid CIDR network '{network}'.");
+                    }
+
+                    options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(prefix, prefixLength));
+                }
             });
 
             services.AddSingleton<RedisService>();
@@ -92,6 +122,7 @@ namespace DiscordStreamBotBackend
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseForwardedHeaders();
             app.UseMiddleware<Middleware.LogMiddleware>();
 
             app.UseRouting();
