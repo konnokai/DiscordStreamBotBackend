@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Prometheus;
 using System;
 using TwitchLib.EventSub.Webhooks.Extensions;
 
@@ -23,6 +24,8 @@ namespace DiscordStreamBotBackend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            StartupValidationHostedService.ValidateConfiguration(Configuration);
+
             // token 儲存改走 MySQL：MySqlDataStore 每次操作用 factory 建短生命週期 context（DataStore 存活期可能跨越/併發於請求 scope，EF context 非執行緒安全）。
             // 仍保留 scoped MainDbContext（委派 factory）供 YouTubeNotificationsController 等既有注入使用。
             services.AddDbContextFactory<MainDbContext>(options =>
@@ -38,21 +41,32 @@ namespace DiscordStreamBotBackend
 
             services.AddSingleton<RedisService>();
             services.AddSingleton<Services.Auth.TokenService>();
+            services.AddSingleton<BearerTokenService>();
+            services.AddSingleton<OAuthStateService>();
+            services.AddSingleton<GoogleOAuthService>();
+            services.AddSingleton<TwitchAuthorizationService>();
 
-            var hostUri = new Uri(Configuration["RedirectUrl"]);
+            var publicUrls = new PublicUrlService(Configuration);
+            services.AddSingleton(publicUrls);
             services.AddCors(options =>
             {
                 options.AddPolicy(name: "allowGET", builder =>
                 {
-                    builder.WithOrigins($"{hostUri.Scheme}://{hostUri.Authority}")
+                    builder.WithOrigins(publicUrls.FrontendDomain)
                            .WithMethods("GET")
-                           .WithHeaders("Content-Type");
+                           .WithHeaders("Content-Type", "Authorization");
                 });
                 options.AddPolicy(name: "allowPOST", builder =>
                 {
-                    builder.WithOrigins($"{hostUri.Scheme}://{hostUri.Authority}")
+                    builder.WithOrigins(publicUrls.FrontendDomain)
                            .WithMethods("POST")
-                           .WithHeaders("Content-Type");
+                           .WithHeaders("Content-Type", "Authorization");
+                });
+                options.AddPolicy(name: "frontend", builder =>
+                {
+                    builder.WithOrigins(publicUrls.FrontendDomain)
+                           .WithMethods("GET", "POST", "DELETE")
+                           .WithHeaders("Content-Type", "Authorization");
                 });
             });
 
@@ -63,7 +77,9 @@ namespace DiscordStreamBotBackend
                 config.EnableLogging = false;
             });
 
+            services.AddHostedService<StartupValidationHostedService>();
             services.AddHostedService<EventSubHostedService>();
+            services.AddHostedService<TwitchTokenValidationHostedService>();
 
             services.Configure<KestrelServerOptions>(options =>
             {
@@ -87,6 +103,7 @@ namespace DiscordStreamBotBackend
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapMetrics();
             });
         }
     }

@@ -12,7 +12,8 @@ public class ServerConfig
     public string GoogleClientSecret { get; set; } = "";
     public string TwitchClientId { get; set; } = "";
     public string TwitchClientSecret { get; set; } = "";
-    public string RedirectUrl { get; set; } = "";
+    public string FrontendDomain { get; set; } = "";
+    public string ApiServerDomain { get; set; } = "";
     public string RedisOption { get; set; } = "127.0.0.1,syncTimeout=3000";
     public string TokenKey { get; set; } = "";
     public string RedisTokenKey { get; set; } = "";
@@ -81,9 +82,17 @@ public class ServerConfig
                 Environment.Exit(3);
             }
 
-            if (string.IsNullOrWhiteSpace(config.RedirectUrl))
+            if (string.IsNullOrWhiteSpace(config.FrontendDomain))
             {
-                _logger.Error($"{nameof(RedirectUrl)} 遺失，請輸入至 server_config.json 後重開伺服器");
+                _logger.Error($"{nameof(FrontendDomain)} 遺失，請輸入至 server_config.json 後重開伺服器");
+                if (!Console.IsInputRedirected)
+                    Console.ReadKey();
+                Environment.Exit(3);
+            }
+
+            if (string.IsNullOrWhiteSpace(config.ApiServerDomain))
+            {
+                _logger.Error($"{nameof(ApiServerDomain)} 遺失，請輸入至 server_config.json 後重開伺服器");
                 if (!Console.IsInputRedirected)
                     Console.ReadKey();
                 Environment.Exit(3);
@@ -104,7 +113,8 @@ public class ServerConfig
             GoogleClientSecret = config.GoogleClientSecret;
             TwitchClientId = config.TwitchClientId;
             TwitchClientSecret = config.TwitchClientSecret;
-            RedirectUrl = config.RedirectUrl;
+            FrontendDomain = config.FrontendDomain;
+            ApiServerDomain = config.ApiServerDomain;
             RedisOption = config.RedisOption;
             TokenKey = config.TokenKey;
             RedisTokenKey = config.RedisTokenKey;

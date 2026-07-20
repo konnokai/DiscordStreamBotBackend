@@ -16,11 +16,13 @@ namespace DiscordStreamBotBackend.Controllers
     {
         private readonly ILogger<RandomVideoController> _logger;
         private readonly RedisService _redisService;
+        private readonly PublicUrlService _publicUrls;
 
-        public RandomVideoController(ILogger<RandomVideoController> logger, RedisService redisService)
+        public RandomVideoController(ILogger<RandomVideoController> logger, RedisService redisService, PublicUrlService publicUrls)
         {
             _logger = logger;
             _redisService = redisService;
+            _publicUrls = publicUrls;
         }
 
         [EnableCors("allowGET")]
@@ -70,7 +72,7 @@ namespace DiscordStreamBotBackend.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "RandomVideo\n");
-                return Redirect("https://dcbot.konnokai.me/stream");
+                return Redirect(_publicUrls.FrontendDomain);
             }
         }
     }

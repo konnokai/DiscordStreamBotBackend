@@ -1,6 +1,5 @@
 ﻿using DiscordStreamBotBackend.Services;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
 using NLog;
@@ -25,14 +24,21 @@ namespace DiscordStreamBotBackend.Middleware
 
         public async Task Invoke(HttpContext context)
         {
+            if (context.Request.Path.Equals("/metrics", StringComparison.OrdinalIgnoreCase))
+            {
+                await _next(context);
+                return;
+            }
+
             var originalResponseBodyStream = context.Response.Body;
 
             try
             {
-                var remoteIpAddress = context.GetRemoteIPAddress();
-                var requestUrl = context.Request.GetDisplayUrl();
-                string badReqRedisKey = $"server.errorcount:{remoteIpAddress.ToString().Replace(":", "-").Replace(".", "-")}";
-                string rngReqRedisKey = $"server.rngvideocount:{remoteIpAddress.ToString().Replace(":", "-").Replace(".", "-")}";
+                var remoteIpAddress = context.Connection.RemoteIpAddress;
+                var remoteIpText = remoteIpAddress?.ToString() ?? "unknown";
+                var requestPath = context.Request.Path.Value ?? "/";
+                string badReqRedisKey = $"server.errorcount:{remoteIpText.Replace(":", "-").Replace(".", "-")}";
+                string rngReqRedisKey = $"server.rngvideocount:{remoteIpText.Replace(":", "-").Replace(".", "-")}";
                 bool isRedisError = false;
 
                 try
@@ -56,7 +62,7 @@ namespace DiscordStreamBotBackend.Middleware
                             return;
                         }
                     }
-                    if (requestUrl.ToLower().Contains("randomvideo"))
+                    if (requestPath.Contains("randomvideo", StringComparison.OrdinalIgnoreCase))
                     {
                         var rngReqCount = await _redisService.RedisDb.StringGetAsync(rngReqRedisKey);
                         if (rngReqCount.HasValue && int.Parse(rngReqCount.ToString()) >= 5)
@@ -93,7 +99,7 @@ namespace DiscordStreamBotBackend.Middleware
                 if (route != null && route == "statuscheck" && context.Response.StatusCode == 200)
                     return;
 
-                logger.Info($"{remoteIpAddress} | {context.Request.Method} | {context.Response.StatusCode} | {requestUrl}");
+                logger.Info($"{remoteIpText} | {context.Request.Method} | {context.Response.StatusCode} | {requestPath}");
 
                 if (!isRedisError)
                 {
@@ -102,7 +108,7 @@ namespace DiscordStreamBotBackend.Middleware
                         await _redisService.RedisDb.StringIncrementAsync(badReqRedisKey);
                         await _redisService.RedisDb.KeyExpireAsync(badReqRedisKey, TimeSpan.FromHours(1));
                     }
-                    if (requestUrl.ToLower().Contains("randomvideo"))
+                    if (requestPath.Contains("randomvideo", StringComparison.OrdinalIgnoreCase))
                     {
                         await _redisService.RedisDb.StringIncrementAsync(rngReqRedisKey);
                         await _redisService.RedisDb.KeyExpireAsync(rngReqRedisKey, TimeSpan.FromHours(1));
@@ -113,14 +119,17 @@ namespace DiscordStreamBotBackend.Middleware
             {
                 logger.Error(e);
 
+                if (context.Response.HasStarted)
+                    throw;
+
                 var errorMessage = JsonConvert.SerializeObject(new
                 {
-                    ErrorMessage = e.Message
+                    ErrorMessage = "伺服器內部錯誤"
                 });
-                var bytes = Encoding.UTF8.GetBytes(errorMessage);
-
-                await originalResponseBodyStream.WriteAsync(
-                    bytes, 0, bytes.Length);
+                context.Response.Clear();
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                context.Response.ContentType = "application/json; charset=utf-8";
+                await context.Response.WriteAsync(errorMessage, Encoding.UTF8);
             }
         }
     }
