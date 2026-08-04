@@ -13,6 +13,9 @@ namespace DiscordStreamBotBackend.Model.Twitch
         [JsonProperty(PropertyName = "expires_in")]
         public int ExpiresIn { get; set; }
 
+        [JsonProperty(PropertyName = "user_id")]
+        public string TwitchUserId { get; set; }
+
         [JsonProperty(PropertyName = "scope")]
         public string[] Scopes { get; set; }
 

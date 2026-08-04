@@ -12,9 +12,9 @@ Compose 只啟動 ASP.NET Core 後端，不會建立或管理 MySQL、Redis、vo
 2. MySQL 與 Redis 已在 Docker 主機上運行並發布可連線的連接埠。
 3. MySQL 使用者允許容器來源連線，且既有 database/schema/table 已存在。
 4. 已準備 Discord、Google、Twitch OAuth 與 webhook 所需的設定值。
-5. `Token:Frontend` 與 `Token:Redis` 都至少為 64 個字元；`Token:Redis` 必須沿用可解密既有 OAuth token 的共享金鑰。
+5. `Token:Frontend` 與 `Token:ProviderTokenEncryptionKey` 都至少為 64 個字元；`Token:ProviderTokenEncryptionKey` 必須沿用可解密既有 OAuth token 的共享金鑰，只改設定欄位名稱，不可變更正式金鑰值。
 
-此次 OAuth 契約與前端網域切換不保留舊版本相容性，必須在維護窗口同步啟用 Backend、Cloudflare Pages Frontend 與 Bot 新連結。部署 Backend 時請旋轉 `Token:Frontend`，讓歷史長效 DT 立即失效；新的 DT 是 12 小時短效 session，Frontend 只應將其視為 opaque token。`Token:Redis` 不可跟著旋轉，否則既有 provider token 將無法解密。
+此次 OAuth 契約與前端網域切換不保留舊版本相容性，必須在維護窗口同步啟用 Backend、Cloudflare Pages Frontend 與 Bot 新連結。部署 Backend 時請旋轉 `Token:Frontend`，讓歷史長效 DT 立即失效；新的 DT 是 12 小時短效 session，Frontend 只應將其視為 opaque token。`Token:ProviderTokenEncryptionKey` 不可跟著旋轉，否則既有 provider token 將無法解密。Backend 只讀取這個 provider token 金鑰欄位，部署設定必須一次完成改名，避免同時存在兩個金鑰來源。
 
 建立實際部署設定。此檔案已被 Git 忽略，且只會以唯讀方式掛載到容器：
 
@@ -84,9 +84,15 @@ Linux 會由 Compose 的 `host-gateway` 映射解析 `host.docker.internal`；Do
 
 `twitch_broadcaster_authorization` 的 migration 由 Bot repo 統一管理，Backend 只映射既有資料表，不會建立或更新 schema。
 
-Backend 每次啟動、HTTP 開始服務前，會以 Redis `SCAN` 尋找 DB 1 的舊 `twitch:oauth:{discordUserId}` token。可驗證或成功刷新的 token 會寫入 `twitch_broadcaster_authorization`；refresh rotation 會先以 compare-and-set 保存回 Redis，MySQL 寫入及授權狀態提示入列後再 compare-and-delete 舊 key。暫時失敗、解密失敗、Client ID/scope 不符或帳號衝突時會保留舊 key，供下次 Backend 啟動重試或人工確認。hourly token validation 不再掃描 legacy key，避免與新 OAuth 或解除連結競態；legacy token 可由 account links API 顯示為失效狀態並由使用者重試解除。
+部署前須先套用 Bot repo 提供的 migration SQL。Twitch provider token 僅保存於 `twitch_broadcaster_authorization`，Backend 不讀寫 Redis token，也不提供舊版 Redis token 遷移流程。
 
-部署時必須沿用既有 `Token:Redis`，且先套用 Bot repo 提供的 migration SQL。Backend 不支援新舊版本同時寫入 legacy key；停止舊 Backend 後才能啟動新版，並在部署 Frontend 前確認 log 顯示 legacy token 已完成遷移或已由維運者處理。未完成的 legacy key 不會在服務運行期間自動遷移。MySQL 已有同帳號 row 時一律視為較新的權威狀態，不會被 legacy token 覆寫；若部署時掃到超過 1 筆 legacy key，為避免 SCAN 順序造成錯誤綁定，Backend 會停止自動遷移並要求人工確認。正式環境目前確認只有 1 筆 legacy key，但仍須以部署時的 Redis `SCAN` 結果為準。
+MySQL Twitch token 的定期 refresh、解除連結與 pending revocation 重試，會與 Bot 共用 Redis DB 1 的 `twitch:oauth:refresh-lock:{twitchUserId}` 分散式鎖。鎖使用唯一 owner、TTL、背景續租及 Lua owner check；每次 MySQL 狀態寫入前都會確認 owner，失去 ownership 的 stale holder 不得覆寫資料。取得鎖後會重新讀取 MySQL row 並驗證最新 access token。鎖競爭或 Redis 暫時錯誤只會延後處理並保留現有授權狀態，不會因此撤銷授權。
+
+refresh rotation 產生的新 token 會先以舊密文作 compare-and-set 條件寫回 MySQL，遇到暫時失敗會以 fresh DbContext 指數退避重試 6 次；仍失敗時，Backend 會在記憶體保留加密後的新 token、持續續租 refresh lock，並每 30 秒重試，成功保存後才釋放鎖。這避免正常運行中的短暫 MySQL 故障讓其他實例拿舊 refresh token 再次刷新。若 process 在 MySQL 故障期間同時崩潰，現有 schema 無法跨 Twitch 與 MySQL 做原子提交；要封閉這個剩餘窗口必須新增 MySQL recovery/outbox 欄位或資料表，不會把 provider token 重新存回 Redis。
+
+解除 Twitch 連結會先把 MySQL row 持久標成 `revocation_pending`，再嘗試取得 refresh lock；因此 lock contention 回傳 HTTP 202 前一定已有排程可重試的資料。低流量的 `twitch:authorization_changed` 不再經過一般 bounded webhook queue，而是直接發布；所有 `RevokedAt` row 仍會在啟動時及每小時 replay invalidation。Redis 暫時失敗、沒有 subscriber，或 process 在 MySQL commit 後、publication 前崩潰時，MySQL row 本身就是 replay source，不需要新增 Bot-to-Backend endpoint。
+
+`tests/DiscordStreamBotBackend.Tests` 覆蓋兩端可在單元層確認的 key、channel、JSON、token encryption 與 startup config 契約。unlink/refresh contention、lease expiry/renewal、MySQL 暫時故障及 invalidation replay 仍需使用真實 MySQL + Redis 的整合環境驗證；刻意不使用 EF Core InMemory provider，因為它不會驗證這些 SQL/鎖語意。
 
 OAuth 與帳號連結 API：
 

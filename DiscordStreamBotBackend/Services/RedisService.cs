@@ -15,6 +15,8 @@ namespace DiscordStreamBotBackend.Services
 {
     public class RedisService : IDisposable
     {
+        public const int ProviderStateDatabaseIndex = 1;
+
         public List<string> NowRecordList { get; private set; } = new List<string>();
         public ConnectionMultiplexer Redis { get; set; }
         public ISubscriber RedisSub { get; set; }
@@ -42,7 +44,8 @@ namespace DiscordStreamBotBackend.Services
             {
                 RedisConnection.Init(configuration.GetConnectionString("Redis"));
                 Redis = RedisConnection.Instance.ConnectionMultiplexer;
-                RedisDb = Redis.GetDatabase(1);
+                RedisDb = Redis.GetDatabase(ProviderStateDatabaseIndex);
+                ValidateProviderStateDatabaseIndex(RedisDb.Database);
                 RedisSub = Redis.GetSubscriber();
                 _logger.LogInformation("Redis 已連線");
             }
@@ -55,6 +58,15 @@ namespace DiscordStreamBotBackend.Services
             _timer = new Timer(_ => RefreshNowRecordList(), null, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(20));
             _publisherTask = Task.Run(() => ProcessPublishQueueAsync(_shutdown.Token));
             _retryTask = Task.Run(() => ProcessPendingRetryAsync(_shutdown.Token));
+        }
+
+        internal static void ValidateProviderStateDatabaseIndex(int databaseIndex)
+        {
+            if (databaseIndex != ProviderStateDatabaseIndex)
+            {
+                throw new InvalidOperationException(
+                    $"Twitch OAuth shared state must use Redis logical database {ProviderStateDatabaseIndex}, but database {databaseIndex} was selected.");
+            }
         }
 
         public void Dispose()

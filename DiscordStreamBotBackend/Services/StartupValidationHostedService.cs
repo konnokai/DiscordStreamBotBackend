@@ -12,16 +12,13 @@ public class StartupValidationHostedService : IHostedService
 {
     private readonly IConfiguration _configuration;
     private readonly RedisService _redisService;
-    private readonly TwitchAuthorizationService _twitchAuthorizationService;
 
     public StartupValidationHostedService(
         IConfiguration configuration,
-        RedisService redisService,
-        TwitchAuthorizationService twitchAuthorizationService)
+        RedisService redisService)
     {
         _configuration = configuration;
         _redisService = redisService;
-        _twitchAuthorizationService = twitchAuthorizationService;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -35,8 +32,6 @@ public class StartupValidationHostedService : IHostedService
         var redisSecret = await _redisService.Redis.GetDatabase(0).StringGetAsync("twitch:webhook_secret");
         if (!redisSecret.HasValue || !FixedTimeEquals(configuredSecret, redisSecret.ToString()))
             throw new InvalidOperationException("Twitch WebHook secret 與 Redis DB 0 的 twitch:webhook_secret 不一致。");
-
-        await _twitchAuthorizationService.MigrateLegacyAuthorizationsAsync(cancellationToken);
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
@@ -44,7 +39,7 @@ public class StartupValidationHostedService : IHostedService
     public static void ValidateConfiguration(IConfiguration configuration)
     {
         ValidateMinimumLength(configuration, "Token:Frontend", 64);
-        ValidateMinimumLength(configuration, "Token:Redis", 64);
+        ValidateMinimumLength(configuration, "Token:ProviderTokenEncryptionKey", 64);
         ValidateRequired(configuration, "FrontendDomain");
         ValidateRequired(configuration, "ApiServerDomain");
         ValidateRequired(configuration, "Discord:ClientId");

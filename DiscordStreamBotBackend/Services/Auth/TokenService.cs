@@ -12,14 +12,14 @@ namespace DiscordStreamBotBackend.Services.Auth
         /// </summary>
         private readonly string _key;
         /// <summary>
-        /// Redis解密金鑰
+        /// Provider token 加解密金鑰
         /// </summary>
-        private readonly string _redisKey;
+        private readonly string _providerTokenEncryptionKey;
 
         public TokenService(IConfiguration configuration)
         {
             _key = configuration["Token:Frontend"];
-            _redisKey = configuration["Token:Redis"];
+            _providerTokenEncryptionKey = configuration["Token:ProviderTokenEncryptionKey"];
         }
 
         /// <summary>
@@ -57,11 +57,11 @@ namespace DiscordStreamBotBackend.Services.Auth
 
             //使用 AES 加密 Payload
             var encrypt = TokenCrypto
-                .AESEncrypt(base64, _redisKey[..16], iv);
+                .AESEncrypt(base64, _providerTokenEncryptionKey[..16], iv);
 
             //取得簽章
             var signature = TokenCrypto
-                .ComputeHMACSHA256(iv + "." + encrypt, _redisKey[..64]);
+                .ComputeHMACSHA256(iv + "." + encrypt, _providerTokenEncryptionKey[..64]);
 
             return iv + "." + encrypt + "." + signature;
         }
@@ -114,10 +114,10 @@ namespace DiscordStreamBotBackend.Services.Auth
             var encrypt = split[1];
             var signature = split[2];
 
-            if (signature != TokenCrypto.ComputeHMACSHA256(iv + "." + encrypt, _redisKey[..64]))
+            if (signature != TokenCrypto.ComputeHMACSHA256(iv + "." + encrypt, _providerTokenEncryptionKey[..64]))
                 throw new ArgumentException("signature");
 
-            var base64 = TokenCrypto.AESDecrypt(encrypt, _redisKey[..16], iv);
+            var base64 = TokenCrypto.AESDecrypt(encrypt, _providerTokenEncryptionKey[..16], iv);
             var json = Encoding.UTF8.GetString(Convert.FromBase64String(base64));
             var payload = JsonConvert.DeserializeObject<T>(json);
 

@@ -41,34 +41,6 @@ namespace DiscordStreamBotBackend
                 options.UseMemberCasing();
             });
 
-            services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor;
-                options.ForwardedForHeaderName = Configuration["ForwardedHeaders:ForwardedForHeaderName"] ?? "CF-Connecting-IP";
-                options.ForwardLimit = 1;
-
-                foreach (var proxy in Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>())
-                {
-                    if (!IPAddress.TryParse(proxy, out var address))
-                        throw new InvalidOperationException($"ForwardedHeaders:KnownProxies contains invalid IP address '{proxy}'.");
-
-                    options.KnownProxies.Add(address);
-                }
-
-                foreach (var network in Configuration.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? Array.Empty<string>())
-                {
-                    var parts = network.Split('/', 2);
-                    if (parts.Length != 2 ||
-                        !IPAddress.TryParse(parts[0], out var prefix) ||
-                        !int.TryParse(parts[1], out var prefixLength))
-                    {
-                        throw new InvalidOperationException($"ForwardedHeaders:KnownNetworks contains invalid CIDR network '{network}'.");
-                    }
-
-                    options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(prefix, prefixLength));
-                }
-            });
-
             services.AddSingleton<RedisService>();
             services.AddSingleton<Services.Auth.TokenService>();
             services.AddSingleton<BearerTokenService>();

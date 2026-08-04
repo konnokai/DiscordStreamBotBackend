@@ -24,6 +24,18 @@ public static class BackendMetrics
         "OAuth token 更新次數。",
         new CounterConfiguration { LabelNames = ["provider", "result"] });
 
+    public static readonly Gauge TwitchRefreshPendingPersistence = Metrics.CreateGauge(
+        "discord_stream_notify_twitch_refresh_pending_persistence",
+        "尚未完成 MySQL 保存的 Twitch refresh token rotation 數量。");
+
+    public static readonly Gauge TwitchRefreshShutdownDraining = Metrics.CreateGauge(
+        "discord_stream_notify_twitch_refresh_shutdown_draining",
+        "Backend 是否正在等待已接受的 Twitch refresh token rotation 保存完成。");
+
+    public static readonly Histogram TwitchRefreshShutdownDrainDuration = Metrics.CreateHistogram(
+        "discord_stream_notify_twitch_refresh_shutdown_drain_duration_seconds",
+        "Backend 關閉時等待 Twitch refresh token rotation 保存的耗時秒數。");
+
     public static readonly Counter TwitchWebhookEvents = Metrics.CreateCounter(
         "discord_stream_notify_twitch_webhook_events_total",
         "Twitch Webhook 事件數。",

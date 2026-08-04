@@ -1,6 +1,7 @@
 using DiscordStreamBotBackend.DataBase;
 using DiscordStreamBotBackend.DataBase.Table;
 using DiscordStreamBotBackend.Services.Auth;
+using Google.Apis.Util.Store;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NLog;
@@ -13,9 +14,9 @@ namespace DiscordStreamBotBackend
 {
     /// <summary>
     /// 會限 OAuth token 的 MySQL 儲存後端（真實來源）。
-    /// T 恆為 Google.Apis 的 TokenResponse、key 為 Discord userId 字串；密文格式與 <see cref="RedisDataStore"/> 相同，與 Bot 端可互相解密。
+    /// T 恆為 Google.Apis 的 TokenResponse、key 為 Discord userId 字串；密文格式與 Bot 端共用，兩端可互相解密。
     /// </summary>
-    public class MySqlDataStore : ITokenDataStore
+    public class MySqlDataStore : IDataStore
     {
         private readonly IDbContextFactory<MainDbContext> _dbContextFactory;
         private readonly TokenService _tokenService;
@@ -96,14 +97,6 @@ namespace DiscordStreamBotBackend
                 db.YoutubeMemberAccessToken.Remove(entity);
                 await db.SaveChangesAsync();
             }
-        }
-
-        public async Task<bool> IsExistUserTokenAsync<T>(string key)
-        {
-            var userId = ulong.Parse(key);
-
-            using var db = _dbContextFactory.CreateDbContext();
-            return await db.YoutubeMemberAccessToken.AsNoTracking().AnyAsync(x => x.DiscordUserId == userId);
         }
     }
 }

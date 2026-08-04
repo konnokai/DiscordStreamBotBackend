@@ -34,7 +34,7 @@ public class AccountLinksController : ControllerBase
         var googleTask = _googleOAuthService.GetAccountLinkAsync(discordUserId, cancellationToken);
         var twitchTask = _twitchAuthorizationService.GetAccountLinkAsync(discordUserId, cancellationToken);
         await Task.WhenAll(googleTask, twitchTask);
-        return Ok(new { google = googleTask.Result, twitch = twitchTask.Result });
+        return Ok(new { google = await googleTask, twitch = await twitchTask });
     }
 
     [HttpDelete("google")]

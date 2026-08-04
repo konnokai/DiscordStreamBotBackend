@@ -26,7 +26,9 @@ public partial class MainDbContext(DbContextOptions<MainDbContext> options) : Db
             entity.Property(x => x.LastValidatedAt).HasColumnType("datetime(6)");
             entity.Property(x => x.AuthorizedAt).HasColumnType("datetime(6)");
             entity.Property(x => x.RevokedAt).HasColumnType("datetime(6)");
-            entity.Property(x => x.DateUpdated).HasColumnType("datetime(6)");
+            entity.Property(x => x.DateUpdated)
+                .HasColumnType("datetime(6)")
+                .IsConcurrencyToken();
         });
     }
 }

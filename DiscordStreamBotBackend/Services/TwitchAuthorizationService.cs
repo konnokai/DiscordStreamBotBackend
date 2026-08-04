@@ -10,7 +10,9 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -26,18 +28,25 @@ public enum TwitchUnlinkResult
     RevocationPending
 }
 
-public class TwitchAuthorizationService
+public class TwitchAuthorizationService : IAsyncDisposable
 {
-    private const string LegacyAuthorizationKeyPrefix = "twitch:oauth:";
+    private const string RevocationPendingReason = "revocation_pending";
+    private const string UserUnlinkedReason = "user_unlinked";
     private const string RequiredScope = "user:read:subscriptions";
+    private const int RefreshedTokenPersistenceAttempts = 6;
     private readonly string _clientId;
     private readonly string _clientSecret;
     private readonly IDbContextFactory<MainDbContext> _dbContextFactory;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<TwitchAuthorizationService> _logger;
     private readonly PublicUrlService _publicUrls;
+    private readonly TwitchOAuthRefreshLock _refreshLock;
+    private readonly TwitchRefreshRotationLifecycle _rotationLifecycle;
     private readonly RedisService _redisService;
     private readonly TokenService _tokenService;
+    private readonly ConcurrentDictionary<string, PendingRefreshedToken> _pendingRefreshedTokens = new(StringComparer.Ordinal);
+    private readonly object _stopGate = new();
+    private Task _stopTask;
 
     public TwitchAuthorizationService(
         IConfiguration configuration,
@@ -55,6 +64,9 @@ public class TwitchAuthorizationService
         _logger = logger;
         _publicUrls = publicUrls;
         _redisService = redisService;
+        _refreshLock = new TwitchOAuthRefreshLock(redisService.RedisDb);
+        _rotationLifecycle = new TwitchRefreshRotationLifecycle(
+            count => BackendMetrics.TwitchRefreshPendingPersistence.Set(count));
         _tokenService = tokenService;
     }
 
@@ -71,6 +83,7 @@ public class TwitchAuthorizationService
         });
     }
 
+    /// <summary>完成 Twitch OAuth callback，在共用 lease 內驗證身分與 scope，並以條件式寫入保存授權。</summary>
     public async Task<string> CompleteAuthorizationAsync(ulong discordUserId, string code, CancellationToken cancellationToken)
     {
         var tokenResult = await ExchangeCodeAsync(code, cancellationToken);
@@ -87,71 +100,94 @@ public class TwitchAuthorizationService
         if (validation.Scopes == null || !validation.Scopes.Contains(RequiredScope, StringComparer.Ordinal))
             return "provider_validation_failed";
 
+        token = NormalizeTokenForPersistence(token, validation, token.RefreshToken, token.TokenType);
+        if (!IsUsableTokenForBot(token, validation.UserId))
+            return "provider_validation_failed";
+
         var profile = await GetUserProfileAsync(token.AccessToken, cancellationToken);
         if (profile == null || profile.Id != validation.UserId)
             return "provider_validation_failed";
 
-        using var db = _dbContextFactory.CreateDbContext();
-        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-        var byDiscord = await db.TwitchBroadcasterAuthorization.SingleOrDefaultAsync(x => x.DiscordUserId == discordUserId, cancellationToken);
-        var byTwitch = await db.TwitchBroadcasterAuthorization.SingleOrDefaultAsync(x => x.TwitchUserId == validation.UserId, cancellationToken);
-
-        if (byDiscord != null && byDiscord.TwitchUserId != validation.UserId)
-        {
-            if (byDiscord.RevocationReason != "user_unlinked")
-                return "account_conflict";
-            db.TwitchBroadcasterAuthorization.Remove(byDiscord);
-            byDiscord = null;
-        }
-
-        if (byTwitch != null && byTwitch.DiscordUserId != discordUserId)
-        {
-            if (byTwitch.RevocationReason != "user_unlinked")
-                return "account_conflict";
-            db.TwitchBroadcasterAuthorization.Remove(byTwitch);
-            byTwitch = null;
-        }
-
-        if (db.ChangeTracker.HasChanges())
-            await db.SaveChangesAsync(cancellationToken);
-
-        var now = DateTime.UtcNow;
-        var entity = byTwitch ?? byDiscord;
-        if (entity == null)
-        {
-            entity = new TwitchBroadcasterAuthorization { TwitchUserId = validation.UserId };
-            db.TwitchBroadcasterAuthorization.Add(entity);
-        }
-
-        entity.DiscordUserId = discordUserId;
-        entity.ClientId = validation.ClientId;
-        entity.UserLogin = profile.Login;
-        entity.DisplayName = profile.DisplayName;
-        entity.ProfileImageUrl = profile.ProfileImageUrl;
-        entity.EncryptedAccessToken = _tokenService.CreateTokenResponseToken(token);
-        entity.Scopes = JsonConvert.SerializeObject(validation.Scopes);
-        entity.TokenExpiresAt = now.AddSeconds(validation.ExpiresIn);
-        entity.LastValidatedAt = now;
-        entity.AuthorizedAt = now;
-        entity.RevokedAt = null;
-        entity.RevocationReason = null;
-        entity.DateUpdated = now;
+        var lockResult = await TryAcquireRefreshLockAsync(validation.UserId, "authorization_callback", cancellationToken);
+        if (lockResult.Status != TwitchOAuthRefreshLockAcquireStatus.Acquired)
+            return "authorization_busy";
 
         try
         {
-            await db.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex)
-        {
-            _logger.LogWarning(ex, "Twitch OAuth 帳號衝突");
-            return "account_conflict";
-        }
+            using var db = _dbContextFactory.CreateDbContext();
+            await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+            var byDiscord = await db.TwitchBroadcasterAuthorization.SingleOrDefaultAsync(x => x.DiscordUserId == discordUserId, cancellationToken);
+            var byTwitch = await db.TwitchBroadcasterAuthorization.SingleOrDefaultAsync(x => x.TwitchUserId == validation.UserId, cancellationToken);
 
-        await _redisService.RedisDb.KeyDeleteAsync(GetLegacyAuthorizationKey(discordUserId));
-        await PublishAuthorizationChangedAsync(entity.TwitchUserId, "linked", CancellationToken.None);
-        await TryUpdateMetricsAsync(CancellationToken.None);
-        return null;
+            if (!await EnsureRefreshLockOwnedAsync(lockResult.Lease, validation.UserId, "authorization_callback", cancellationToken))
+                return "authorization_busy";
+
+            if (byDiscord != null && byDiscord.TwitchUserId != validation.UserId)
+            {
+                if (byDiscord.RevocationReason != UserUnlinkedReason)
+                    return "account_conflict";
+                db.TwitchBroadcasterAuthorization.Remove(byDiscord);
+                byDiscord = null;
+            }
+
+            if (byTwitch != null && byTwitch.DiscordUserId != discordUserId)
+            {
+                if (byTwitch.RevocationReason != UserUnlinkedReason)
+                    return "account_conflict";
+                db.TwitchBroadcasterAuthorization.Remove(byTwitch);
+                byTwitch = null;
+            }
+
+            if (db.ChangeTracker.HasChanges())
+            {
+                if (!await EnsureRefreshLockOwnedAsync(lockResult.Lease, validation.UserId, "authorization_callback_cleanup", cancellationToken))
+                    return "authorization_busy";
+                await db.SaveChangesAsync(cancellationToken);
+            }
+
+            var now = UtcNowForMySql();
+            var entity = byTwitch ?? byDiscord;
+            if (entity == null)
+            {
+                entity = new TwitchBroadcasterAuthorization { TwitchUserId = validation.UserId };
+                db.TwitchBroadcasterAuthorization.Add(entity);
+            }
+
+            entity.DiscordUserId = discordUserId;
+            entity.ClientId = validation.ClientId;
+            entity.UserLogin = profile.Login;
+            entity.DisplayName = profile.DisplayName;
+            entity.ProfileImageUrl = profile.ProfileImageUrl;
+            entity.EncryptedAccessToken = _tokenService.CreateTokenResponseToken(token);
+            entity.Scopes = JsonConvert.SerializeObject(validation.Scopes);
+            entity.TokenExpiresAt = now.AddSeconds(validation.ExpiresIn);
+            entity.LastValidatedAt = now;
+            entity.AuthorizedAt = now;
+            entity.RevokedAt = null;
+            entity.RevocationReason = null;
+            entity.DateUpdated = now;
+
+            try
+            {
+                if (!await EnsureRefreshLockOwnedAsync(lockResult.Lease, validation.UserId, "authorization_callback_persistence", cancellationToken))
+                    return "authorization_busy";
+                await db.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogWarning(ex, "Twitch OAuth 帳號衝突");
+                return "account_conflict";
+            }
+
+            await TryPublishAuthorizationChangedAsync(entity, "linked", CancellationToken.None);
+            await TryUpdateMetricsAsync(CancellationToken.None);
+            return null;
+        }
+        finally
+        {
+            await ReleaseRefreshLockAsync(lockResult.Lease, validation.UserId, "authorization_callback", CancellationToken.None);
+        }
     }
 
     public async Task<TwitchAccountLink> GetAccountLinkAsync(ulong discordUserId, CancellationToken cancellationToken)
@@ -160,14 +196,11 @@ public class TwitchAuthorizationService
         var entity = await db.TwitchBroadcasterAuthorization.AsNoTracking()
             .SingleOrDefaultAsync(x => x.DiscordUserId == discordUserId, cancellationToken);
         if (entity == null)
-        {
-            var hasLegacyAuthorization = await _redisService.RedisDb.KeyExistsAsync(GetLegacyAuthorizationKey(discordUserId));
-            return new TwitchAccountLink { Status = hasLegacyAuthorization ? "invalid" : "unlinked" };
-        }
+            return new TwitchAccountLink { Status = "unlinked" };
 
         var status = entity.RevokedAt == null
             ? entity.ClientId == _clientId && !string.IsNullOrWhiteSpace(entity.EncryptedAccessToken) ? "linked" : "invalid"
-            : entity.RevocationReason == "user_unlinked" ? "revoked" : "invalid";
+            : entity.RevocationReason == UserUnlinkedReason ? "revoked" : "invalid";
         return new TwitchAccountLink
         {
             Status = status,
@@ -178,44 +211,79 @@ public class TwitchAuthorizationService
         };
     }
 
+    /// <summary>先將 unlink 意圖保存至 MySQL，再於 refresh lease 內撤銷 provider token 並完成本地失效狀態。</summary>
     public async Task<TwitchUnlinkResult> UnlinkAsync(ulong discordUserId, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         using var db = _dbContextFactory.CreateDbContext();
-        var entity = await db.TwitchBroadcasterAuthorization.SingleOrDefaultAsync(x => x.DiscordUserId == discordUserId, cancellationToken);
-        if (entity == null)
-            return await UnlinkLegacyAuthorizationAsync(discordUserId, cancellationToken);
-        if (entity.RevocationReason == "user_unlinked")
+        var entity = await db.TwitchBroadcasterAuthorization
+            .SingleOrDefaultAsync(x => x.DiscordUserId == discordUserId, cancellationToken);
+        if (entity == null || entity.RevocationReason == UserUnlinkedReason)
             return TwitchUnlinkResult.Unlinked;
 
-        var revokeStatus = entity.RevokedAt != null && entity.RevocationReason != "revocation_pending"
-            ? TwitchApiResultStatus.Invalid
-            : TwitchApiResultStatus.TransientFailure;
-        if (!string.IsNullOrWhiteSpace(entity.EncryptedAccessToken))
+        if (entity.RevocationReason != RevocationPendingReason)
         {
-            try
-            {
-                var token = _tokenService.GetTokenResponseValue<TwitchAccessTokenData>(entity.EncryptedAccessToken);
-                if (!string.IsNullOrWhiteSpace(token?.AccessToken))
-                    revokeStatus = await RevokeTokenAsync(token.AccessToken, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Twitch token 解密失敗，保留 token 並標記待重試撤銷");
-            }
+            await MarkRevocationPendingAsync(entity, db, cancellationToken);
+            await TryPublishAuthorizationChangedAsync(entity, "invalid", cancellationToken);
         }
 
-        if (revokeStatus == TwitchApiResultStatus.Success || revokeStatus == TwitchApiResultStatus.Invalid)
+        var twitchUserId = entity.TwitchUserId;
+        var lockResult = await TryAcquireRefreshLockAsync(twitchUserId, "unlink", cancellationToken);
+        if (lockResult.Status != TwitchOAuthRefreshLockAcquireStatus.Acquired)
+            return TwitchUnlinkResult.RevocationPending;
+
+        try
         {
-            await FinalizeUnlinkAsync(entity, db, cancellationToken);
+            if (!await EnsureRefreshLockOwnedAsync(lockResult.Lease, twitchUserId, "unlink", cancellationToken))
+                return TwitchUnlinkResult.RevocationPending;
+
+            using var lockedDb = _dbContextFactory.CreateDbContext();
+            entity = await lockedDb.TwitchBroadcasterAuthorization
+                .SingleOrDefaultAsync(x => x.TwitchUserId == twitchUserId, cancellationToken);
+            if (entity == null || entity.DiscordUserId != discordUserId)
+                return TwitchUnlinkResult.Unlinked;
+            if (entity.RevocationReason == UserUnlinkedReason)
+                return TwitchUnlinkResult.Unlinked;
+            if (entity.RevocationReason != RevocationPendingReason)
+                return TwitchUnlinkResult.RevocationPending;
+
+            var revokeStatus = CanFinalizeRevocationWithoutProviderToken(entity.EncryptedAccessToken)
+                ? TwitchApiResultStatus.Invalid
+                : TwitchApiResultStatus.TransientFailure;
+            if (!CanFinalizeRevocationWithoutProviderToken(entity.EncryptedAccessToken))
+            {
+                try
+                {
+                    var token = _tokenService.GetTokenResponseValue<TwitchAccessTokenData>(entity.EncryptedAccessToken);
+                    if (!string.IsNullOrWhiteSpace(token?.AccessToken))
+                        revokeStatus = await RevokeTokenAsync(token.AccessToken, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Twitch token 解密失敗，保留 token 並標記待重試撤銷");
+                }
+            }
+
+            if (revokeStatus == TwitchApiResultStatus.Success || revokeStatus == TwitchApiResultStatus.Invalid)
+            {
+                if (!await EnsureRefreshLockOwnedAsync(lockResult.Lease, twitchUserId, "unlink", cancellationToken))
+                    return TwitchUnlinkResult.RevocationPending;
+
+                await FinalizeUnlinkAsync(entity, lockedDb, cancellationToken);
+                await TryUpdateMetricsAsync(CancellationToken.None);
+                return TwitchUnlinkResult.Unlinked;
+            }
+
             await TryUpdateMetricsAsync(CancellationToken.None);
-            return TwitchUnlinkResult.Unlinked;
+            return TwitchUnlinkResult.RevocationPending;
         }
-
-        await MarkRevocationPendingAsync(entity, db, cancellationToken);
-        await TryUpdateMetricsAsync(CancellationToken.None);
-        return TwitchUnlinkResult.RevocationPending;
+        finally
+        {
+            await ReleaseRefreshLockAsync(lockResult.Lease, twitchUserId, "unlink", CancellationToken.None);
+        }
     }
 
+    /// <summary>重試待處理撤銷、驗證所有有效授權、補送失效事件並更新 OAuth 指標。</summary>
     public async Task ValidateAllAsync(CancellationToken cancellationToken)
     {
         await RetryPendingRevocationsAsync(cancellationToken);
@@ -228,6 +296,12 @@ public class TwitchAuthorizationService
 
         foreach (var userId in userIds)
         {
+            if (_pendingRefreshedTokens.ContainsKey(userId))
+            {
+                BackendMetrics.OAuthTokenValidations.WithLabels("twitch", "refresh_persistence_pending").Inc();
+                continue;
+            }
+
             try
             {
                 await ValidateStoredAuthorizationAsync(userId, cancellationToken);
@@ -243,353 +317,226 @@ public class TwitchAuthorizationService
             }
         }
 
+        await ReplayInvalidatedAuthorizationsAsync(cancellationToken);
         await UpdateMetricsAsync(cancellationToken);
     }
 
-    public async Task MigrateLegacyAuthorizationsAsync(CancellationToken cancellationToken)
+    /// <summary>以 Twitch validation 正規化 token 的身分、scope、期限與型別，產生 Bot 可讀的共用契約。</summary>
+    internal static TwitchAccessTokenData NormalizeTokenForPersistence(
+        TwitchAccessTokenData token,
+        TwitchValidateTokenData validation,
+        string fallbackRefreshToken,
+        string fallbackTokenType)
     {
-        var legacyKeys = new HashSet<string>(StringComparer.Ordinal);
-        var scannedServerCount = 0;
-        foreach (var endpoint in _redisService.Redis.GetEndPoints())
+        ArgumentNullException.ThrowIfNull(token);
+        ArgumentNullException.ThrowIfNull(validation);
+
+        // Provider validation 才是授權真相；身分、scope、期限與 token type 一律正規化後再加密。
+        if (string.IsNullOrWhiteSpace(token.RefreshToken))
+            token.RefreshToken = fallbackRefreshToken;
+        token.TwitchUserId = validation.UserId;
+        token.Scopes = (validation.Scopes ?? [])
+            .Where(scope => !string.IsNullOrWhiteSpace(scope))
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+        token.TokenType = NormalizeTokenType(token.TokenType, fallbackTokenType);
+        token.ExpiresIn = Math.Max(0, validation.ExpiresIn);
+        return token;
+    }
+
+    internal static bool IsUsableTokenForBot(TwitchAccessTokenData token, string twitchUserId)
+        => token != null &&
+            !string.IsNullOrWhiteSpace(token.AccessToken) &&
+            !string.IsNullOrWhiteSpace(token.RefreshToken) &&
+            string.Equals(token.TokenType, "bearer", StringComparison.OrdinalIgnoreCase) &&
+            !string.IsNullOrWhiteSpace(token.TwitchUserId) &&
+            token.TwitchUserId == twitchUserId &&
+            token.Scopes?.Contains(RequiredScope, StringComparer.Ordinal) == true;
+
+    private static string NormalizeTokenType(string tokenType, string fallbackTokenType)
+    {
+        var value = string.IsNullOrWhiteSpace(tokenType) ? fallbackTokenType : tokenType;
+        return string.IsNullOrWhiteSpace(value) ? "bearer" : value.Trim().ToLowerInvariant();
+    }
+
+    /// <summary>在 refresh lease 內重讀、驗證並視需要 rotation MySQL 授權，暫時錯誤不撤銷資料。</summary>
+    private async Task ValidateStoredAuthorizationAsync(string twitchUserId, CancellationToken cancellationToken)
+    {
+        var lockResult = await TryAcquireRefreshLockAsync(twitchUserId, "stored_token_validation", cancellationToken);
+        if (lockResult.Status != TwitchOAuthRefreshLockAcquireStatus.Acquired)
         {
+            BackendMetrics.OAuthTokenValidations
+                .WithLabels("twitch", lockResult.Status == TwitchOAuthRefreshLockAcquireStatus.Contended ? "lock_contended" : "lock_temporary_failure")
+                .Inc();
+            return;
+        }
+
+        try
+        {
+            using var db = _dbContextFactory.CreateDbContext();
+            var entity = await db.TwitchBroadcasterAuthorization
+                .SingleOrDefaultAsync(x => x.TwitchUserId == twitchUserId, cancellationToken);
+            if (entity == null || entity.RevokedAt != null)
+                return;
+
+            TwitchAccessTokenData token;
             try
             {
-                var server = _redisService.Redis.GetServer(endpoint);
-                if (server.IsReplica)
-                    continue;
-
-                foreach (var key in server.Keys(_redisService.RedisDb.Database, $"{LegacyAuthorizationKeyPrefix}*", pageSize: 250))
-                    legacyKeys.Add(key.ToString());
-                scannedServerCount++;
-            }
-            catch (Exception ex) when (ex is RedisException or InvalidOperationException)
-            {
-                _logger.LogWarning(ex, "掃描舊 Twitch OAuth token 失敗，將於下次 Backend 啟動時重試");
-            }
-        }
-
-        if (scannedServerCount == 0)
-        {
-            _logger.LogWarning("沒有可完成 SCAN 的 Redis primary，舊 Twitch OAuth token 將於下次 Backend 啟動時重試");
-            return;
-        }
-
-        if (legacyKeys.Count == 0)
-            return;
-        if (legacyKeys.Count > 1)
-        {
-            _logger.LogError(
-                "偵測到 {LegacyTokenCount} 筆舊 Twitch OAuth token，超過已確認的單筆資料；為避免錯誤綁定，停止自動遷移並要求人工確認",
-                legacyKeys.Count);
-            return;
-        }
-
-        var completedCount = 0;
-        foreach (var key in legacyKeys)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            try
-            {
-                if (await TryMigrateLegacyAuthorizationAsync(key, cancellationToken))
-                    completedCount++;
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                throw;
+                token = _tokenService.GetTokenResponseValue<TwitchAccessTokenData>(entity.EncryptedAccessToken);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "舊 Twitch OAuth token 遷移失敗，保留 Redis 資料並於下次 Backend 啟動時重試");
-            }
-        }
-
-        _logger.LogInformation(
-            "舊 Twitch OAuth token 遷移完成 | 掃描: {ScannedCount} | 已完成: {CompletedCount} | 待重試: {PendingCount}",
-            legacyKeys.Count,
-            completedCount,
-            legacyKeys.Count - completedCount);
-    }
-
-    private async Task<bool> TryMigrateLegacyAuthorizationAsync(string legacyKey, CancellationToken cancellationToken)
-    {
-        if (!legacyKey.StartsWith(LegacyAuthorizationKeyPrefix, StringComparison.Ordinal) ||
-            !ulong.TryParse(legacyKey[LegacyAuthorizationKeyPrefix.Length..], out var discordUserId))
-        {
-            _logger.LogWarning("略過格式錯誤的舊 Twitch OAuth Redis key");
-            return false;
-        }
-
-        var encryptedToken = await _redisService.RedisDb.StringGetAsync(legacyKey);
-        if (!encryptedToken.HasValue)
-            return true;
-
-        TwitchAccessTokenData token;
-        try
-        {
-            token = _tokenService.GetTokenResponseValue<TwitchAccessTokenData>(encryptedToken.ToString());
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "舊 Twitch OAuth token 無法解密，保留 Redis 資料供人工確認");
-            return false;
-        }
-
-        var validationResult = await ValidateTokenAsync(token?.AccessToken, cancellationToken);
-        if (validationResult.Status == TwitchApiResultStatus.Invalid)
-        {
-            // Twitch 已接受 refresh 後可能立即 rotation；正常關閉也必須先把新 token CAS 保存回 Redis。
-            var refreshResult = await RefreshTokenAsync(token?.RefreshToken, CancellationToken.None);
-            if (refreshResult.Status != TwitchApiResultStatus.Success)
-            {
-                _logger.LogWarning("舊 Twitch OAuth token 已失效且無法刷新，保留 Redis 資料供使用者重新授權");
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(refreshResult.Value.RefreshToken))
-                refreshResult.Value.RefreshToken = token.RefreshToken;
-            token = refreshResult.Value;
-            var refreshedEncryptedToken = _tokenService.CreateTokenResponseToken(token);
-            if (!await ReplaceLegacyTokenIfUnchangedAsync(legacyKey, encryptedToken, refreshedEncryptedToken))
-            {
-                _logger.LogWarning("舊 Twitch OAuth token 在刷新期間已被更新，保留最新 Redis 資料並於下次重試");
-                return false;
-            }
-
-            encryptedToken = refreshedEncryptedToken;
-            validationResult = await ValidateTokenAsync(token.AccessToken, cancellationToken);
-        }
-
-        if (validationResult.Status != TwitchApiResultStatus.Success)
-        {
-            _logger.LogWarning("舊 Twitch OAuth token 暫時無法驗證，保留 Redis 資料並於下次重試");
-            return false;
-        }
-
-        var validation = validationResult.Value;
-        if (validation.ClientId != _clientId ||
-            string.IsNullOrWhiteSpace(validation.UserId) ||
-            validation.Scopes == null ||
-            !validation.Scopes.Contains(RequiredScope, StringComparer.Ordinal))
-        {
-            _logger.LogWarning("舊 Twitch OAuth token 與目前 Twitch Application 或必要 scope 不相容，保留 Redis 資料供人工確認");
-            return false;
-        }
-
-        var profile = await GetUserProfileAsync(token.AccessToken, cancellationToken);
-        if (profile == null || profile.Id != validation.UserId)
-        {
-            _logger.LogWarning("舊 Twitch OAuth token 無法取得一致的使用者資料，保留 Redis 資料並於下次重試");
-            return false;
-        }
-
-        using var db = _dbContextFactory.CreateDbContext();
-        var byDiscord = await db.TwitchBroadcasterAuthorization
-            .SingleOrDefaultAsync(x => x.DiscordUserId == discordUserId, cancellationToken);
-        var byTwitch = await db.TwitchBroadcasterAuthorization
-            .SingleOrDefaultAsync(x => x.TwitchUserId == validation.UserId, cancellationToken);
-        if (byDiscord != null || byTwitch != null)
-        {
-            if (byDiscord?.TwitchUserId == validation.UserId && byTwitch?.DiscordUserId == discordUserId)
-            {
-                if (byDiscord.RevokedAt != null)
-                {
-                    var revokeStatus = await RevokeTokenAsync(token.AccessToken, cancellationToken);
-                    if (revokeStatus != TwitchApiResultStatus.Success && revokeStatus != TwitchApiResultStatus.Invalid)
-                    {
-                        _logger.LogWarning("MySQL 授權已撤銷，但舊 Twitch OAuth token 暫時無法撤銷，保留 Redis 資料供人工確認");
-                        return false;
-                    }
-                }
-
-                // MySQL row 代表較新的權威狀態，不可讓 legacy token 覆寫新 OAuth 或撤銷結果。
-                return await DeleteLegacyTokenIfUnchangedAsync(legacyKey, encryptedToken);
-            }
-
-            _logger.LogWarning("舊 Twitch OAuth token 與既有 MySQL 授權資料衝突，保留 Redis 資料供人工確認");
-            return false;
-        }
-
-        var now = DateTime.UtcNow;
-        db.TwitchBroadcasterAuthorization.Add(new TwitchBroadcasterAuthorization
-        {
-            TwitchUserId = validation.UserId,
-            DiscordUserId = discordUserId,
-            ClientId = validation.ClientId,
-            UserLogin = profile.Login,
-            DisplayName = profile.DisplayName,
-            ProfileImageUrl = profile.ProfileImageUrl,
-            EncryptedAccessToken = encryptedToken.ToString(),
-            Scopes = JsonConvert.SerializeObject(validation.Scopes),
-            TokenExpiresAt = validation.ExpiresIn > 0 ? now.AddSeconds(validation.ExpiresIn) : null,
-            LastValidatedAt = now,
-            AuthorizedAt = now,
-            DateUpdated = now
-        });
-
-        try
-        {
-            await db.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex)
-        {
-            _logger.LogWarning(ex, "舊 Twitch OAuth token 寫入 MySQL 時發生帳號衝突，保留 Redis 資料供人工確認");
-            return false;
-        }
-
-        await PublishAuthorizationChangedAsync(validation.UserId, "linked", cancellationToken);
-        return await DeleteLegacyTokenIfUnchangedAsync(legacyKey, encryptedToken);
-    }
-
-    private async Task<TwitchUnlinkResult> UnlinkLegacyAuthorizationAsync(ulong discordUserId, CancellationToken cancellationToken)
-    {
-        var legacyKey = GetLegacyAuthorizationKey(discordUserId);
-        var encryptedToken = await _redisService.RedisDb.StringGetAsync(legacyKey);
-        if (!encryptedToken.HasValue)
-            return TwitchUnlinkResult.Unlinked;
-
-        TwitchAccessTokenData token;
-        try
-        {
-            token = _tokenService.GetTokenResponseValue<TwitchAccessTokenData>(encryptedToken.ToString());
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "舊 Twitch OAuth token 解密失敗，保留 Redis 資料供使用者重試解除連結");
-            return TwitchUnlinkResult.RevocationPending;
-        }
-
-        var revokeStatus = await RevokeTokenAsync(token?.AccessToken, cancellationToken);
-        if (revokeStatus != TwitchApiResultStatus.Success && revokeStatus != TwitchApiResultStatus.Invalid)
-            return TwitchUnlinkResult.RevocationPending;
-
-        if (!await DeleteLegacyTokenIfUnchangedAsync(legacyKey, encryptedToken))
-            return TwitchUnlinkResult.RevocationPending;
-
-        return TwitchUnlinkResult.Unlinked;
-    }
-
-    private async Task<bool> ReplaceLegacyTokenIfUnchangedAsync(string key, RedisValue expectedValue, RedisValue newValue)
-    {
-        var transaction = _redisService.RedisDb.CreateTransaction();
-        transaction.AddCondition(Condition.StringEqual(key, expectedValue));
-        _ = transaction.StringSetAsync(key, newValue);
-        return await transaction.ExecuteAsync();
-    }
-
-    private async Task<bool> DeleteLegacyTokenIfUnchangedAsync(string key, RedisValue expectedValue)
-    {
-        var transaction = _redisService.RedisDb.CreateTransaction();
-        transaction.AddCondition(Condition.StringEqual(key, expectedValue));
-        _ = transaction.KeyDeleteAsync(key);
-        return await transaction.ExecuteAsync();
-    }
-
-    private static string GetLegacyAuthorizationKey(ulong discordUserId)
-        => $"{LegacyAuthorizationKeyPrefix}{discordUserId}";
-
-    private async Task ValidateStoredAuthorizationAsync(string twitchUserId, CancellationToken cancellationToken)
-    {
-        using var db = _dbContextFactory.CreateDbContext();
-        var entity = await db.TwitchBroadcasterAuthorization.SingleOrDefaultAsync(x => x.TwitchUserId == twitchUserId, cancellationToken);
-        if (entity == null || entity.RevokedAt != null)
-            return;
-
-        TwitchAccessTokenData token;
-        try
-        {
-            token = _tokenService.GetTokenResponseValue<TwitchAccessTokenData>(entity.EncryptedAccessToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Twitch token 解密失敗");
-            BackendMetrics.OAuthTokenValidations.WithLabels("twitch", "decrypt_failure").Inc();
-            return;
-        }
-
-        var validationResult = await ValidateTokenAsync(token?.AccessToken, cancellationToken);
-        var refreshed = false;
-        if (validationResult.Status == TwitchApiResultStatus.TransientFailure || validationResult.Status == TwitchApiResultStatus.Failure)
-        {
-            BackendMetrics.OAuthTokenValidations.WithLabels("twitch", "temporary_failure").Inc();
-            return;
-        }
-
-        if (validationResult.Status == TwitchApiResultStatus.Invalid)
-        {
-            var refreshResult = await RefreshTokenAsync(token?.RefreshToken, cancellationToken);
-            if (refreshResult.Status == TwitchApiResultStatus.Invalid)
-            {
-                BackendMetrics.OAuthTokenRefreshes.WithLabels("twitch", "failure").Inc();
-                await MarkRevokedAsync(entity, "refresh_invalid", db, cancellationToken);
-                return;
-            }
-            if (refreshResult.Status != TwitchApiResultStatus.Success)
-            {
-                BackendMetrics.OAuthTokenRefreshes.WithLabels("twitch", "temporary_failure").Inc();
+                _logger.LogWarning(ex, "Twitch token 解密失敗");
+                BackendMetrics.OAuthTokenValidations.WithLabels("twitch", "decrypt_failure").Inc();
                 return;
             }
 
-            var refreshedToken = refreshResult.Value;
-            if (string.IsNullOrWhiteSpace(refreshedToken.RefreshToken))
-                refreshedToken.RefreshToken = token.RefreshToken;
-            token = refreshedToken;
-            validationResult = await ValidateTokenAsync(token.AccessToken, cancellationToken);
-            refreshed = true;
-            BackendMetrics.OAuthTokenRefreshes.WithLabels("twitch", "success").Inc();
-
+            var validationResult = await ValidateTokenAsync(token?.AccessToken, cancellationToken);
+            var refreshed = false;
             if (validationResult.Status == TwitchApiResultStatus.TransientFailure || validationResult.Status == TwitchApiResultStatus.Failure)
             {
-                await SaveRefreshedTokenForRetryAsync(entity, token, db, cancellationToken);
                 BackendMetrics.OAuthTokenValidations.WithLabels("twitch", "temporary_failure").Inc();
                 return;
             }
-        }
 
-        if (validationResult.Status == TwitchApiResultStatus.Invalid)
-        {
-            await MarkRevokedAsync(entity, "token_invalid", db, cancellationToken);
-            return;
-        }
-        var validation = validationResult.Value;
-        if (validation.ClientId != _clientId)
-        {
-            await MarkRevokedAsync(entity, "client_id_mismatch", db, cancellationToken);
-            return;
-        }
-        if (validation.UserId != entity.TwitchUserId)
-        {
-            await MarkRevokedAsync(entity, "user_id_mismatch", db, cancellationToken);
-            return;
-        }
-        if (validation.Scopes == null || !validation.Scopes.Contains(RequiredScope, StringComparer.Ordinal))
-        {
-            await MarkRevokedAsync(entity, "scope_mismatch", db, cancellationToken);
-            return;
-        }
+            if (validationResult.Status == TwitchApiResultStatus.Invalid)
+            {
+                if (!_rotationLifecycle.TryBeginRefresh(out var refreshOperation))
+                {
+                    BackendMetrics.OAuthTokenRefreshes.WithLabels("twitch", "shutdown_rejected").Inc();
+                    return;
+                }
 
-        var now = DateTime.UtcNow;
-        if (refreshed)
-            entity.EncryptedAccessToken = _tokenService.CreateTokenResponseToken(token);
-        entity.UserLogin = validation.Login ?? entity.UserLogin;
-        entity.Scopes = JsonConvert.SerializeObject(validation.Scopes ?? []);
-        entity.TokenExpiresAt = now.AddSeconds(validation.ExpiresIn);
-        entity.LastValidatedAt = now;
-        entity.DateUpdated = now;
-        await db.SaveChangesAsync(cancellationToken);
-        BackendMetrics.OAuthTokenValidations.WithLabels("twitch", refreshed ? "refreshed" : "valid").Inc();
+                using (refreshOperation)
+                {
+                    // provider 接受 rotation 後使用不可取消的保存路徑，並在 operation 結束前交給 drain 追蹤。
+                    var refreshResult = await RefreshTokenAsync(token?.RefreshToken, CancellationToken.None);
+                    if (refreshResult.Status == TwitchApiResultStatus.Invalid)
+                    {
+                        BackendMetrics.OAuthTokenRefreshes.WithLabels("twitch", "failure").Inc();
+                        if (!await EnsureRefreshLockOwnedAsync(lockResult.Lease, twitchUserId, "stored_token_validation", cancellationToken))
+                            return;
+                        await MarkRevokedAsync(entity, "refresh_invalid", db, cancellationToken);
+                        return;
+                    }
+                    if (refreshResult.Status != TwitchApiResultStatus.Success)
+                    {
+                        BackendMetrics.OAuthTokenRefreshes.WithLabels("twitch", "temporary_failure").Inc();
+                        return;
+                    }
+
+                    var refreshedToken = refreshResult.Value;
+                    if (string.IsNullOrWhiteSpace(refreshedToken.RefreshToken))
+                        refreshedToken.RefreshToken = token.RefreshToken;
+                    refreshedToken.TwitchUserId = entity.TwitchUserId;
+                    refreshedToken.Scopes ??= token.Scopes;
+                    refreshedToken.TokenType = NormalizeTokenType(refreshedToken.TokenType, token.TokenType);
+                    token = refreshedToken;
+
+                    await SaveRefreshedTokenForRetryAsync(
+                        entity.TwitchUserId,
+                        entity.EncryptedAccessToken,
+                        token,
+                        lockResult.Lease,
+                        CancellationToken.None);
+                    await db.Entry(entity).ReloadAsync(cancellationToken);
+                    if (entity.RevokedAt != null)
+                        return;
+
+                    validationResult = await ValidateTokenAsync(token.AccessToken, cancellationToken);
+                    refreshed = true;
+                    BackendMetrics.OAuthTokenRefreshes.WithLabels("twitch", "success").Inc();
+
+                    if (validationResult.Status == TwitchApiResultStatus.TransientFailure || validationResult.Status == TwitchApiResultStatus.Failure)
+                    {
+                        BackendMetrics.OAuthTokenValidations.WithLabels("twitch", "temporary_failure").Inc();
+                        return;
+                    }
+                }
+            }
+
+            if (validationResult.Status == TwitchApiResultStatus.Invalid)
+            {
+                if (!await EnsureRefreshLockOwnedAsync(lockResult.Lease, twitchUserId, "stored_token_validation", cancellationToken))
+                    return;
+                await MarkRevokedAsync(entity, "token_invalid", db, cancellationToken);
+                return;
+            }
+            var validation = validationResult.Value;
+            if (validation.ClientId != _clientId)
+            {
+                if (!await EnsureRefreshLockOwnedAsync(lockResult.Lease, twitchUserId, "stored_token_validation", cancellationToken))
+                    return;
+                await MarkRevokedAsync(entity, "client_id_mismatch", db, cancellationToken);
+                return;
+            }
+            if (validation.UserId != entity.TwitchUserId)
+            {
+                if (!await EnsureRefreshLockOwnedAsync(lockResult.Lease, twitchUserId, "stored_token_validation", cancellationToken))
+                    return;
+                await MarkRevokedAsync(entity, "user_id_mismatch", db, cancellationToken);
+                return;
+            }
+            if (validation.Scopes == null || !validation.Scopes.Contains(RequiredScope, StringComparer.Ordinal))
+            {
+                if (!await EnsureRefreshLockOwnedAsync(lockResult.Lease, twitchUserId, "stored_token_validation", cancellationToken))
+                    return;
+                await MarkRevokedAsync(entity, "scope_mismatch", db, cancellationToken);
+                return;
+            }
+
+            if (!await EnsureRefreshLockOwnedAsync(lockResult.Lease, twitchUserId, "stored_token_validation", cancellationToken))
+                return;
+
+            var now = UtcNowForMySql();
+            entity.UserLogin = validation.Login ?? entity.UserLogin;
+            entity.Scopes = JsonConvert.SerializeObject(validation.Scopes ?? []);
+            entity.TokenExpiresAt = now.AddSeconds(validation.ExpiresIn);
+            entity.LastValidatedAt = now;
+            entity.DateUpdated = now;
+            await db.SaveChangesAsync(cancellationToken);
+            BackendMetrics.OAuthTokenValidations.WithLabels("twitch", refreshed ? "refreshed" : "valid").Inc();
+        }
+        finally
+        {
+            if (!_pendingRefreshedTokens.TryGetValue(twitchUserId, out var pending) ||
+                !ReferenceEquals(pending.Lease, lockResult.Lease))
+            {
+                await ReleaseRefreshLockAsync(lockResult.Lease, twitchUserId, "stored_token_validation", CancellationToken.None);
+            }
+            else
+            {
+                _logger.LogWarning(
+                    "Twitch rotation 後 token 尚未寫入 MySQL，持續續租 refresh lock 並由背景工作重試 | TwitchUserId: {TwitchUserId}",
+                    twitchUserId);
+            }
+        }
     }
 
     private async Task MarkRevokedAsync(TwitchBroadcasterAuthorization entity, string reason, MainDbContext db, CancellationToken cancellationToken)
     {
-        var now = DateTime.UtcNow;
+        var now = UtcNowForMySql();
+        var affected = await db.TwitchBroadcasterAuthorization
+            .Where(x =>
+                x.TwitchUserId == entity.TwitchUserId &&
+                x.RevokedAt == null &&
+                x.DateUpdated == entity.DateUpdated &&
+                x.EncryptedAccessToken == entity.EncryptedAccessToken)
+            .ExecuteUpdateAsync(updates => updates
+                .SetProperty(x => x.EncryptedAccessToken, (string)null)
+                .SetProperty(x => x.TokenExpiresAt, (DateTime?)null)
+                .SetProperty(x => x.RevokedAt, now)
+                .SetProperty(x => x.RevocationReason, reason)
+                .SetProperty(x => x.DateUpdated, now), cancellationToken);
+        ThrowIfStateChanged(affected, entity.TwitchUserId, "authorization invalidation");
+
         entity.EncryptedAccessToken = null;
         entity.TokenExpiresAt = null;
         entity.RevokedAt = now;
         entity.RevocationReason = reason;
         entity.DateUpdated = now;
-        await db.SaveChangesAsync(cancellationToken);
         BackendMetrics.OAuthTokenValidations.WithLabels("twitch", "revoked").Inc();
-        await PublishAuthorizationChangedAsync(entity.TwitchUserId, "invalid", cancellationToken);
+        await TryPublishAuthorizationChangedAsync(entity, "invalid", cancellationToken);
     }
 
     private async Task<TwitchApiResult<TwitchAccessTokenData>> ExchangeCodeAsync(string code, CancellationToken cancellationToken)
@@ -746,30 +693,43 @@ public class TwitchAuthorizationService
         }
     }
 
+    /// <summary>重試已持久化為 revocation_pending 的授權，直到 provider 撤銷與本地 finalization 完成。</summary>
     private async Task RetryPendingRevocationsAsync(CancellationToken cancellationToken)
     {
         using var db = _dbContextFactory.CreateDbContext();
         var userIds = await db.TwitchBroadcasterAuthorization.AsNoTracking()
-            .Where(x => x.RevocationReason == "revocation_pending" && x.EncryptedAccessToken != null)
+            .Where(x => x.RevocationReason == RevocationPendingReason)
             .Select(x => x.TwitchUserId)
             .ToListAsync(cancellationToken);
 
         foreach (var userId in userIds)
         {
+            TwitchOAuthRefreshLockAcquireResult lockResult = null;
             try
             {
+                lockResult = await TryAcquireRefreshLockAsync(userId, "pending_revocation", cancellationToken);
+                if (lockResult.Status != TwitchOAuthRefreshLockAcquireStatus.Acquired)
+                    continue;
+
                 using var retryDb = _dbContextFactory.CreateDbContext();
                 var entity = await retryDb.TwitchBroadcasterAuthorization.SingleOrDefaultAsync(x => x.TwitchUserId == userId, cancellationToken);
-                if (entity?.RevocationReason != "revocation_pending" || string.IsNullOrWhiteSpace(entity.EncryptedAccessToken))
+                if (entity?.RevocationReason != RevocationPendingReason)
                     continue;
 
-                var token = _tokenService.GetTokenResponseValue<TwitchAccessTokenData>(entity.EncryptedAccessToken);
-                if (string.IsNullOrWhiteSpace(token?.AccessToken))
-                    continue;
+                var result = TwitchApiResultStatus.Invalid;
+                if (!CanFinalizeRevocationWithoutProviderToken(entity.EncryptedAccessToken))
+                {
+                    var token = _tokenService.GetTokenResponseValue<TwitchAccessTokenData>(entity.EncryptedAccessToken);
+                    if (!string.IsNullOrWhiteSpace(token?.AccessToken))
+                        result = await RevokeTokenAsync(token.AccessToken, cancellationToken);
+                }
 
-                var result = await RevokeTokenAsync(token.AccessToken, cancellationToken);
                 if (result == TwitchApiResultStatus.Success || result == TwitchApiResultStatus.Invalid)
+                {
+                    if (!await EnsureRefreshLockOwnedAsync(lockResult.Lease, userId, "pending_revocation", cancellationToken))
+                        continue;
                     await FinalizeUnlinkAsync(entity, retryDb, cancellationToken);
+                }
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -779,57 +739,600 @@ public class TwitchAuthorizationService
             {
                 _logger.LogWarning(ex, "Twitch pending revoke 重試失敗，使用者: {TwitchUserId}", userId);
             }
+            finally
+            {
+                if (lockResult?.Status == TwitchOAuthRefreshLockAcquireStatus.Acquired)
+                    await ReleaseRefreshLockAsync(lockResult.Lease, userId, "pending_revocation", CancellationToken.None);
+            }
         }
     }
 
     private async Task MarkRevocationPendingAsync(TwitchBroadcasterAuthorization entity, MainDbContext db, CancellationToken cancellationToken)
     {
-        var now = DateTime.UtcNow;
+        var now = UtcNowForMySql();
+        var affected = await db.TwitchBroadcasterAuthorization
+            .Where(x =>
+                x.TwitchUserId == entity.TwitchUserId &&
+                x.DiscordUserId == entity.DiscordUserId &&
+                x.DateUpdated == entity.DateUpdated &&
+                x.RevocationReason == entity.RevocationReason &&
+                x.EncryptedAccessToken == entity.EncryptedAccessToken)
+            .ExecuteUpdateAsync(updates => updates
+                .SetProperty(x => x.RevokedAt, now)
+                .SetProperty(x => x.RevocationReason, RevocationPendingReason)
+                .SetProperty(x => x.DateUpdated, now), cancellationToken);
+        ThrowIfStateChanged(affected, entity.TwitchUserId, "revocation pending intent");
+
         entity.RevokedAt = now;
-        entity.RevocationReason = "revocation_pending";
+        entity.RevocationReason = RevocationPendingReason;
         entity.DateUpdated = now;
-        await db.SaveChangesAsync(cancellationToken);
-        await PublishAuthorizationChangedAsync(entity.TwitchUserId, "invalid", cancellationToken);
     }
 
+    internal static bool CanFinalizeRevocationWithoutProviderToken(string encryptedAccessToken)
+        => string.IsNullOrWhiteSpace(encryptedAccessToken);
+
+    /// <summary>以 token 密文與更新時間 CAS 將 unlink 完成狀態寫入 MySQL，並發布可重播的失效事件。</summary>
     private async Task FinalizeUnlinkAsync(TwitchBroadcasterAuthorization entity, MainDbContext db, CancellationToken cancellationToken)
     {
-        var now = DateTime.UtcNow;
+        var now = UtcNowForMySql();
+        var affected = await db.TwitchBroadcasterAuthorization
+            .Where(x =>
+                x.TwitchUserId == entity.TwitchUserId &&
+                x.DiscordUserId == entity.DiscordUserId &&
+                x.RevocationReason == RevocationPendingReason &&
+                x.DateUpdated == entity.DateUpdated &&
+                x.EncryptedAccessToken == entity.EncryptedAccessToken)
+            .ExecuteUpdateAsync(updates => updates
+                .SetProperty(x => x.EncryptedAccessToken, (string)null)
+                .SetProperty(x => x.TokenExpiresAt, (DateTime?)null)
+                .SetProperty(x => x.RevokedAt, now)
+                .SetProperty(x => x.RevocationReason, UserUnlinkedReason)
+                .SetProperty(x => x.DateUpdated, now), cancellationToken);
+        ThrowIfStateChanged(affected, entity.TwitchUserId, "unlink finalization");
+
         entity.EncryptedAccessToken = null;
         entity.TokenExpiresAt = null;
         entity.RevokedAt = now;
-        entity.RevocationReason = "user_unlinked";
+        entity.RevocationReason = UserUnlinkedReason;
         entity.DateUpdated = now;
-        await db.SaveChangesAsync(cancellationToken);
-        await PublishAuthorizationChangedAsync(entity.TwitchUserId, "invalid", cancellationToken);
+        await TryPublishAuthorizationChangedAsync(entity, "invalid", cancellationToken);
     }
 
+    /// <summary>登記 provider 已接受的 rotation，立即嘗試 MySQL CAS，失敗則連同 lease 移交持續保存。</summary>
     private async Task SaveRefreshedTokenForRetryAsync(
-        TwitchBroadcasterAuthorization entity,
+        string twitchUserId,
+        string expectedEncryptedToken,
         TwitchAccessTokenData token,
-        MainDbContext db,
+        TwitchOAuthRefreshLockLease lease,
         CancellationToken cancellationToken)
     {
-        var now = DateTime.UtcNow;
-        entity.EncryptedAccessToken = _tokenService.CreateTokenResponseToken(token);
-        if (token.ExpiresIn > 0)
-            entity.TokenExpiresAt = now.AddSeconds(token.ExpiresIn);
-        entity.DateUpdated = now;
-        await db.SaveChangesAsync(cancellationToken);
+        // Provider 接受 rotation 後先登記記憶體交接，再嘗試 MySQL CAS。
+        // 立即保存失敗時，背景工作與 shutdown drain 會持續保護唯一有效的 replacement。
+        var now = UtcNowForMySql();
+        var pending = new PendingRefreshedToken(
+            expectedEncryptedToken,
+            _tokenService.CreateTokenResponseToken(token),
+            token.ExpiresIn > 0 ? now.AddSeconds(token.ExpiresIn) : null,
+            lease);
+        await RegisterPendingRefreshedTokenAsync(twitchUserId, pending);
+
+        if (await PersistRefreshedTokenWithRetryAsync(twitchUserId, pending, lease, cancellationToken))
+            return;
+
+        if (_pendingRefreshedTokens.TryGetValue(twitchUserId, out var current) &&
+            ReferenceEquals(current, pending))
+        {
+            QueuePendingRefreshPersistence(twitchUserId, pending);
+        }
+
+        throw new InvalidOperationException("Twitch refresh token 已 rotation，已保留 refresh lock 並排入持續保存。");
     }
 
-    private Task PublishAuthorizationChangedAsync(string twitchUserId, string status, CancellationToken cancellationToken)
+    /// <summary>觸發目前記憶體中所有已接受 rotation 的保存重試，不會丟棄尚未落盤的 replacement。</summary>
+    public async Task RetryPendingRefreshPersistenceAsync(CancellationToken cancellationToken)
     {
-        var payload = JsonConvert.SerializeObject(new { TwitchUserId = twitchUserId, Status = status });
-        return _redisService.AddPubMessageAsync(RedisChannels.Twitch.AuthorizationChanged, payload, cancellationToken).AsTask();
+        foreach (var item in _pendingRefreshedTokens.ToArray())
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await RetryPendingRefreshPersistenceItemAsync(item.Key, item.Value, cancellationToken);
+        }
+    }
+
+    /// <summary>將 pending rotation 登記到背景重試與 shutdown drain，且每筆 rotation 只排入一次。</summary>
+    private void QueuePendingRefreshPersistence(string twitchUserId, PendingRefreshedToken pending)
+    {
+        if (!pending.TryMarkRetryQueued())
+            return;
+
+        var start = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var task = RunQueuedPendingRefreshPersistenceAsync(twitchUserId, pending, start.Task);
+        _rotationLifecycle.TrackAcceptedPersistence(task);
+        start.SetResult();
+    }
+
+    private async Task RunQueuedPendingRefreshPersistenceAsync(
+        string twitchUserId,
+        PendingRefreshedToken pending,
+        Task start)
+    {
+        await start;
+        try
+        {
+            while (_pendingRefreshedTokens.TryGetValue(twitchUserId, out var current) &&
+                ReferenceEquals(current, pending))
+            {
+                await RetryPendingRefreshPersistenceItemAsync(twitchUserId, pending, CancellationToken.None);
+                if (!_pendingRefreshedTokens.TryGetValue(twitchUserId, out current) ||
+                    !ReferenceEquals(current, pending))
+                {
+                    break;
+                }
+
+                _logger.LogWarning(
+                    "仍在等待 Twitch rotation token 保存完成，持續持有並續租 refresh lock | TwitchUserId: {TwitchUserId}",
+                    twitchUserId);
+                await Task.Delay(TimeSpan.FromSeconds(30));
+            }
+        }
+        finally
+        {
+            await ReleaseRefreshLockAsync(
+                pending.Lease,
+                twitchUserId,
+                "pending_refresh_persistence_completed",
+                CancellationToken.None);
+        }
+    }
+
+    /// <summary>序列化單筆 rotation 的重試，必要時重新取得過期 lease，再執行條件式保存。</summary>
+    private async Task RetryPendingRefreshPersistenceItemAsync(
+        string twitchUserId,
+        PendingRefreshedToken pending,
+        CancellationToken cancellationToken)
+    {
+        await pending.PersistenceGate.WaitAsync(cancellationToken);
+        try
+        {
+            if (!_pendingRefreshedTokens.TryGetValue(twitchUserId, out var current) ||
+                !ReferenceEquals(current, pending))
+            {
+                return;
+            }
+
+            var ownership = await pending.Lease.EnsureOwnedAsync(cancellationToken);
+            if (ownership.Status == TwitchOAuthRefreshLockOwnershipStatus.OwnershipLost)
+            {
+                var expiredLease = pending.Lease;
+                var lockResult = await TryAcquireRefreshLockAsync(
+                    twitchUserId,
+                    "pending_refresh_persistence",
+                    cancellationToken);
+                if (lockResult.Status != TwitchOAuthRefreshLockAcquireStatus.Acquired)
+                    return;
+
+                if (!_pendingRefreshedTokens.TryGetValue(twitchUserId, out current) ||
+                    !ReferenceEquals(current, pending))
+                {
+                    await ReleaseRefreshLockAsync(
+                        lockResult.Lease,
+                        twitchUserId,
+                        "pending_refresh_persistence_stale_entry",
+                        CancellationToken.None);
+                    return;
+                }
+
+                pending.Lease = lockResult.Lease;
+                await ReleaseRefreshLockAsync(
+                    expiredLease,
+                    twitchUserId,
+                    "pending_refresh_persistence_expired_lease",
+                    CancellationToken.None);
+            }
+            else if (ownership.Status == TwitchOAuthRefreshLockOwnershipStatus.TemporaryFailure)
+            {
+                _logger.LogWarning(
+                    ownership.Exception,
+                    "Twitch rotation 後 token 重試時無法確認 refresh lock owner，保留待下次重試 | TwitchUserId: {TwitchUserId}",
+                    twitchUserId);
+                return;
+            }
+
+            await PersistRefreshedTokenWithRetryAsync(
+                twitchUserId,
+                pending,
+                pending.Lease,
+                cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Twitch rotation 後 token 仍無法寫入 MySQL，保留在記憶體待下次重試 | TwitchUserId: {TwitchUserId}",
+                twitchUserId);
+        }
+        finally
+        {
+            pending.PersistenceGate.Release();
+        }
+    }
+
+    /// <summary>在 lease owner 保護下以舊密文 CAS 保存 replacement，並辨識冪等完成或 stale 狀態。</summary>
+    private async Task<bool> PersistRefreshedTokenWithRetryAsync(
+        string twitchUserId,
+        PendingRefreshedToken pending,
+        TwitchOAuthRefreshLockLease lease,
+        CancellationToken cancellationToken)
+    {
+        for (var attempt = 1; attempt <= RefreshedTokenPersistenceAttempts; attempt++)
+        {
+            if (!await EnsureRefreshLockOwnedAsync(lease, twitchUserId, "refresh_token_persistence", cancellationToken))
+                return false;
+
+            try
+            {
+                using var db = _dbContextFactory.CreateDbContext();
+                var persistedAt = UtcNowForMySql();
+                // 只有仍保存 refresh 前密文的 row 可接收 replacement；0 列代表 revoke、relink 或其他 rotation 已先更新。
+                var affected = await db.TwitchBroadcasterAuthorization
+                    .Where(x =>
+                        x.TwitchUserId == twitchUserId &&
+                        (x.RevocationReason == null || x.RevocationReason == RevocationPendingReason) &&
+                        x.EncryptedAccessToken == pending.ExpectedEncryptedToken)
+                    .ExecuteUpdateAsync(updates => updates
+                        .SetProperty(x => x.EncryptedAccessToken, pending.EncryptedToken)
+                        .SetProperty(x => x.TokenExpiresAt, pending.TokenExpiresAt)
+                        .SetProperty(x => x.DateUpdated, persistedAt), cancellationToken);
+                if (affected != 1)
+                {
+                    var currentState = await db.TwitchBroadcasterAuthorization.AsNoTracking()
+                        .Where(x => x.TwitchUserId == twitchUserId)
+                        .Select(x => new { x.EncryptedAccessToken, x.RevocationReason })
+                        .SingleOrDefaultAsync(cancellationToken);
+                    if (currentState != null && IsRefreshedTokenPersistenceSatisfied(
+                        currentState.EncryptedAccessToken,
+                        currentState.RevocationReason,
+                        pending.EncryptedToken))
+                    {
+                        TryRemovePendingRefreshedToken(twitchUserId, pending);
+                        return true;
+                    }
+
+                    TryRemovePendingRefreshedToken(twitchUserId, pending);
+                    _logger.LogWarning(
+                        "Twitch rotation 後 token 寫入時授權 row 已撤銷或不存在，未覆寫較新的狀態 | TwitchUserId: {TwitchUserId}",
+                        twitchUserId);
+                    return false;
+                }
+
+                TryRemovePendingRefreshedToken(twitchUserId, pending);
+                return true;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception ex) when (attempt < RefreshedTokenPersistenceAttempts)
+            {
+                var delay = TimeSpan.FromMilliseconds(250 * Math.Pow(2, attempt - 1));
+                _logger.LogWarning(
+                    ex,
+                    "Twitch rotation 後 token 寫入 MySQL 暫時失敗，準備重試 | Attempt: {Attempt}/{MaxAttempts} | TwitchUserId: {TwitchUserId}",
+                    attempt,
+                    RefreshedTokenPersistenceAttempts,
+                    twitchUserId);
+                await Task.Delay(delay, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(
+                    ex,
+                    "Twitch rotation 後 token 寫入 MySQL 已用完立即重試次數，轉交持續保存工作 | Attempt: {Attempt}/{MaxAttempts} | TwitchUserId: {TwitchUserId}",
+                    attempt,
+                    RefreshedTokenPersistenceAttempts,
+                    twitchUserId);
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>從 MySQL revoked 狀態補送可能遺失的授權事件，發布前仍會檢查目前版本。</summary>
+    private async Task ReplayInvalidatedAuthorizationsAsync(CancellationToken cancellationToken)
+    {
+        // Redis Pub/Sub 不保證服務離線或發布失敗時送達，因此從 MySQL 的 revoked 狀態定期補送。
+        // 真正發布前仍會比對目前版本，避免舊 invalid 事件影響已重新連結的帳號。
+        using var db = _dbContextFactory.CreateDbContext();
+        var candidates = await db.TwitchBroadcasterAuthorization.AsNoTracking()
+            .Where(x => x.RevokedAt != null)
+            .ToListAsync(cancellationToken);
+
+        foreach (var candidate in candidates)
+        {
+            TwitchOAuthRefreshLockAcquireResult lockResult = null;
+            try
+            {
+                lockResult = await TryAcquireRefreshLockAsync(candidate.TwitchUserId, "authorization_invalidation_replay", cancellationToken);
+                if (lockResult.Status != TwitchOAuthRefreshLockAcquireStatus.Acquired)
+                    continue;
+
+                if (await EnsureRefreshLockOwnedAsync(
+                    lockResult.Lease,
+                    candidate.TwitchUserId,
+                    "authorization_invalidation_replay",
+                    cancellationToken))
+                {
+                    await TryPublishAuthorizationChangedAsync(candidate, "invalid", cancellationToken);
+                }
+            }
+            finally
+            {
+                if (lockResult?.Status == TwitchOAuthRefreshLockAcquireStatus.Acquired)
+                {
+                    await ReleaseRefreshLockAsync(
+                        lockResult.Lease,
+                        candidate.TwitchUserId,
+                        "authorization_invalidation_replay",
+                        CancellationToken.None);
+                }
+            }
+        }
+    }
+
+    private async Task<TwitchOAuthRefreshLockAcquireResult> TryAcquireRefreshLockAsync(
+        string twitchUserId,
+        string operation,
+        CancellationToken cancellationToken)
+    {
+        var result = await _refreshLock.TryAcquireAsync(twitchUserId, cancellationToken);
+        if (result.Status == TwitchOAuthRefreshLockAcquireStatus.Contended)
+        {
+            _logger.LogInformation(
+                "Twitch OAuth refresh lock 已由其他實例持有，延後處理 | Operation: {Operation} | TwitchUserId: {TwitchUserId}",
+                operation,
+                twitchUserId);
+        }
+        else if (result.Status == TwitchOAuthRefreshLockAcquireStatus.TemporaryFailure)
+        {
+            _logger.LogWarning(
+                result.Exception,
+                "Twitch OAuth refresh lock 暫時無法取得，保留現有授權狀態 | Operation: {Operation} | TwitchUserId: {TwitchUserId}",
+                operation,
+                twitchUserId);
+        }
+
+        return result;
+    }
+
+    private async Task<bool> EnsureRefreshLockOwnedAsync(
+        TwitchOAuthRefreshLockLease lease,
+        string twitchUserId,
+        string operation,
+        CancellationToken cancellationToken)
+    {
+        var result = await lease.EnsureOwnedAsync(cancellationToken);
+        if (result.Status == TwitchOAuthRefreshLockOwnershipStatus.Owned)
+            return true;
+
+        if (result.Status == TwitchOAuthRefreshLockOwnershipStatus.OwnershipLost)
+        {
+            _logger.LogWarning(
+                "Twitch OAuth refresh lock owner 已變更，停止寫入以避免 stale holder 覆寫 | Operation: {Operation} | TwitchUserId: {TwitchUserId}",
+                operation,
+                twitchUserId);
+        }
+        else
+        {
+            _logger.LogWarning(
+                result.Exception,
+                "Twitch OAuth refresh lock 無法確認 owner，停止寫入以避免 stale holder 覆寫 | Operation: {Operation} | TwitchUserId: {TwitchUserId}",
+                operation,
+                twitchUserId);
+        }
+
+        return false;
+    }
+
+    private async Task ReleaseRefreshLockAsync(
+        TwitchOAuthRefreshLockLease lease,
+        string twitchUserId,
+        string operation,
+        CancellationToken cancellationToken)
+    {
+        var result = await lease.ReleaseAsync(cancellationToken);
+        if (result.Status == TwitchOAuthRefreshLockReleaseStatus.OwnershipLost)
+        {
+            _logger.LogWarning(
+                "Twitch OAuth refresh lock 在釋放前已過期或 owner 已變更，未刪除 lock | Operation: {Operation} | TwitchUserId: {TwitchUserId}",
+                operation,
+                twitchUserId);
+        }
+        else if (result.Status == TwitchOAuthRefreshLockReleaseStatus.TemporaryFailure)
+        {
+            _logger.LogWarning(
+                result.Exception,
+                "Twitch OAuth refresh lock 暫時無法釋放，將由 TTL 清除 | Operation: {Operation} | TwitchUserId: {TwitchUserId}",
+                operation,
+                twitchUserId);
+        }
+    }
+
+    /// <summary>僅在 MySQL 目前狀態仍符合預期版本時發布授權事件，忽略 relink 後的 stale publication。</summary>
+    private async Task TryPublishAuthorizationChangedAsync(
+        TwitchBroadcasterAuthorization expectedState,
+        string status,
+        CancellationToken cancellationToken)
+    {
+        // 非同步發布可能晚於 relink；MySQL 當前狀態必須仍符合 expectedState 才能送出事件。
+        using var db = _dbContextFactory.CreateDbContext();
+        var currentState = await db.TwitchBroadcasterAuthorization.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.TwitchUserId == expectedState.TwitchUserId, cancellationToken);
+        if (!ShouldPublishAuthorizationChange(expectedState, currentState, status))
+        {
+            _logger.LogInformation(
+                "略過已過時的 Twitch authorization_changed publication | TwitchUserId: {TwitchUserId} | Status: {Status}",
+                expectedState.TwitchUserId,
+                status);
+            return;
+        }
+
+        var payload = JsonConvert.SerializeObject(new TwitchAuthorizationChangedPayload(currentState.TwitchUserId, status));
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var subscriberCount = await _redisService.RedisSub.PublishAsync(
+                new RedisChannel(RedisChannels.Twitch.AuthorizationChanged, RedisChannel.PatternMode.Literal),
+                payload);
+            if (subscriberCount == 0)
+            {
+                _logger.LogWarning(
+                    "Twitch authorization_changed 沒有 Redis subscriber；MySQL 狀態將由定期 replay 補送 | TwitchUserId: {TwitchUserId} | Status: {Status}",
+                    currentState.TwitchUserId,
+                    status);
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(
+                ex,
+                "Twitch authorization_changed 暫時無法發布；MySQL 狀態將由定期 replay 補送 | TwitchUserId: {TwitchUserId} | Status: {Status}",
+                currentState.TwitchUserId,
+                status);
+        }
+    }
+
+    internal static bool IsInvalidationStatus(string status)
+        => string.Equals(status, "invalid", StringComparison.Ordinal) ||
+            string.Equals(status, "revoked", StringComparison.Ordinal) ||
+            string.Equals(status, "unlinked", StringComparison.Ordinal);
+
+    internal static bool ShouldPublishAuthorizationChange(
+        TwitchBroadcasterAuthorization expectedState,
+        TwitchBroadcasterAuthorization currentState,
+        string status)
+        => currentState != null &&
+            NormalizeMySqlDateTime(currentState.DateUpdated) == NormalizeMySqlDateTime(expectedState.DateUpdated) &&
+            currentState.RevocationReason == expectedState.RevocationReason &&
+            IsInvalidationStatus(status) == currentState.RevokedAt.HasValue;
+
+    internal static bool IsRefreshedTokenPersistenceSatisfied(
+        string currentEncryptedToken,
+        string revocationReason,
+        string pendingEncryptedToken)
+        => currentEncryptedToken == pendingEncryptedToken &&
+            (revocationReason == null || revocationReason == RevocationPendingReason);
+
+    private static DateTime UtcNowForMySql() => NormalizeMySqlDateTime(DateTime.UtcNow);
+
+    private static DateTime NormalizeMySqlDateTime(DateTime value)
+        => new(value.Ticks - value.Ticks % TimeSpan.TicksPerMicrosecond, DateTimeKind.Utc);
+
+    private static void ThrowIfStateChanged(int affectedRows, string twitchUserId, string operation)
+    {
+        if (affectedRows != 1)
+        {
+            throw new DbUpdateConcurrencyException(
+                $"Twitch authorization state changed during {operation}; stale write rejected for {twitchUserId}.");
+        }
+    }
+
+    private bool TryRemovePendingRefreshedToken(string twitchUserId, PendingRefreshedToken pending)
+        => ((ICollection<KeyValuePair<string, PendingRefreshedToken>>)_pendingRefreshedTokens)
+            .Remove(new KeyValuePair<string, PendingRefreshedToken>(twitchUserId, pending));
+
+    private async Task RegisterPendingRefreshedTokenAsync(string twitchUserId, PendingRefreshedToken pending)
+    {
+        while (!_pendingRefreshedTokens.TryAdd(twitchUserId, pending))
+        {
+            if (!_pendingRefreshedTokens.TryGetValue(twitchUserId, out var existing) ||
+                !_pendingRefreshedTokens.TryUpdate(twitchUserId, pending, existing))
+            {
+                continue;
+            }
+
+            await ReleaseRefreshLockAsync(
+                existing.Lease,
+                twitchUserId,
+                "superseded_pending_refresh",
+                CancellationToken.None);
+            break;
+        }
+    }
+
+    /// <summary>停止接納新 refresh，等待執行中的 rotation 完成交接並 drain 所有 persistence task。</summary>
+    public Task StopAcceptingAndDrainAsync()
+    {
+        lock (_stopGate)
+            return _stopTask ??= StopCoreAsync();
+    }
+
+    /// <summary>執行 rotation lifecycle drain，定期記錄等待狀態並更新關機 persistence 指標。</summary>
+    private async Task StopCoreAsync()
+    {
+        var stopwatch = Stopwatch.StartNew();
+        var drainTask = _rotationLifecycle.StopAcceptingAndDrainAsync();
+        var isDraining = _rotationLifecycle.ActiveOperationCount > 0 ||
+            _rotationLifecycle.PendingPersistenceCount > 0;
+        BackendMetrics.TwitchRefreshShutdownDraining.Set(isDraining ? 1 : 0);
+        if (isDraining)
+        {
+            _logger.LogWarning(
+                "Backend 正在等待已接受的 Twitch refresh rotation 保存完成 | Active: {ActiveCount} | Pending: {PendingCount}",
+                _rotationLifecycle.ActiveOperationCount,
+                _rotationLifecycle.PendingPersistenceCount);
+        }
+
+        try
+        {
+            while (!drainTask.IsCompleted)
+            {
+                var completed = await Task.WhenAny(drainTask, Task.Delay(TimeSpan.FromSeconds(30)));
+                if (completed != drainTask)
+                {
+                    _logger.LogWarning(
+                        "Backend 關閉仍在等待 Twitch refresh rotation 保存 | Active: {ActiveCount} | Pending: {PendingCount} | ElapsedSeconds: {ElapsedSeconds:F1}",
+                        _rotationLifecycle.ActiveOperationCount,
+                        _rotationLifecycle.PendingPersistenceCount,
+                        stopwatch.Elapsed.TotalSeconds);
+                }
+            }
+            await drainTask;
+        }
+        finally
+        {
+            stopwatch.Stop();
+            BackendMetrics.TwitchRefreshShutdownDraining.Set(0);
+            BackendMetrics.TwitchRefreshShutdownDrainDuration.Observe(stopwatch.Elapsed.TotalSeconds);
+        }
+
+        if (isDraining)
+        {
+            _logger.LogInformation(
+                "Backend 已保存全部接受的 Twitch refresh rotation | DrainSeconds: {DrainSeconds:F1}",
+                stopwatch.Elapsed.TotalSeconds);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await StopAcceptingAndDrainAsync();
+        GC.SuppressFinalize(this);
     }
 
     private async Task UpdateMetricsAsync(CancellationToken cancellationToken)
     {
         using var db = _dbContextFactory.CreateDbContext();
         var linked = await db.TwitchBroadcasterAuthorization.AsNoTracking().CountAsync(x => x.RevokedAt == null, cancellationToken);
-        var revoked = await db.TwitchBroadcasterAuthorization.AsNoTracking().CountAsync(x => x.RevokedAt != null && x.RevocationReason == "user_unlinked", cancellationToken);
-        var invalid = await db.TwitchBroadcasterAuthorization.AsNoTracking().CountAsync(x => x.RevokedAt != null && x.RevocationReason != "user_unlinked", cancellationToken);
+        var revoked = await db.TwitchBroadcasterAuthorization.AsNoTracking().CountAsync(x => x.RevokedAt != null && x.RevocationReason == UserUnlinkedReason, cancellationToken);
+        var invalid = await db.TwitchBroadcasterAuthorization.AsNoTracking().CountAsync(x => x.RevokedAt != null && x.RevocationReason != UserUnlinkedReason, cancellationToken);
         BackendMetrics.OAuthLinkedAccounts.WithLabels("twitch", "linked").Set(linked);
         BackendMetrics.OAuthLinkedAccounts.WithLabels("twitch", "revoked").Set(revoked);
         BackendMetrics.OAuthLinkedAccounts.WithLabels("twitch", "invalid").Set(invalid);
@@ -846,6 +1349,47 @@ public class TwitchAuthorizationService
             _logger.LogWarning(ex, "Twitch OAuth 帳號 metrics 更新失敗");
         }
     }
+}
+
+internal sealed class TwitchAuthorizationChangedPayload
+{
+    public TwitchAuthorizationChangedPayload(string twitchUserId, string status)
+    {
+        TwitchUserId = twitchUserId;
+        Status = status;
+    }
+
+    [JsonProperty("TwitchUserId")]
+    public string TwitchUserId { get; }
+
+    [JsonProperty("Status")]
+    public string Status { get; }
+}
+
+internal sealed class PendingRefreshedToken
+{
+    private int _retryQueued;
+
+    public PendingRefreshedToken(
+        string expectedEncryptedToken,
+        string encryptedToken,
+        DateTime? tokenExpiresAt,
+        TwitchOAuthRefreshLockLease lease)
+    {
+        ExpectedEncryptedToken = expectedEncryptedToken;
+        EncryptedToken = encryptedToken;
+        TokenExpiresAt = tokenExpiresAt;
+        Lease = lease;
+    }
+
+    public string ExpectedEncryptedToken { get; }
+    public string EncryptedToken { get; }
+    public DateTime? TokenExpiresAt { get; }
+    public TwitchOAuthRefreshLockLease Lease { get; set; }
+    public SemaphoreSlim PersistenceGate { get; } = new(1, 1);
+
+    public bool TryMarkRetryQueued()
+        => Interlocked.Exchange(ref _retryQueued, 1) == 0;
 }
 
 internal enum TwitchApiResultStatus

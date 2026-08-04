@@ -1,12 +1,21 @@
 {
   "profiles": {
-    "Discord Stream Bot Backend": {
+    "WSL": {
+      "commandName": "WSL2",
+      "launchUrl": "https://localhost:7220",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:7220;http://localhost:7221"
+      },
+      "distributionName": ""
+    },
+    "DiscordStreamBotBackend": {
       "commandName": "Project",
       "workingDirectory": ".\\bin\\Debug\\net8.0",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:7220;http://localhost:7221"
+      "applicationUrl": "http://localhost:5003"
     }
   }
 }

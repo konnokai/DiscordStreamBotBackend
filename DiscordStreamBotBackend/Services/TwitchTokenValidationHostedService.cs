@@ -24,10 +24,30 @@ public class TwitchTokenValidationHostedService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await ValidateAsync(stoppingToken);
+        await RunValidationLoopAsync(stoppingToken);
+    }
+
+    /// <summary>先停止接納 refresh，再停止一般排程，最後等待已接受的 rotation 全部安全保存。</summary>
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        // 先封鎖新的 refresh，再取消一般驗證迴圈；已被 Twitch 接受的 rotation 不可隨 host 關閉遺失。
+        var drainTask = _twitchAuthorizationService.StopAcceptingAndDrainAsync();
+        try
+        {
+            await base.StopAsync(cancellationToken);
+        }
+        finally
+        {
+            await drainTask;
+        }
+    }
+
+    private async Task RunValidationLoopAsync(CancellationToken cancellationToken)
+    {
+        await ValidateAsync(cancellationToken);
         using var timer = new PeriodicTimer(TimeSpan.FromHours(1));
-        while (await timer.WaitForNextTickAsync(stoppingToken))
-            await ValidateAsync(stoppingToken);
+        while (await timer.WaitForNextTickAsync(cancellationToken))
+            await ValidateAsync(cancellationToken);
     }
 
     private async Task ValidateAsync(CancellationToken cancellationToken)

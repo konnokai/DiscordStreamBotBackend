@@ -5,6 +5,8 @@ VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordStreamBotBackend", "DiscordStreamBotBackend\DiscordStreamBotBackend.csproj", "{D4742516-1917-4328-91D9-35085BCF26F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordStreamBotBackend.Tests", "tests\DiscordStreamBotBackend.Tests\DiscordStreamBotBackend.Tests.csproj", "{73694692-793A-49D0-9C23-2CA1DF39133A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{D4742516-1917-4328-91D9-35085BCF26F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4742516-1917-4328-91D9-35085BCF26F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4742516-1917-4328-91D9-35085BCF26F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73694692-793A-49D0-9C23-2CA1DF39133A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73694692-793A-49D0-9C23-2CA1DF39133A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73694692-793A-49D0-9C23-2CA1DF39133A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73694692-793A-49D0-9C23-2CA1DF39133A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
