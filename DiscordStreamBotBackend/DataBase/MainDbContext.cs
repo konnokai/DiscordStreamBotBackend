@@ -6,6 +6,7 @@ namespace DiscordStreamBotBackend.DataBase;
 public partial class MainDbContext(DbContextOptions<MainDbContext> options) : DbContext(options)
 {
     public virtual DbSet<TwitchBroadcasterAuthorization> TwitchBroadcasterAuthorization { get; set; }
+    public virtual DbSet<GoogleOAuthUnlinkIntent> GoogleOAuthUnlinkIntent { get; set; }
     public virtual DbSet<YoutubeChannelSpider> YoutubeChannelSpider { get; set; }
     public virtual DbSet<YoutubeMemberAccessToken> YoutubeMemberAccessToken { get; set; }
     public virtual DbSet<YoutubeMemberCheck> YoutubeMemberCheck { get; set; }
@@ -29,6 +30,23 @@ public partial class MainDbContext(DbContextOptions<MainDbContext> options) : Db
             entity.Property(x => x.DateUpdated)
                 .HasColumnType("datetime(6)")
                 .IsConcurrencyToken();
+        });
+
+        modelBuilder.Entity<GoogleOAuthUnlinkIntent>(entity =>
+        {
+            entity.ToTable("google_oauth_unlink_intent");
+            entity.Property(x => x.ExpectedEncryptedToken).HasColumnType("longtext").IsRequired(false);
+            entity.Property(x => x.DateAdded).HasColumnType("datetime(6)");
+        });
+
+        modelBuilder.Entity<YoutubeMemberCheck>(entity =>
+        {
+            entity.Property(x => x.CheckYtChannelId).HasColumnType("longtext").IsRequired();
+            entity.HasIndex(x => new { x.GuildId, x.UserId, x.CheckYtChannelId })
+                .IsUnique()
+                .HasPrefixLength(0, 0, 24);
+            entity.HasIndex(x => new { x.PendingRoleRemoval, x.GuildId });
+            entity.HasIndex(x => new { x.UserId, x.PendingRoleRemoval });
         });
     }
 }

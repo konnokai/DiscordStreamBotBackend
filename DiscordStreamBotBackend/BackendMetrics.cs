@@ -24,6 +24,10 @@ public static class BackendMetrics
         "OAuth token 更新次數。",
         new CounterConfiguration { LabelNames = ["provider", "result"] });
 
+    public static readonly Counter GoogleCleanupWakeupPublishFailures = Metrics.CreateCounter(
+        "discord_stream_notify_google_cleanup_wakeup_publish_failures_total",
+        "Google 解除連結已提交後，Redis 角色清理喚醒通知失敗次數。");
+
     public static readonly Gauge TwitchRefreshPendingPersistence = Metrics.CreateGauge(
         "discord_stream_notify_twitch_refresh_pending_persistence",
         "尚未完成 MySQL 保存的 Twitch refresh token rotation 數量。");

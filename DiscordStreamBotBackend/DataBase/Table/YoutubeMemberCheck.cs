@@ -12,6 +12,7 @@ namespace DiscordStreamBotBackend.DataBase.Table
         public string CheckYtChannelId { get; set; }
         public DateTime LastCheckTime { get; set; } = DateTime.Now;
         public bool IsChecked { get; set; } = false;
+        public bool PendingRoleRemoval { get; set; }
         public DateTime? DateAdded { get; set; }
     }
 }

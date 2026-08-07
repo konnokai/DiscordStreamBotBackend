@@ -45,7 +45,26 @@ namespace DiscordStreamBotBackend
             services.AddSingleton<Services.Auth.TokenService>();
             services.AddSingleton<BearerTokenService>();
             services.AddSingleton<OAuthStateService>();
+            services.AddSingleton<GoogleAccountOperationCoordinator>();
+            services.AddSingleton<IGoogleOAuthOperationLock>(p =>
+                new GoogleOAuthOperationLock(p.GetRequiredService<RedisService>().RedisDb));
+            services.AddSingleton<IGoogleUnlinkOperationCancellationFactory, GoogleUnlinkOperationCancellationFactory>();
             services.AddSingleton<GoogleOAuthService>();
+            services.AddSingleton<IGoogleAccountProvider>(p => p.GetRequiredService<GoogleOAuthService>());
+            services.AddSingleton<IGoogleProviderRevoker>(p => p.GetRequiredService<GoogleOAuthService>());
+            services.AddSingleton<IGoogleAccountLinkMetricsRefresher>(p => p.GetRequiredService<GoogleOAuthService>());
+            services.AddSingleton<IGoogleAccountLinkStore, GoogleAccountLinkStore>();
+            services.AddSingleton<IGoogleMemberCleanupWakeupPublisher, GoogleMemberCleanupWakeupPublisher>();
+            services.AddSingleton<GoogleAccountLinkService>(p => new GoogleAccountLinkService(
+                p.GetRequiredService<IGoogleAccountProvider>(),
+                p.GetRequiredService<IGoogleProviderRevoker>(),
+                p.GetRequiredService<IGoogleAccountLinkStore>(),
+                p.GetRequiredService<IGoogleMemberCleanupWakeupPublisher>(),
+                p.GetRequiredService<IGoogleAccountLinkMetricsRefresher>(),
+                p.GetRequiredService<GoogleAccountOperationCoordinator>(),
+                p.GetRequiredService<IGoogleOAuthOperationLock>(),
+                p.GetRequiredService<IGoogleUnlinkOperationCancellationFactory>(),
+                p.GetRequiredService<Microsoft.Extensions.Logging.ILogger<GoogleAccountLinkService>>()));
             services.AddSingleton<TwitchAuthorizationService>();
 
             var publicUrls = new PublicUrlService(Configuration);

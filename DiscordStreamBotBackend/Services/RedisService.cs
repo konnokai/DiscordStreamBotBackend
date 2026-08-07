@@ -136,6 +136,9 @@ namespace DiscordStreamBotBackend.Services
                 _logger.LogError(ex, "通知訊息發送錯誤 | Channel: \"{Channel}\"\n", message.Key);
             }
 
+            if (message.Key == RedisChannels.Member.RevokeToken)
+                BackendMetrics.GoogleCleanupWakeupPublishFailures.Inc();
+
             return false;
         }
 

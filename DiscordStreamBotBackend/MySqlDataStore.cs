@@ -7,11 +7,34 @@ using Newtonsoft.Json;
 using NLog;
 using NLog.Web;
 using System;
+using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DiscordStreamBotBackend
 {
+    internal enum ProviderTokenLoadStatus
+    {
+        Missing,
+        Loaded,
+        Unreadable
+    }
+
+    internal readonly record struct ProviderTokenLoadResult<T>(
+        ProviderTokenLoadStatus Status,
+        T Value,
+        string EncryptedPayload,
+        Exception Error);
+
+    internal sealed class ProviderTokenUnreadableException : Exception
+    {
+        public ProviderTokenUnreadableException(string key, Exception innerException)
+            : base($"Provider token '{key}' exists but cannot be read.", innerException)
+        {
+        }
+    }
+
     /// <summary>
     /// 會限 OAuth token 的 MySQL 儲存後端（真實來源）。
     /// T 恆為 Google.Apis 的 TokenResponse、key 為 Discord userId 字串；密文格式與 Bot 端共用，兩端可互相解密。
@@ -55,34 +78,130 @@ namespace DiscordStreamBotBackend
 
         public async Task<T> GetAsync<T>(string key)
         {
+            var result = await LoadAsync<T>(key, CancellationToken.None);
+            return result.Status switch
+            {
+                ProviderTokenLoadStatus.Missing => default,
+                ProviderTokenLoadStatus.Loaded => result.Value,
+                _ => throw new ProviderTokenUnreadableException(key, result.Error)
+            };
+        }
+
+        internal async Task<bool> HasUnlinkIntentAsync(
+            ulong discordUserId,
+            CancellationToken cancellationToken)
+        {
+            using var db = _dbContextFactory.CreateDbContext();
+            return await db.GoogleOAuthUnlinkIntent.AsNoTracking()
+                .AnyAsync(x => x.DiscordUserId == discordUserId, cancellationToken);
+        }
+
+        internal async Task<bool> StoreAuthorizationIfNoUnlinkIntentAsync<T>(
+            ulong discordUserId,
+            T value,
+            CancellationToken cancellationToken)
+        {
+            var encryptedValue = _tokenService.CreateTokenResponseToken(value);
+            var dateAdded = DateTime.UtcNow;
+            using var db = _dbContextFactory.CreateDbContext();
+            await using var transaction = await db.Database.BeginTransactionAsync(
+                IsolationLevel.Serializable,
+                cancellationToken);
+            if (await db.GoogleOAuthUnlinkIntent.AsNoTracking()
+                .AnyAsync(x => x.DiscordUserId == discordUserId, cancellationToken))
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                return false;
+            }
+
+            await db.Database.ExecuteSqlInterpolatedAsync($@"
+INSERT INTO `youtube_member_access_token`
+    (`discord_user_id`, `encrypted_access_token`, `date_added`)
+VALUES ({discordUserId}, {encryptedValue}, {dateAdded})
+ON DUPLICATE KEY UPDATE
+    `encrypted_access_token` = {encryptedValue},
+    `date_added` = {dateAdded}", cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return true;
+        }
+
+        internal async Task<bool> StoreRefreshIfCurrentAsync<T>(
+            ulong discordUserId,
+            string expectedEncryptedToken,
+            T value,
+            CancellationToken cancellationToken)
+        {
+            var encryptedValue = _tokenService.CreateTokenResponseToken(value);
+            var dateAdded = DateTime.UtcNow;
+            using var db = _dbContextFactory.CreateDbContext();
+            var updated = await db.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE `youtube_member_access_token`
+SET `encrypted_access_token` = {encryptedValue},
+    `date_added` = {dateAdded}
+WHERE `discord_user_id` = {discordUserId}
+  AND BINARY `encrypted_access_token` = BINARY {expectedEncryptedToken}
+  AND NOT EXISTS (
+      SELECT 1 FROM `google_oauth_unlink_intent`
+      WHERE `discord_user_id` = {discordUserId})", cancellationToken);
+            return updated == 1;
+        }
+
+        internal async Task<ProviderTokenLoadResult<T>> LoadAsync<T>(
+            string key,
+            CancellationToken cancellationToken)
+        {
             var userId = ulong.Parse(key);
 
             using var db = _dbContextFactory.CreateDbContext();
-            var str = await db.YoutubeMemberAccessToken.AsNoTracking()
+            var encryptedPayload = await db.YoutubeMemberAccessToken.AsNoTracking()
                 .Where(x => x.DiscordUserId == userId)
                 .Select(x => x.EncryptedAccessToken)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
+            var result = DecodeStoredToken<T>(encryptedPayload, _tokenService);
 
-            if (str == null)
-                return default(T);
+            if (result.Status == ProviderTokenLoadStatus.Unreadable)
+                _logger.Error(result.Error, $"MySqlDataStore-LoadAsync ({key}): token 無法解密或反序列化");
 
+            return result;
+        }
+
+        internal static ProviderTokenLoadResult<T> DecodeStoredToken<T>(
+            string encryptedPayload,
+            TokenService tokenService)
+        {
+            if (encryptedPayload == null)
+                return new ProviderTokenLoadResult<T>(ProviderTokenLoadStatus.Missing, default, null, null);
+
+            Exception decryptError;
             try
             {
-                return _tokenService.GetTokenResponseValue<T>(str);
+                var value = tokenService.GetTokenResponseValue<T>(encryptedPayload);
+                if (value is not null)
+                    return new ProviderTokenLoadResult<T>(ProviderTokenLoadStatus.Loaded, value, encryptedPayload, null);
+
+                decryptError = new JsonSerializationException("Decrypted provider token payload was null.");
             }
             catch (Exception ex)
             {
-                _logger.Warn($"MySqlDataStore-GetAsync ({key}): 解密失敗，也許還沒加密? {ex}");
+                decryptError = ex;
+            }
 
-                try
-                {
-                    return JsonConvert.DeserializeObject<T>(str);
-                }
-                catch (Exception ex2)
-                {
-                    _logger.Error($"MySqlDataStore-GetAsync ({key}): JsonDes 失敗 {ex2}");
-                    return default(T);
-                }
+            try
+            {
+                // 舊資料曾以未加密 JSON 儲存；只在 AES/HMAC 解析失敗後保留這條相容路徑。
+                var value = JsonConvert.DeserializeObject<T>(encryptedPayload);
+                if (value is not null)
+                    return new ProviderTokenLoadResult<T>(ProviderTokenLoadStatus.Loaded, value, encryptedPayload, null);
+
+                throw new JsonSerializationException("Legacy provider token payload was null.");
+            }
+            catch (Exception jsonError)
+            {
+                return new ProviderTokenLoadResult<T>(
+                    ProviderTokenLoadStatus.Unreadable,
+                    default,
+                    encryptedPayload,
+                    new AggregateException(decryptError, jsonError));
             }
         }
 

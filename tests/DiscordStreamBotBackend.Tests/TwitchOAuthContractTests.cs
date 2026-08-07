@@ -15,6 +15,7 @@ public sealed class TwitchOAuthContractTests
     {
         Assert.Equal("twitch:authorization_changed", RedisChannels.Twitch.AuthorizationChanged);
         Assert.Equal("twitch:oauth:refresh-lock:user-42", TwitchOAuthRefreshLock.GetKey("user-42"));
+        Assert.Equal("google:oauth:operation-lock:42", RedisChannels.OAuth.GoogleOperationLock(42));
         Assert.Equal(1, RedisService.ProviderStateDatabaseIndex);
         RedisService.ValidateProviderStateDatabaseIndex(1);
     }

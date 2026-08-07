@@ -82,7 +82,7 @@ Linux 會由 Compose 的 `host-gateway` 映射解析 `host.docker.internal`；Do
 
 應用層 rate limit 與 access log 使用 ASP.NET Core Forwarded Headers middleware 正規化後的 `HttpContext.Connection.RemoteIpAddress`。預設從 Cloudflare 的 `CF-Connecting-IP` 取得原始 IP；若反向代理送的是 `CF-Real-IP` 或 `X-Forwarded-For`，請修改 `ForwardedHeaders:ForwardedForHeaderName`。只有 `ForwardedHeaders:KnownProxies` 或 `KnownNetworks` 內的可信代理能改寫 IP，Docker 預設私有網段可設定為 `172.16.0.0/12`，實際部署仍應依 `docker network inspect` 結果縮小範圍。對外發布的 Backend port 必須限制為只能由反向代理存取，否則用戶可直接連線並偽造轉送 header。
 
-`twitch_broadcaster_authorization` 的 migration 由 Bot repo 統一管理，Backend 只映射既有資料表，不會建立或更新 schema。
+共享 OAuth 與會員驗證資料表的 migration 由 Bot repo 統一管理，Backend 只映射既有 schema，不會建立或更新資料表。`youtube_member_check` 包含 `pending_role_removal`，並沿用 Bot migration 建立的 `(pending_role_removal, guild_id)`、`(user_id, pending_role_removal)` 與唯一 `(guild_id, user_id, check_yt_channel_id(24))` indexes；Backend repo 不建立對應 migration。
 
 部署前須先套用 Bot repo 提供的 migration SQL。Twitch provider token 僅保存於 `twitch_broadcaster_authorization`，Backend 不讀寫 Redis token，也不提供舊版 Redis token 遷移流程。
 
@@ -106,6 +106,30 @@ OAuth 與帳號連結 API：
 | `GET` | `/account-links` | 查詢 Google 與 Twitch 連結狀態 |
 | `DELETE` | `/account-links/google` | 解除 Google 連結 |
 | `DELETE` | `/account-links/twitch` | 解除 Twitch 連結 |
+
+Google account-link response 的 `status` 只表示 OAuth 狀態，值維持 `linked | unlinked | invalid`。Discord 身分組清理狀態由 `cleanupPending` 與各 subscription 的 `pendingRoleRemoval` 分開表示。`guildId` 一律回傳十進位字串，Frontend 必須以 `string` 接收，不可轉成 JavaScript `number`：
+
+```json
+{
+  "google": {
+    "status": "unlinked",
+    "subscriptions": [
+      {
+        "guildId": "18446744073709551615",
+        "channelId": "UC...",
+        "isChecked": false,
+        "pendingRoleRemoval": true,
+        "lastCheckedAt": "2026-08-04T12:00:00Z"
+      }
+    ],
+    "cleanupPending": true
+  }
+}
+```
+
+Google 已連結時，`GET /account-links` 回傳該 Discord user 的所有 subscription rows；未連結或 token 無效時，仍回傳待清理 rows。刪除 token 不會讓 `cleanupPending` 消失。
+
+`DELETE /account-links/google` 先撤銷 Google provider token。撤銷失敗時不修改本機 token 或 check rows，並回傳 503。撤銷成功後，Backend 在同一個 MySQL transaction 以原始 token 密文作 CAS，將該 user 的 checks 設為 `is_checked=false`、`pending_role_removal=true`，同時刪除本機 token；若操作期間 token 已被新連結取代，回傳 409 並保留新 token/check state。commit 完成後才發布 `member.revokeToken`，payload 維持 Discord user ID 十進位字串。Redis 訊息只負責喚醒 Bot，發送失敗不會推翻已提交的 unlink。存在待清理 rows 時回傳 HTTP 202，否則回傳 HTTP 200；兩者 body 都是 `{"status":"unlinked","cleanupPending":boolean}`。
 
 舊的 `/DiscordCallBack`、`/GoogleCallBack`、`/GetGoogleData`、`/UnlinkGoogle` 端點已移除，不提供向前相容。
 

@@ -9,9 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -19,15 +21,17 @@ using System.Threading.Tasks;
 
 namespace DiscordStreamBotBackend.Services;
 
-public class GoogleOAuthService
+public class GoogleOAuthService : IGoogleAccountProvider, IGoogleProviderRevoker, IGoogleAccountLinkMetricsRefresher
 {
     private const string Scope = "https://www.googleapis.com/auth/youtube.force-ssl";
+    private readonly GoogleAccountOperationCoordinator _coordinator;
+    private readonly IGoogleOAuthOperationLock _distributedOperationLock;
+    private readonly MySqlDataStore _dataStore;
     private readonly GoogleAuthorizationCodeFlow _flow;
     private readonly IDbContextFactory<MainDbContext> _dbContextFactory;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<GoogleOAuthService> _logger;
     private readonly PublicUrlService _publicUrls;
-    private readonly RedisService _redisService;
     private readonly string _clientId;
 
     public GoogleOAuthService(
@@ -36,15 +40,18 @@ public class GoogleOAuthService
         IHttpClientFactory httpClientFactory,
         ILogger<GoogleOAuthService> logger,
         PublicUrlService publicUrls,
-        RedisService redisService,
-        TokenService tokenService)
+        TokenService tokenService,
+        GoogleAccountOperationCoordinator coordinator,
+        IGoogleOAuthOperationLock distributedOperationLock)
     {
+        _coordinator = coordinator;
+        _distributedOperationLock = distributedOperationLock;
         _dbContextFactory = dbContextFactory;
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _publicUrls = publicUrls;
-        _redisService = redisService;
         _clientId = configuration["Google:ClientId"];
+        _dataStore = new MySqlDataStore(dbContextFactory, tokenService);
         _flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
         {
             ClientSecrets = new ClientSecrets
@@ -53,7 +60,7 @@ public class GoogleOAuthService
                 ClientSecret = configuration["Google:ClientSecret"]
             },
             Scopes = [Scope],
-            DataStore = new MySqlDataStore(dbContextFactory, tokenService)
+            DataStore = new NonPersistentGoogleDataStore()
         });
     }
 
@@ -77,8 +84,26 @@ public class GoogleOAuthService
 
     public async Task<bool> CompleteAuthorizationAsync(ulong discordUserId, string code, string redirectUrl, CancellationToken cancellationToken)
     {
+        using var operationLease = await _coordinator.AcquireAsync(discordUserId, cancellationToken);
+        GoogleOAuthOperationLockAcquireResult lockResult = await _distributedOperationLock.TryAcquireAsync(
+            discordUserId, cancellationToken);
+        if (lockResult.Status != GoogleOAuthOperationLockAcquireStatus.Acquired)
+        {
+            _logger.LogWarning(
+                lockResult.Exception,
+                "Google callback 無法取得跨程序 OAuth lease | DiscordUserId: {DiscordUserId} | Status: {Status}",
+                discordUserId,
+                lockResult.Status);
+            return false;
+        }
+        await using var distributedLease = lockResult.Lease;
         var key = discordUserId.ToString();
-        var existing = await _flow.LoadTokenAsync(key, cancellationToken);
+        if (await _dataStore.HasUnlinkIntentAsync(discordUserId, cancellationToken))
+            return false;
+        var existingLoad = await _dataStore.LoadAsync<TokenResponse>(key, cancellationToken);
+        var existing = existingLoad.Status == ProviderTokenLoadStatus.Loaded
+            ? existingLoad.Value
+            : null;
         var token = await _flow.ExchangeCodeForTokenAsync(key, code, redirectUrl, cancellationToken);
         if (token == null || string.IsNullOrWhiteSpace(token.AccessToken))
             return false;
@@ -87,22 +112,36 @@ public class GoogleOAuthService
             token.RefreshToken = existing?.RefreshToken;
 
         if (string.IsNullOrWhiteSpace(token.RefreshToken))
+            return false;
+
+        if (await distributedLease.EnsureOwnedAsync(cancellationToken) !=
+            GoogleOAuthOperationLockOwnershipStatus.Owned)
         {
-            await _flow.DeleteTokenAsync(key, cancellationToken);
             return false;
         }
-
-        await _flow.DataStore.StoreAsync(key, token);
+        if (!await _dataStore.StoreAuthorizationIfNoUnlinkIntentAsync(
+            discordUserId, token, cancellationToken))
+        {
+            return false;
+        }
         await TryUpdateMetricsAsync(CancellationToken.None);
         return true;
     }
 
-    public async Task<GoogleAccountLink> GetAccountLinkAsync(ulong discordUserId, CancellationToken cancellationToken)
+    public async Task<GoogleAccountLink> GetProviderAccountAsync(ulong discordUserId, CancellationToken cancellationToken)
     {
+        using var operationLease = await _coordinator.AcquireAsync(discordUserId, cancellationToken);
         var key = discordUserId.ToString();
-        var token = await _flow.LoadTokenAsync(key, cancellationToken);
-        if (token == null)
+        var loadResult = await _dataStore.LoadAsync<TokenResponse>(key, cancellationToken);
+        if (loadResult.Status == ProviderTokenLoadStatus.Missing)
             return new GoogleAccountLink { Status = "unlinked" };
+        if (loadResult.Status == ProviderTokenLoadStatus.Unreadable)
+        {
+            BackendMetrics.OAuthTokenValidations.WithLabels("google", "invalid").Inc();
+            return new GoogleAccountLink { Status = "invalid" };
+        }
+
+        var token = loadResult.Value;
 
         if (string.IsNullOrWhiteSpace(token.AccessToken) || string.IsNullOrWhiteSpace(token.RefreshToken))
         {
@@ -114,8 +153,46 @@ public class GoogleOAuthService
         {
             if (IsExpired(token))
             {
-                token = await _flow.RefreshTokenAsync(key, token.RefreshToken, cancellationToken);
-                BackendMetrics.OAuthTokenRefreshes.WithLabels("google", "success").Inc();
+                GoogleOAuthOperationLockAcquireResult lockResult = await _distributedOperationLock.TryAcquireAsync(
+                    discordUserId, cancellationToken);
+                if (lockResult.Status != GoogleOAuthOperationLockAcquireStatus.Acquired)
+                {
+                    _logger.LogWarning(
+                        lockResult.Exception,
+                        "Google refresh 無法取得跨程序 OAuth lease | DiscordUserId: {DiscordUserId} | Status: {Status}",
+                        discordUserId,
+                        lockResult.Status);
+                    return new GoogleAccountLink { Status = "invalid" };
+                }
+                await using var distributedLease = lockResult.Lease;
+                loadResult = await _dataStore.LoadAsync<TokenResponse>(key, cancellationToken);
+                if (loadResult.Status != ProviderTokenLoadStatus.Loaded)
+                    return new GoogleAccountLink { Status = "invalid" };
+                if (await _dataStore.HasUnlinkIntentAsync(discordUserId, cancellationToken))
+                    return new GoogleAccountLink { Status = "invalid" };
+                token = loadResult.Value;
+                if (IsExpired(token))
+                {
+                    if (await distributedLease.EnsureOwnedAsync(cancellationToken) !=
+                        GoogleOAuthOperationLockOwnershipStatus.Owned)
+                    {
+                        return new GoogleAccountLink { Status = "invalid" };
+                    }
+                    string expectedEncryptedToken = loadResult.EncryptedPayload;
+                    token = await _flow.RefreshTokenAsync(key, token.RefreshToken, cancellationToken);
+                    token.RefreshToken ??= loadResult.Value.RefreshToken;
+                    if (await distributedLease.EnsureOwnedAsync(cancellationToken) !=
+                            GoogleOAuthOperationLockOwnershipStatus.Owned ||
+                        !await _dataStore.StoreRefreshIfCurrentAsync(
+                            discordUserId,
+                            expectedEncryptedToken,
+                            token,
+                            cancellationToken))
+                    {
+                        return new GoogleAccountLink { Status = "invalid" };
+                    }
+                    BackendMetrics.OAuthTokenRefreshes.WithLabels("google", "success").Inc();
+                }
             }
 
             var channel = await GetChannelAsync(token.AccessToken, cancellationToken);
@@ -125,27 +202,18 @@ public class GoogleOAuthService
                 return new GoogleAccountLink { Status = "invalid" };
             }
 
-            using var db = _dbContextFactory.CreateDbContext();
-            var subscriptions = await db.YoutubeMemberCheck.AsNoTracking()
-                .Where(x => x.UserId == discordUserId)
-                .Select(x => new GoogleMemberSubscription
-                {
-                    GuildId = x.GuildId,
-                    ChannelId = x.CheckYtChannelId,
-                    IsChecked = x.IsChecked,
-                    LastCheckedAt = x.LastCheckTime
-                })
-                .ToListAsync(cancellationToken);
-
             BackendMetrics.OAuthTokenValidations.WithLabels("google", "valid").Inc();
             return new GoogleAccountLink
             {
                 Status = "linked",
                 ChannelId = channel.id,
                 UserName = channel.snippet.title,
-                ProfileImageUrl = channel.snippet.thumbnails?.@default?.url,
-                Subscriptions = subscriptions
+                ProfileImageUrl = channel.snippet.thumbnails?.@default?.url
             };
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -157,34 +225,95 @@ public class GoogleOAuthService
         }
     }
 
-    public async Task<bool> UnlinkAsync(ulong discordUserId, CancellationToken cancellationToken)
+    async Task<GoogleProviderRevokeResult> IGoogleProviderRevoker.RevokeAsync(
+        ulong discordUserId,
+        string expectedEncryptedToken,
+        CancellationToken cancellationToken)
     {
         var key = discordUserId.ToString();
-        var token = await _flow.LoadTokenAsync(key, cancellationToken);
-        if (token == null)
-            return true;
+        var loadResult = await _dataStore.LoadAsync<TokenResponse>(key, cancellationToken);
+        if (loadResult.Status == ProviderTokenLoadStatus.Missing)
+        {
+            return expectedEncryptedToken == null
+                ? new GoogleProviderRevokeResult(GoogleProviderRevokeOutcome.NoGrant, null)
+                : new GoogleProviderRevokeResult(GoogleProviderRevokeOutcome.TokenChanged, null);
+        }
+        if (!string.Equals(loadResult.EncryptedPayload, expectedEncryptedToken, StringComparison.Ordinal))
+            return new GoogleProviderRevokeResult(GoogleProviderRevokeOutcome.TokenChanged, null);
+        if (loadResult.Status == ProviderTokenLoadStatus.Unreadable)
+        {
+            _logger.LogWarning("Google provider 撤銷失敗，本機 token 無法讀取；保留 token 與會員檢查");
+            return new GoogleProviderRevokeResult(GoogleProviderRevokeOutcome.TokenUnreadable, null);
+        }
+
+        var token = loadResult.Value;
 
         var revokeToken = token.RefreshToken ?? token.AccessToken;
         if (string.IsNullOrWhiteSpace(revokeToken))
         {
             _logger.LogWarning("Google provider 撤銷失敗，本機 token 缺少可撤銷內容");
+            return new GoogleProviderRevokeResult(GoogleProviderRevokeOutcome.Failed, null);
+        }
+
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, "https://oauth2.googleapis.com/revoke")
+            {
+                Content = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["token"] = revokeToken
+                })
+            };
+            using var response = await _httpClientFactory.CreateClient().SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                string responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                if (IsConclusiveAlreadyRevoked((int)response.StatusCode, responseBody))
+                {
+                    return new GoogleProviderRevokeResult(
+                        GoogleProviderRevokeOutcome.Revoked,
+                        loadResult.EncryptedPayload);
+                }
+                _logger.LogWarning(
+                    "Google provider 撤銷失敗，保留本機 token 待稍後重試 | StatusCode: {StatusCode}",
+                    (int)response.StatusCode);
+                return new GoogleProviderRevokeResult(GoogleProviderRevokeOutcome.Failed, null);
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Google provider 撤銷失敗，保留本機 token 待稍後重試");
+            return new GoogleProviderRevokeResult(GoogleProviderRevokeOutcome.Failed, null);
+        }
+
+        return new GoogleProviderRevokeResult(
+            GoogleProviderRevokeOutcome.Revoked,
+            loadResult.EncryptedPayload);
+    }
+
+    internal static bool IsConclusiveAlreadyRevoked(int statusCode, string responseBody)
+    {
+        if (statusCode < (int)HttpStatusCode.BadRequest || statusCode >= 500 ||
+            string.IsNullOrWhiteSpace(responseBody))
+        {
             return false;
         }
 
         try
         {
-            await _flow.RevokeTokenAsync(key, revokeToken, cancellationToken);
+            return string.Equals(
+                JObject.Parse(responseBody).Value<string>("error"),
+                "invalid_token",
+                StringComparison.OrdinalIgnoreCase);
         }
-        catch (Exception ex)
+        catch (JsonException)
         {
-            _logger.LogWarning(ex, "Google provider 撤銷失敗，保留本機 token 待稍後重試");
             return false;
         }
-
-        await _flow.DeleteTokenAsync(key, cancellationToken);
-        await _redisService.AddPubMessageAsync("member.revokeToken", key, CancellationToken.None);
-        await TryUpdateMetricsAsync(CancellationToken.None);
-        return true;
     }
 
     public async Task UpdateMetricsAsync(CancellationToken cancellationToken)

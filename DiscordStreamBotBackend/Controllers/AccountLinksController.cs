@@ -12,16 +12,16 @@ namespace DiscordStreamBotBackend.Controllers;
 public class AccountLinksController : ControllerBase
 {
     private readonly BearerTokenService _bearerTokenService;
-    private readonly GoogleOAuthService _googleOAuthService;
+    private readonly GoogleAccountLinkService _googleAccountLinkService;
     private readonly TwitchAuthorizationService _twitchAuthorizationService;
 
     public AccountLinksController(
         BearerTokenService bearerTokenService,
-        GoogleOAuthService googleOAuthService,
+        GoogleAccountLinkService googleAccountLinkService,
         TwitchAuthorizationService twitchAuthorizationService)
     {
         _bearerTokenService = bearerTokenService;
-        _googleOAuthService = googleOAuthService;
+        _googleAccountLinkService = googleAccountLinkService;
         _twitchAuthorizationService = twitchAuthorizationService;
     }
 
@@ -31,22 +31,20 @@ public class AccountLinksController : ControllerBase
         if (!TryGetDiscordUserId(out var discordUserId))
             return Unauthorized(new { error = "Discord 登入憑證無效，請重新登入。" });
 
-        var googleTask = _googleOAuthService.GetAccountLinkAsync(discordUserId, cancellationToken);
+        var googleTask = _googleAccountLinkService.GetAccountLinkAsync(discordUserId, cancellationToken);
         var twitchTask = _twitchAuthorizationService.GetAccountLinkAsync(discordUserId, cancellationToken);
         await Task.WhenAll(googleTask, twitchTask);
         return Ok(new { google = await googleTask, twitch = await twitchTask });
     }
 
     [HttpDelete("google")]
-    public async Task<IActionResult> DeleteGoogle()
+    public async Task<IActionResult> DeleteGoogle(CancellationToken cancellationToken)
     {
         if (!TryGetDiscordUserId(out var discordUserId))
             return Unauthorized(new { error = "Discord 登入憑證無效，請重新登入。" });
 
-        if (!await _googleOAuthService.UnlinkAsync(discordUserId, CancellationToken.None))
-            return StatusCode(503, new { error = "google_revoke_failed" });
-
-        return Ok(new { status = "unlinked", message = "Google 連結已解除。" });
+        var result = await _googleAccountLinkService.UnlinkAsync(discordUserId, cancellationToken);
+        return CreateGoogleUnlinkResult(result);
     }
 
     [HttpDelete("twitch")]
@@ -64,4 +62,20 @@ public class AccountLinksController : ControllerBase
 
     private bool TryGetDiscordUserId(out ulong discordUserId)
         => _bearerTokenService.TryGetDiscordUserId(Request.Headers.Authorization.ToString(), out discordUserId);
+
+    internal static IActionResult CreateGoogleUnlinkResult(GoogleUnlinkResult result)
+    {
+        if (result == GoogleUnlinkResult.ProviderRevokeFailed)
+            return new ObjectResult(new { error = "google_revoke_failed" }) { StatusCode = 503 };
+        if (result == GoogleUnlinkResult.TokenChanged)
+            return new ConflictObjectResult(new { error = "google_token_changed", retryable = true });
+
+        var response = new Model.GoogleUnlinkResponse
+        {
+            CleanupPending = result == GoogleUnlinkResult.CleanupPending
+        };
+        return response.CleanupPending
+            ? new ObjectResult(response) { StatusCode = 202 }
+            : new OkObjectResult(response);
+    }
 }
