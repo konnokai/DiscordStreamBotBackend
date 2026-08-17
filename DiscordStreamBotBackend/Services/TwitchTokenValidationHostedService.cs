@@ -27,10 +27,10 @@ public class TwitchTokenValidationHostedService : BackgroundService
         await RunValidationLoopAsync(stoppingToken);
     }
 
-    /// <summary>先停止接納 refresh，再停止一般排程，最後等待已接受的 rotation 全部安全保存。</summary>
+    /// <summary>先停止接受新的 refresh，再停止一般排程，最後等待已接受的 rotation 全部安全寫入。</summary>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        // 先封鎖新的 refresh，再取消一般驗證迴圈；已被 Twitch 接受的 rotation 不可隨 host 關閉遺失。
+        // 先停止接受新的 refresh，再取消一般驗證迴圈；Twitch 已接受的 rotation 不可因服務關閉而遺失。
         var drainTask = _twitchAuthorizationService.StopAcceptingAndDrainAsync();
         try
         {
@@ -73,7 +73,7 @@ public class TwitchTokenValidationHostedService : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Google OAuth 帳號 metrics 更新失敗");
+            _logger.LogWarning(ex, "Google OAuth 帳號指標更新失敗");
         }
     }
 }

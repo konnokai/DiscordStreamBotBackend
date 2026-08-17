@@ -40,7 +40,7 @@ internal sealed class TwitchRefreshRotationLifecycle
         }
     }
 
-    /// <summary>在尚未關機時登記 refresh operation，使 drain 能等待其完成 rotation 保存交接。</summary>
+    /// <summary>在尚未關機時登記 refresh operation，讓 drain 等待 rotation 寫入完成。</summary>
     public bool TryBeginRefresh(out Lease lease)
     {
         lock (_gate)
@@ -58,7 +58,7 @@ internal sealed class TwitchRefreshRotationLifecycle
         }
     }
 
-    /// <summary>追蹤 provider 已接受之 rotation 的保存工作，直到落盤或確認 stale。</summary>
+    /// <summary>追蹤 provider 已接受的 rotation 寫入工作，直到完成或確認狀態已過期。</summary>
     public void TrackAcceptedPersistence(Task task)
     {
         ArgumentNullException.ThrowIfNull(task);
@@ -74,13 +74,13 @@ internal sealed class TwitchRefreshRotationLifecycle
         _ = RemoveWhenCompletedAsync(id, task);
     }
 
-    /// <summary>停止接納新 refresh，等待執行中 operation 交接後 drain 全部保存工作。</summary>
+    /// <summary>停止接受新的 refresh，等待進行中的 operation 完成交接，再等待所有寫入工作結束。</summary>
     public Task StopAcceptingAndDrainAsync()
     {
         lock (_gate)
         {
-            // 先停止接納 refresh，再等現有 operation 登記已接受 rotation 的保存工作。
-            // 完成這段交接後才可 drain task snapshot，避免關機在空窗提前結束。
+            // 先停止接受 refresh，再等現有 operation 登記已接受的 rotation 寫入工作。
+            // 完成這段交接後才能 drain task snapshot，避免關機在空窗期提前結束。
             _stopping = true;
             return _stopTask ??= DrainAsync(_activeOperationsDrained.Task);
         }
@@ -132,7 +132,7 @@ internal sealed class TwitchRefreshRotationLifecycle
         }
         catch
         {
-            // 指標更新不得中斷已接受的 refresh rotation 保存。
+            // 指標更新不得中斷已接受的 refresh rotation 寫入工作。
         }
     }
 

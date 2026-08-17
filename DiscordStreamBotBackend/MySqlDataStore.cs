@@ -30,14 +30,14 @@ namespace DiscordStreamBotBackend
     internal sealed class ProviderTokenUnreadableException : Exception
     {
         public ProviderTokenUnreadableException(string key, Exception innerException)
-            : base($"Provider token '{key}' exists but cannot be read.", innerException)
+            : base($"Provider token '{key}' 已存在，但無法讀取。", innerException)
         {
         }
     }
 
     /// <summary>
-    /// 會限 OAuth token 的 MySQL 儲存後端（真實來源）。
-    /// T 恆為 Google.Apis 的 TokenResponse、key 為 Discord userId 字串；密文格式與 Bot 端共用，兩端可互相解密。
+    /// 會限 OAuth token 的 MySQL 儲存後端，也是 token 的資料來源。
+    /// T 一律是 Google.Apis 的 TokenResponse，key 是 Discord userId 字串；密文格式與 Bot 共用，兩端都能解密。
     /// </summary>
     public class MySqlDataStore : IDataStore
     {
@@ -160,7 +160,7 @@ WHERE `discord_user_id` = {discordUserId}
             var result = DecodeStoredToken<T>(encryptedPayload, _tokenService);
 
             if (result.Status == ProviderTokenLoadStatus.Unreadable)
-                _logger.Error(result.Error, $"MySqlDataStore-LoadAsync ({key}): token 無法解密或反序列化");
+                _logger.Error(result.Error, $"MySqlDataStore-LoadAsync ({key}): token 解密或反序列化失敗。");
 
             return result;
         }
@@ -179,7 +179,7 @@ WHERE `discord_user_id` = {discordUserId}
                 if (value is not null)
                     return new ProviderTokenLoadResult<T>(ProviderTokenLoadStatus.Loaded, value, encryptedPayload, null);
 
-                decryptError = new JsonSerializationException("Decrypted provider token payload was null.");
+                decryptError = new JsonSerializationException("解密後的 provider token payload 為空。");
             }
             catch (Exception ex)
             {
@@ -193,7 +193,7 @@ WHERE `discord_user_id` = {discordUserId}
                 if (value is not null)
                     return new ProviderTokenLoadResult<T>(ProviderTokenLoadStatus.Loaded, value, encryptedPayload, null);
 
-                throw new JsonSerializationException("Legacy provider token payload was null.");
+                throw new JsonSerializationException("舊格式的 provider token payload 為空。");
             }
             catch (Exception jsonError)
             {

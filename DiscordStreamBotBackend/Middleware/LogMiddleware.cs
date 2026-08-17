@@ -52,7 +52,7 @@ namespace DiscordStreamBotBackend.Middleware
                             await _redisService.RedisDb.KeyExpireAsync(badReqRedisKey, TimeSpan.FromHours(1));
                             var errorMessage = JsonConvert.SerializeObject(new
                             {
-                                ErrorMessage = "429 Too Many Requests"
+                                ErrorMessage = "429 請求過於頻繁"
                             });
                             var bytes = Encoding.UTF8.GetBytes(errorMessage);
 
@@ -71,7 +71,7 @@ namespace DiscordStreamBotBackend.Middleware
                             await _redisService.RedisDb.KeyExpireAsync(rngReqRedisKey, TimeSpan.FromHours(1));
                             var errorMessage = JsonConvert.SerializeObject(new
                             {
-                                ErrorMessage = "429 Too Many Requests"
+                                ErrorMessage = "429 請求過於頻繁"
                             });
                             var bytes = Encoding.UTF8.GetBytes(errorMessage);
 
@@ -84,17 +84,16 @@ namespace DiscordStreamBotBackend.Middleware
                 }
                 catch (RedisConnectionException redisEx)
                 {
-                    logger.Error(redisEx, "Redis 掛掉了");
+                    logger.Error(redisEx, "Redis 連線中斷。");
                     isRedisError = true;
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, "Middleware 錯誤");
+                    logger.Error(ex, "Middleware 處理失敗。");
                 }
 
                 await _next(context);
 
-                // Generate from ChatGPT
                 var route = context.GetRouteValue("action")?.ToString()?.ToLower();
                 if (route != null && route == "statuscheck" && context.Response.StatusCode == 200)
                     return;
@@ -124,7 +123,7 @@ namespace DiscordStreamBotBackend.Middleware
 
                 var errorMessage = JsonConvert.SerializeObject(new
                 {
-                    ErrorMessage = "伺服器內部錯誤"
+                    ErrorMessage = "伺服器發生錯誤"
                 });
                 context.Response.Clear();
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;

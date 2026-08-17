@@ -27,11 +27,11 @@ public class StartupValidationHostedService : IHostedService
 
         var configuredSecret = _configuration["Twitch:WebHookSecret"];
         if (IsMissingOrPlaceholder(configuredSecret))
-            throw new InvalidOperationException("Twitch:WebHookSecret 不可為空或 placeholder。");
+            throw new InvalidOperationException("Twitch:WebHookSecret 不可為空，也不能使用範例值。");
 
         var redisSecret = await _redisService.Redis.GetDatabase(0).StringGetAsync("twitch:webhook_secret");
         if (!redisSecret.HasValue || !FixedTimeEquals(configuredSecret, redisSecret.ToString()))
-            throw new InvalidOperationException("Twitch WebHook secret 與 Redis DB 0 的 twitch:webhook_secret 不一致。");
+            throw new InvalidOperationException("Twitch Webhook Secret 與 Redis DB 0 的 twitch:webhook_secret 不一致。");
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
@@ -63,20 +63,20 @@ public class StartupValidationHostedService : IHostedService
     {
         var value = configuration[key];
         if (string.IsNullOrWhiteSpace(value) || value.Length < minimumLength || IsPlaceholder(value))
-            throw new InvalidOperationException($"{key} 必須至少 {minimumLength} 個字元，且不可使用 placeholder。");
+            throw new InvalidOperationException($"{key} 必須至少 {minimumLength} 個字元，且不能使用範例值。");
     }
 
     private static void ValidateRequired(IConfiguration configuration, string key)
     {
         if (IsMissingOrPlaceholder(configuration[key]))
-            throw new InvalidOperationException($"{key} 不可為空或 placeholder。");
+            throw new InvalidOperationException($"{key} 不可為空，也不能使用範例值。");
     }
 
     private static void ValidateConnectionString(IConfiguration configuration, string name)
     {
         var value = configuration.GetConnectionString(name);
         if (IsMissingOrPlaceholder(value))
-            throw new InvalidOperationException($"ConnectionStrings:{name} 不可為空或 placeholder。");
+            throw new InvalidOperationException($"ConnectionStrings:{name} 不可為空，也不能使用範例值。");
     }
 
     private static bool IsMissingOrPlaceholder(string value) => string.IsNullOrWhiteSpace(value) || IsPlaceholder(value);

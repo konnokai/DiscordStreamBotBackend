@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace DiscordStreamBotBackend.Services;
 
-/// <summary>阻止 Google SDK 隱含 Store/Delete；authoritative MySQL mutation 由持有 lease 的服務明確執行。</summary>
+/// <summary>阻止 Google SDK 隱含執行 Store/Delete；實際的 MySQL 異動由持有 lease 的服務明確處理。</summary>
 internal sealed class NonPersistentGoogleDataStore : IDataStore
 {
     public Task ClearAsync() => Task.CompletedTask;

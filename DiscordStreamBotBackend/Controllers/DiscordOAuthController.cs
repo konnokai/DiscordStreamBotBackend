@@ -44,7 +44,7 @@ public class DiscordOAuthController : ControllerBase
     public async Task<IActionResult> Callback([FromBody] DiscordOAuthCallbackRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request?.Code))
-            return BadRequest(new { error = "missing_code", message = "Discord 登入回傳缺少授權碼。" });
+            return BadRequest(new { error = "missing_code", message = "Discord 登入回應缺少授權碼。" });
 
         try
         {
@@ -60,19 +60,19 @@ public class DiscordOAuthController : ControllerBase
             using var response = await _httpClient.PostAsync("https://discord.com/api/v10/oauth2/token", content, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return IsTemporaryProviderFailure(response.StatusCode)
-                    ? StatusCode(503, new { error = "provider_unavailable", message = "Discord 暫時無法使用，請稍後重試。" })
-                    : BadRequest(new { error = "token_exchange_failed", message = "Discord 登入失敗，請重新嘗試。" });
+                    ? StatusCode(503, new { error = "provider_unavailable", message = "Discord 暫時無法使用，請稍後再試。" })
+                    : BadRequest(new { error = "token_exchange_failed", message = "Discord 登入失敗，請再試一次。" });
 
             var tokenData = JsonConvert.DeserializeObject<DiscordAccessTokenData>(await response.Content.ReadAsStringAsync(cancellationToken));
             if (string.IsNullOrWhiteSpace(tokenData?.AccessToken) || tokenData.ExpiresIn <= 0)
-                return Unauthorized(new { error = "invalid_token", message = "Discord 認證失敗，請重新登入。" });
+                return Unauthorized(new { error = "invalid_token", message = "Discord 驗證失敗，請重新登入。" });
 
             using var userRequest = new HttpRequestMessage(HttpMethod.Get, "https://discord.com/api/v10/users/@me");
             userRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenData.AccessToken);
             using var userResponse = await _httpClient.SendAsync(userRequest, cancellationToken);
             if (!userResponse.IsSuccessStatusCode)
                 return IsTemporaryProviderFailure(userResponse.StatusCode)
-                    ? StatusCode(503, new { error = "provider_unavailable", message = "Discord 暫時無法使用，請稍後重試。" })
+                    ? StatusCode(503, new { error = "provider_unavailable", message = "Discord 暫時無法使用，請稍後再試。" })
                     : Unauthorized(new { error = "profile_fetch_failed", message = "無法取得 Discord 帳號資料，請重新登入。" });
 
             var discordUser = JsonConvert.DeserializeObject<DiscordUser>(await userResponse.Content.ReadAsStringAsync(cancellationToken));
@@ -93,17 +93,17 @@ public class DiscordOAuthController : ControllerBase
         catch (TaskCanceledException ex)
         {
             _logger.LogWarning(ex, "Discord OAuth callback 等待 provider 回應逾時");
-            return StatusCode(503, new { error = "provider_unavailable", message = "Discord 暫時無法使用，請稍後重試。" });
+            return StatusCode(503, new { error = "provider_unavailable", message = "Discord 暫時無法使用，請稍後再試。" });
         }
         catch (HttpRequestException ex)
         {
             _logger.LogWarning(ex, "Discord OAuth callback 的 API 或 token 交換失敗");
-            return StatusCode(503, new { error = "provider_unavailable", message = "Discord 暫時無法使用，請稍後重試。" });
+            return StatusCode(503, new { error = "provider_unavailable", message = "Discord 暫時無法使用，請稍後再試。" });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Discord OAuth callback 處理失敗");
-            return StatusCode(500, new { error = "server_error", message = "伺服器內部錯誤，請稍後重試。" });
+            return StatusCode(500, new { error = "server_error", message = "伺服器發生錯誤，請稍後再試。" });
         }
     }
 

@@ -91,7 +91,7 @@ public class GoogleOAuthService : IGoogleAccountProvider, IGoogleProviderRevoker
         {
             _logger.LogWarning(
                 lockResult.Exception,
-                "Google callback 無法取得跨程序 OAuth lease | DiscordUserId: {DiscordUserId} | Status: {Status}",
+                "Google callback 無法取得跨程序 OAuth lease；DiscordUserId: {DiscordUserId}；Status: {Status}",
                 discordUserId,
                 lockResult.Status);
             return false;
@@ -159,7 +159,7 @@ public class GoogleOAuthService : IGoogleAccountProvider, IGoogleProviderRevoker
                 {
                     _logger.LogWarning(
                         lockResult.Exception,
-                        "Google refresh 無法取得跨程序 OAuth lease | DiscordUserId: {DiscordUserId} | Status: {Status}",
+                        "Google refresh 無法取得跨程序 OAuth lease；DiscordUserId: {DiscordUserId}；Status: {Status}",
                         discordUserId,
                         lockResult.Status);
                     return new GoogleAccountLink { Status = "invalid" };
@@ -242,7 +242,7 @@ public class GoogleOAuthService : IGoogleAccountProvider, IGoogleProviderRevoker
             return new GoogleProviderRevokeResult(GoogleProviderRevokeOutcome.TokenChanged, null);
         if (loadResult.Status == ProviderTokenLoadStatus.Unreadable)
         {
-            _logger.LogWarning("Google provider 撤銷失敗，本機 token 無法讀取；保留 token 與會員檢查");
+            _logger.LogWarning("Google Token 撤銷失敗，無法讀取本機 Token；保留 Token 與會員檢查。");
             return new GoogleProviderRevokeResult(GoogleProviderRevokeOutcome.TokenUnreadable, null);
         }
 
@@ -251,7 +251,7 @@ public class GoogleOAuthService : IGoogleAccountProvider, IGoogleProviderRevoker
         var revokeToken = token.RefreshToken ?? token.AccessToken;
         if (string.IsNullOrWhiteSpace(revokeToken))
         {
-            _logger.LogWarning("Google provider 撤銷失敗，本機 token 缺少可撤銷內容");
+            _logger.LogWarning("Google Token 撤銷失敗，本機沒有可撤銷的 Token。");
             return new GoogleProviderRevokeResult(GoogleProviderRevokeOutcome.Failed, null);
         }
 
@@ -275,7 +275,7 @@ public class GoogleOAuthService : IGoogleAccountProvider, IGoogleProviderRevoker
                         loadResult.EncryptedPayload);
                 }
                 _logger.LogWarning(
-                    "Google provider 撤銷失敗，保留本機 token 待稍後重試 | StatusCode: {StatusCode}",
+                    "Google Token 撤銷失敗，保留本機 Token，稍後再試 | StatusCode: {StatusCode}",
                     (int)response.StatusCode);
                 return new GoogleProviderRevokeResult(GoogleProviderRevokeOutcome.Failed, null);
             }
@@ -286,7 +286,7 @@ public class GoogleOAuthService : IGoogleAccountProvider, IGoogleProviderRevoker
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Google provider 撤銷失敗，保留本機 token 待稍後重試");
+            _logger.LogWarning(ex, "Google Token 撤銷失敗，保留本機 Token，稍後再試。");
             return new GoogleProviderRevokeResult(GoogleProviderRevokeOutcome.Failed, null);
         }
 
@@ -331,7 +331,7 @@ public class GoogleOAuthService : IGoogleAccountProvider, IGoogleProviderRevoker
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Google OAuth 帳號 metrics 更新失敗");
+            _logger.LogWarning(ex, "Google OAuth 帳號指標更新失敗");
         }
     }
 

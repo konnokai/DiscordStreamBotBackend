@@ -44,7 +44,7 @@ public class DiscordGuildAuthorizationService
         var guilds = JsonConvert.DeserializeObject<List<AdminGuild>>(
             await response.Content.ReadAsStringAsync(cancellationToken));
         if (guilds == null)
-            throw new JsonSerializationException("Discord guild response was empty.");
+            throw new JsonSerializationException("Discord guild 回應沒有內容。");
 
         var manageableGuilds = guilds.Where(CanManage).ToList();
         if (useCache)

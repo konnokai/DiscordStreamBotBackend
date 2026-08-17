@@ -28,7 +28,7 @@ namespace DiscordStreamBotBackend
 #endif
 
             var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
-            logger.Info(VERSION + " 初始化中");
+            logger.Info(VERSION + " 正在初始化");
 
             try
             {
@@ -36,12 +36,12 @@ namespace DiscordStreamBotBackend
             }
             catch (Exception exception)
             {
-                //NLog: catch setup errors
-                logger.Error(exception, "Stopped program because of exception\r\n");
+                // NLog：攔截啟動設定錯誤。
+                logger.Error(exception, "程式因例外而停止。");
             }
             finally
             {
-                // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
+                // 結束程式前先寫完 log，並停止內部計時器與執行緒，避免 Linux 發生 segmentation fault。
                 LogManager.Shutdown();
             }
         }

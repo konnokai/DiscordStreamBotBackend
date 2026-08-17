@@ -55,7 +55,7 @@ public class AccountLinksController : ControllerBase
 
         var result = await _twitchAuthorizationService.UnlinkAsync(discordUserId, CancellationToken.None);
         if (result == TwitchUnlinkResult.RevocationPending)
-            return Accepted(new { status = "revocation_pending", message = "Twitch 撤銷暫時失敗，系統將自動重試。" });
+            return Accepted(new { status = "revocation_pending", message = "Twitch 連結撤銷暫時失敗，稍後會自動重試。" });
 
         return Ok(new { status = "revoked", message = "Twitch 連結已解除。" });
     }

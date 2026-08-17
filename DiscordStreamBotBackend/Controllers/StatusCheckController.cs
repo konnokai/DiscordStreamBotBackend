@@ -17,7 +17,7 @@ namespace DiscordStreamBotBackend.Controllers
             if (HttpContext.Request.Headers.Authorization != "Basic Enna_Alouette")
             {
                 result.StatusCode = 403;
-                result.Content = JsonConvert.SerializeObject(new { ErrorMessage = "403 Forbidden" });
+                result.Content = JsonConvert.SerializeObject(new { ErrorMessage = "403 禁止存取" });
             }
             else
             {

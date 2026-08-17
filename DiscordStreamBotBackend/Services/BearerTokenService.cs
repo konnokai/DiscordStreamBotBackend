@@ -21,7 +21,7 @@ public class BearerTokenService
         if (discordUserId == 0)
             throw new ArgumentOutOfRangeException(nameof(discordUserId));
         if (string.IsNullOrWhiteSpace(discordAccessToken))
-            throw new ArgumentException("Discord access token is required.", nameof(discordAccessToken));
+            throw new ArgumentException("必須提供 Discord access token。", nameof(discordAccessToken));
         if (providerExpiresInSeconds <= 0)
             throw new ArgumentOutOfRangeException(nameof(providerExpiresInSeconds));
 

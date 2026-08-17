@@ -94,8 +94,8 @@ public sealed class GoogleAccountOperationCoordinator
     private readonly Dictionary<ulong, GateEntry> _gates = new();
     private readonly object _sync = new();
 
-    // 此 gate 處理單程序內的排隊與 callback 共用；跨程序互斥由 GoogleOAuthOperationLock 負責，
-    // encrypted-token CAS 則是 distributed lease 之外的最後一道 replacement-token 防線。
+    // 這個 gate 只處理單一程序內的排隊與 callback 共用；跨程序互斥交給 GoogleOAuthOperationLock，
+    // 分散式 lease 外再用加密 Token 的 CAS 防止新 Token 被舊操作覆蓋。
     internal int GateCount
     {
         get
@@ -118,8 +118,8 @@ public sealed class GoogleAccountOperationCoordinator
                 _gates.Add(discordUserId, entry);
             }
 
-            // References include both the current holder and queued waiters. Registration and
-            // exact-entry removal use the same lock, so an acquire cannot attach to an evicted gate.
+            // 參照數包含目前持有者與排隊中的等待者。註冊與移除指定項目使用同一把鎖，
+            // 確保取得 gate 時不會掛到已移除的項目。
             entry.ReferenceCount++;
         }
 
@@ -256,8 +256,8 @@ public sealed class GoogleAccountLinkService
         ulong discordUserId,
         CancellationToken requestCancellationToken)
     {
-        // RequestAborted 只能中止驗證前的請求工作；開始撤銷後改用 server-owned timeout，避免 client disconnect
-        // 發生在 Google 已接受 revoke 與本機 transaction 之間。
+        // RequestAborted 只負責中止驗證前的請求；開始撤銷後改用伺服器持有的逾時，避免用戶端在
+        // Google 接受撤銷與本機 transaction 之間斷線。
         _ = requestCancellationToken;
         using var operationCancellation = _operationCancellationFactory.Create();
         var operationToken = operationCancellation.Token;
@@ -271,14 +271,14 @@ public sealed class GoogleAccountLinkService
             {
                 _logger.LogWarning(
                     lockResult.Exception,
-                    "Google 解除連結無法取得跨程序 OAuth lease | DiscordUserId: {DiscordUserId} | Status: {Status}",
+                    "Google 解除連結無法取得跨程序 OAuth lease；DiscordUserId: {DiscordUserId}；Status: {Status}",
                     discordUserId,
                     lockResult.Status);
                 return GoogleUnlinkResult.ProviderRevokeFailed;
             }
             await using var distributedLease = lockResult.Lease;
 
-            // 先保存角色清理意圖；Google revoke 成功後即使程序中斷，排程仍有 durable state 可續做。
+            // 先儲存角色清理意圖；即使 Google 撤銷成功後程序中斷，排程仍可依這筆資料繼續處理。
             var preparation = await _accountLinkStore.PreparePendingCleanupAsync(
                 discordUserId,
                 operationToken);
@@ -319,7 +319,7 @@ public sealed class GoogleAccountLinkService
         catch (OperationCanceledException) when (operationToken.IsCancellationRequested)
         {
             _logger.LogWarning(
-                "Google 解除連結超過 server operation timeout | DiscordUserId: {DiscordUserId}",
+                "Google 解除連結超過伺服器作業時間限制 | DiscordUserId: {DiscordUserId}",
                 discordUserId);
             return GoogleUnlinkResult.ProviderRevokeFailed;
         }
@@ -338,7 +338,7 @@ public sealed class GoogleAccountLinkService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Google 解除連結已提交，但 OAuth linked-account metrics 更新失敗");
+            _logger.LogWarning(ex, "Google 解除連結已寫入資料庫，但 OAuth 帳號指標更新失敗");
         }
     }
 
@@ -353,7 +353,7 @@ public sealed class GoogleAccountLinkService
             BackendMetrics.GoogleCleanupWakeupPublishFailures.Inc();
             _logger.LogWarning(
                 ex,
-                "Google 解除連結已提交，但 Redis 角色清理喚醒通知失敗 | DiscordUserId: {DiscordUserId}",
+                "Google 解除連結已寫入資料庫，但 Redis 角色清理喚醒通知失敗 | DiscordUserId: {DiscordUserId}",
                 discordUserId);
         }
     }
@@ -404,7 +404,7 @@ internal sealed class GoogleAccountLinkStore : IGoogleAccountLinkStore
         CancellationToken cancellationToken)
     {
         using var db = _dbContextFactory.CreateDbContext();
-        // Serializable 讓 token snapshot 與 cleanup intent 成為同一個 durable checkpoint。
+        // 使用 Serializable 讓 Token 快照與清理意圖在同一個可持久化檢查點中完成。
         await using var transaction = await db.Database.BeginTransactionAsync(
             IsolationLevel.Serializable,
             cancellationToken);
@@ -447,8 +447,8 @@ internal sealed class GoogleAccountLinkStore : IGoogleAccountLinkStore
         CancellationToken cancellationToken)
     {
         using var db = _dbContextFactory.CreateDbContext();
-        // Serializable + PK lookup protects the no-token case from a concurrent cross-process insert.
-        // Existing-token revokes additionally use the encrypted payload itself as the CAS value.
+        // Serializable 加上主鍵查詢，可防止原本沒有 Token 時被其他程序同時插入；
+        // 已有 Token 的撤銷則另外用加密內容做 CAS。
         await using var transaction = await db.Database.BeginTransactionAsync(
             IsolationLevel.Serializable,
             cancellationToken);
@@ -464,8 +464,8 @@ internal sealed class GoogleAccountLinkStore : IGoogleAccountLinkStore
         }
         else
         {
-            // Token ciphertext/HMAC is case-sensitive. BINARY avoids a case-insensitive text collation
-            // accepting a payload that is not byte-for-byte the grant sent to Google's revoke endpoint.
+            // Token 密文與 HMAC 區分大小寫。使用 BINARY 比對，避免資料庫不分大小寫的排序規則接受
+            // 與送給 Google 撤銷端點不完全相同的內容。
             var deleted = await db.Database.ExecuteSqlInterpolatedAsync($@"
 DELETE FROM `youtube_member_access_token`
 WHERE `discord_user_id` = {discordUserId}

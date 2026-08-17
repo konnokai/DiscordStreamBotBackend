@@ -23,13 +23,13 @@ namespace DiscordStreamBotBackend
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        // 由執行階段呼叫，負責註冊應用程式服務。
         public void ConfigureServices(IServiceCollection services)
         {
             StartupValidationHostedService.ValidateConfiguration(Configuration);
 
-            // token 儲存改走 MySQL：MySqlDataStore 每次操作用 factory 建短生命週期 context（DataStore 存活期可能跨越/併發於請求 scope，EF context 非執行緒安全）。
-            // 仍保留 scoped MainDbContext（委派 factory）供 YouTubeNotificationsController 等既有注入使用。
+            // Token 改由 MySQL 儲存。MySqlDataStore 每次操作都用 factory 建立短生命週期的 context，因為 DataStore 的存活時間可能跨越多個請求 scope，或同時處理多個請求，而 EF context 不是執行緒安全的。
+            // 保留 scoped MainDbContext，透過 factory 建立，供 YouTubeNotificationsController 等既有元件注入使用。
             services.AddDbContextFactory<MainDbContext>(options =>
                 options
                     .UseMySql(Configuration.GetConnectionString("MySql"), ServerVersion.AutoDetect(Configuration.GetConnectionString("MySql")))
@@ -113,7 +113,7 @@ namespace DiscordStreamBotBackend
             services.AddHttpClient();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        // 由執行階段呼叫，負責設定 HTTP 請求管線。
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseForwardedHeaders();

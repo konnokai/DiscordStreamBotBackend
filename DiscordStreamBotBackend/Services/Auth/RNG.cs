@@ -6,7 +6,7 @@ namespace DiscordStreamBotBackend.Services.Auth
     // https://blog.miniasp.com/post/2008/05/13/Random-vs-RNGCryptoServiceProvider
     // https://learn.microsoft.com/zh-tw/dotnet/api/system.security.cryptography.randomnumbergenerator?view=net-7.0
     /// <summary>
-    /// 使用 RNGCryptoServiceProvider 產生由密碼編譯服務供應者 (CSP) 提供的亂數產生器。
+    /// 使用密碼編譯安全的亂數產生器。
     /// </summary>
     public static class RNG
     {
@@ -14,7 +14,7 @@ namespace DiscordStreamBotBackend.Services.Auth
         private static byte[] rb = new byte[4];
 
         /// <summary>
-        /// 產生一個非負數的亂數
+        /// 產生非負亂數。
         /// </summary>
         public static int Next()
         {
@@ -24,9 +24,9 @@ namespace DiscordStreamBotBackend.Services.Auth
             return value;
         }
         /// <summary>
-        /// 產生一個非負數且最大值 max 以下的亂數
+        /// 產生 0 到 max 之間的亂數，包含 max。
         /// </summary>
-        /// <param name="max">最大值</param>
+        /// <param name="max">最大值。</param>
         public static int Next(int max)
         {
             rngp.GetBytes(rb);
@@ -36,10 +36,10 @@ namespace DiscordStreamBotBackend.Services.Auth
             return value;
         }
         /// <summary>
-        /// 產生一個非負數且最小值在 min 以上最大值在 max 以下的亂數
+        /// 產生 min 到 max 之間的亂數，包含兩端。
         /// </summary>
-        /// <param name="min">最小值</param>
-        /// <param name="max">最大值</param>
+        /// <param name="min">最小值。</param>
+        /// <param name="max">最大值。</param>
         public static int Next(int min, int max)
         {
             int value = Next(max - min) + min;

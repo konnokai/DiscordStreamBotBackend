@@ -35,7 +35,7 @@ namespace DiscordStreamBotBackend.Services
             {
                 BackendMetrics.TwitchWebhookEvents.WithLabels("revocation", "received").Inc();
                 BackendMetrics.TwitchWebhookLastReceived.WithLabels("revocation").Set(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-                _logger.LogWarning("收到 Twitch EventSub subscription revocation");
+                _logger.LogWarning("收到 Twitch EventSub 訂閱撤銷事件。");
                 return Task.CompletedTask;
             };
             return Task.CompletedTask;
@@ -53,7 +53,7 @@ namespace DiscordStreamBotBackend.Services
         private Task OnError(object sender, OnErrorArgs e)
         {
             BackendMetrics.TwitchWebhookEvents.WithLabels("unknown", "error").Inc();
-            _logger.LogError("Twitch 錯誤，原因: {Reason} - 訊息: {Message}\n", e.Reason, e.Message);
+            _logger.LogError("Twitch 發生錯誤，原因：{Reason}，訊息：{Message}", e.Reason, e.Message);
             return Task.CompletedTask;
         }
 
@@ -71,7 +71,7 @@ namespace DiscordStreamBotBackend.Services
 
         private Task _eventSubWebhooks_OnChannelUpdate(object sender, ChannelUpdateArgs e)
         {
-            _logger.LogInformation("Twitch 頻道狀態更新: {UserName} - {Titlie} ({CategoryName})",
+            _logger.LogInformation("Twitch 頻道狀態更新：{UserName} - {Title}（{CategoryName}）",
                 e.Payload.Event.BroadcasterUserName,
                 e.Payload.Event.Title,
                 e.Payload.Event.CategoryName);
@@ -91,7 +91,7 @@ namespace DiscordStreamBotBackend.Services
             catch (Exception ex)
             {
                 BackendMetrics.TwitchWebhookEvents.WithLabels(type, "error").Inc();
-                _logger.LogError(ex, "Twitch Webhook 事件加入 Redis 發布佇列失敗，類型: {Type}", type);
+                _logger.LogError(ex, "Twitch Webhook 事件無法加入 Redis 發布佇列，類型：{Type}", type);
                 throw;
             }
         }

@@ -83,7 +83,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         });
     }
 
-    /// <summary>完成 Twitch OAuth callback，在共用 lease 內驗證身分與 scope，並以條件式寫入保存授權。</summary>
+    /// <summary>完成 Twitch OAuth callback，在共用 lease 內驗證身分與 scope，並以條件式將授權寫入資料庫。</summary>
     public async Task<string> CompleteAuthorizationAsync(ulong discordUserId, string code, CancellationToken cancellationToken)
     {
         var tokenResult = await ExchangeCodeAsync(code, cancellationToken);
@@ -211,7 +211,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         };
     }
 
-    /// <summary>先將 unlink 意圖保存至 MySQL，再於 refresh lease 內撤銷 provider token 並完成本地失效狀態。</summary>
+    /// <summary>先將 unlink 意圖寫入 MySQL，再於 refresh lease 內撤銷 provider token 並完成本機失效處理。</summary>
     public async Task<TwitchUnlinkResult> UnlinkAsync(ulong discordUserId, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -283,7 +283,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         }
     }
 
-    /// <summary>重試待處理撤銷、驗證所有有效授權、補送失效事件並更新 OAuth 指標。</summary>
+    /// <summary>重試已標記為 revocation_pending 的授權，直到 provider 撤銷並完成本機狀態更新。</summary>
     public async Task ValidateAllAsync(CancellationToken cancellationToken)
     {
         await RetryPendingRevocationsAsync(cancellationToken);
@@ -321,7 +321,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         await UpdateMetricsAsync(cancellationToken);
     }
 
-    /// <summary>以 Twitch validation 正規化 token 的身分、scope、期限與型別，產生 Bot 可讀的共用契約。</summary>
+    /// <summary>依 Twitch validation 正規化 token 的身分、scope、期限與型別，產生 Bot 可讀的共用資料格式。</summary>
     internal static TwitchAccessTokenData NormalizeTokenForPersistence(
         TwitchAccessTokenData token,
         TwitchValidateTokenData validation,
@@ -331,7 +331,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         ArgumentNullException.ThrowIfNull(token);
         ArgumentNullException.ThrowIfNull(validation);
 
-        // Provider validation 才是授權真相；身分、scope、期限與 token type 一律正規化後再加密。
+        // Provider validation 是授權的唯一依據；身分、scope、期限與 token type 一律正規化後再加密。
         if (string.IsNullOrWhiteSpace(token.RefreshToken))
             token.RefreshToken = fallbackRefreshToken;
         token.TwitchUserId = validation.UserId;
@@ -359,7 +359,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         return string.IsNullOrWhiteSpace(value) ? "bearer" : value.Trim().ToLowerInvariant();
     }
 
-    /// <summary>在 refresh lease 內重讀、驗證並視需要 rotation MySQL 授權，暫時錯誤不撤銷資料。</summary>
+    /// <summary>在 refresh lease 內重新讀取並驗證 MySQL 授權，必要時執行 rotation；暫時錯誤不撤銷資料。</summary>
     private async Task ValidateStoredAuthorizationAsync(string twitchUserId, CancellationToken cancellationToken)
     {
         var lockResult = await TryAcquireRefreshLockAsync(twitchUserId, "stored_token_validation", cancellationToken);
@@ -409,7 +409,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
 
                 using (refreshOperation)
                 {
-                    // provider 接受 rotation 後使用不可取消的保存路徑，並在 operation 結束前交給 drain 追蹤。
+                    // provider 接受 rotation 後，改用不可取消的寫入流程，並在 operation 結束前交給 drain 追蹤。
                     var refreshResult = await RefreshTokenAsync(token?.RefreshToken, CancellationToken.None);
                     if (refreshResult.Status == TwitchApiResultStatus.Invalid)
                     {
@@ -507,7 +507,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
             else
             {
                 _logger.LogWarning(
-                    "Twitch rotation 後 token 尚未寫入 MySQL，持續續租 refresh lock 並由背景工作重試 | TwitchUserId: {TwitchUserId}",
+                    "Twitch rotation 後 token 尚未寫入 MySQL，持續續租 refresh lock，並由背景工作重試 | TwitchUserId: {TwitchUserId}",
                     twitchUserId);
             }
         }
@@ -679,7 +679,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
                 return TwitchApiResultStatus.Invalid;
             }
 
-            _logger.LogWarning("Twitch provider 撤銷回傳非成功狀態碼: {StatusCode}", (int)response.StatusCode);
+            _logger.LogWarning("Twitch provider 撤銷回傳非成功狀態碼：{StatusCode}", (int)response.StatusCode);
             return TwitchApiResultStatus.Failure;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -688,12 +688,12 @@ public class TwitchAuthorizationService : IAsyncDisposable
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
-            _logger.LogWarning(ex, "Twitch provider 撤銷暫時失敗");
+            _logger.LogWarning(ex, "Twitch provider 撤銷暫時失敗。");
             return TwitchApiResultStatus.TransientFailure;
         }
     }
 
-    /// <summary>重試已持久化為 revocation_pending 的授權，直到 provider 撤銷與本地 finalization 完成。</summary>
+    /// <summary>重試已標記為 revocation_pending 的授權，直到 provider 撤銷並完成本機狀態更新。</summary>
     private async Task RetryPendingRevocationsAsync(CancellationToken cancellationToken)
     {
         using var db = _dbContextFactory.CreateDbContext();
@@ -737,7 +737,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Twitch pending revoke 重試失敗，使用者: {TwitchUserId}", userId);
+                _logger.LogWarning(ex, "Twitch 待處理撤銷重試失敗，使用者：{TwitchUserId}", userId);
             }
             finally
             {
@@ -771,7 +771,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
     internal static bool CanFinalizeRevocationWithoutProviderToken(string encryptedAccessToken)
         => string.IsNullOrWhiteSpace(encryptedAccessToken);
 
-    /// <summary>以 token 密文與更新時間 CAS 將 unlink 完成狀態寫入 MySQL，並發布可重播的失效事件。</summary>
+    /// <summary>以 Token 密文與更新時間 CAS 將 unlink 完成狀態寫入 MySQL，並發布可重播的失效事件。</summary>
     private async Task FinalizeUnlinkAsync(TwitchBroadcasterAuthorization entity, MainDbContext db, CancellationToken cancellationToken)
     {
         var now = UtcNowForMySql();
@@ -788,7 +788,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
                 .SetProperty(x => x.RevokedAt, now)
                 .SetProperty(x => x.RevocationReason, UserUnlinkedReason)
                 .SetProperty(x => x.DateUpdated, now), cancellationToken);
-        ThrowIfStateChanged(affected, entity.TwitchUserId, "unlink finalization");
+        ThrowIfStateChanged(affected, entity.TwitchUserId, "unlink 完成處理");
 
         entity.EncryptedAccessToken = null;
         entity.TokenExpiresAt = null;
@@ -798,7 +798,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         await TryPublishAuthorizationChangedAsync(entity, "invalid", cancellationToken);
     }
 
-    /// <summary>登記 provider 已接受的 rotation，立即嘗試 MySQL CAS，失敗則連同 lease 移交持續保存。</summary>
+    /// <summary>登記 provider 已接受的 rotation，立即嘗試以 MySQL CAS 寫入；失敗時連同 lease 交給背景工作持續處理。</summary>
     private async Task SaveRefreshedTokenForRetryAsync(
         string twitchUserId,
         string expectedEncryptedToken,
@@ -806,8 +806,8 @@ public class TwitchAuthorizationService : IAsyncDisposable
         TwitchOAuthRefreshLockLease lease,
         CancellationToken cancellationToken)
     {
-        // Provider 接受 rotation 後先登記記憶體交接，再嘗試 MySQL CAS。
-        // 立即保存失敗時，背景工作與 shutdown drain 會持續保護唯一有效的 replacement。
+        // Provider 接受 rotation 後，先在記憶體登記待寫入的 token，再嘗試用 MySQL CAS 寫入。
+        // 立即寫入失敗時，背景工作與 shutdown drain 會繼續保留唯一有效的替代 token。
         var now = UtcNowForMySql();
         var pending = new PendingRefreshedToken(
             expectedEncryptedToken,
@@ -825,10 +825,10 @@ public class TwitchAuthorizationService : IAsyncDisposable
             QueuePendingRefreshPersistence(twitchUserId, pending);
         }
 
-        throw new InvalidOperationException("Twitch refresh token 已 rotation，已保留 refresh lock 並排入持續保存。");
+        throw new InvalidOperationException("Twitch refresh token 已完成 rotation；已保留 refresh lock，並排入後續寫入。");
     }
 
-    /// <summary>觸發目前記憶體中所有已接受 rotation 的保存重試，不會丟棄尚未落盤的 replacement。</summary>
+    /// <summary>觸發目前記憶體中所有已接受 rotation 的寫入重試，不會丟棄尚未寫入資料庫的替代 token。</summary>
     public async Task RetryPendingRefreshPersistenceAsync(CancellationToken cancellationToken)
     {
         foreach (var item in _pendingRefreshedTokens.ToArray())
@@ -869,7 +869,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
                 }
 
                 _logger.LogWarning(
-                    "仍在等待 Twitch rotation token 保存完成，持續持有並續租 refresh lock | TwitchUserId: {TwitchUserId}",
+                    "仍在等待 Twitch rotation token 寫入完成，持續持有並續租 refresh lock | TwitchUserId: {TwitchUserId}",
                     twitchUserId);
                 await Task.Delay(TimeSpan.FromSeconds(30));
             }
@@ -884,7 +884,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         }
     }
 
-    /// <summary>序列化單筆 rotation 的重試，必要時重新取得過期 lease，再執行條件式保存。</summary>
+    /// <summary>序列化單筆 rotation 的重試，必要時重新取得過期 lease，再執行條件式寫入。</summary>
     private async Task RetryPendingRefreshPersistenceItemAsync(
         string twitchUserId,
         PendingRefreshedToken pending,
@@ -932,7 +932,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
             {
                 _logger.LogWarning(
                     ownership.Exception,
-                    "Twitch rotation 後 token 重試時無法確認 refresh lock owner，保留待下次重試 | TwitchUserId: {TwitchUserId}",
+                    "Twitch rotation 後重試 token 時無法確認 refresh lock owner，保留至下次重試 | TwitchUserId: {TwitchUserId}",
                     twitchUserId);
                 return;
             }
@@ -951,7 +951,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         {
             _logger.LogError(
                 ex,
-                "Twitch rotation 後 token 仍無法寫入 MySQL，保留在記憶體待下次重試 | TwitchUserId: {TwitchUserId}",
+                "Twitch rotation 後 token 仍無法寫入 MySQL，保留在記憶體等下次重試 | TwitchUserId: {TwitchUserId}",
                 twitchUserId);
         }
         finally
@@ -960,7 +960,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         }
     }
 
-    /// <summary>在 lease owner 保護下以舊密文 CAS 保存 replacement，並辨識冪等完成或 stale 狀態。</summary>
+    /// <summary>在 lease owner 保護下以舊密文 CAS 寫入替代 token，並辨識冪等完成或過期狀態。</summary>
     private async Task<bool> PersistRefreshedTokenWithRetryAsync(
         string twitchUserId,
         PendingRefreshedToken pending,
@@ -976,7 +976,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
             {
                 using var db = _dbContextFactory.CreateDbContext();
                 var persistedAt = UtcNowForMySql();
-                // 只有仍保存 refresh 前密文的 row 可接收 replacement；0 列代表 revoke、relink 或其他 rotation 已先更新。
+                // 只有仍保留 refresh 前密文的資料列可接收替代 token；0 列代表 revoke、relink 或其他 rotation 已先更新。
                 var affected = await db.TwitchBroadcasterAuthorization
                     .Where(x =>
                         x.TwitchUserId == twitchUserId &&
@@ -1003,7 +1003,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
 
                     TryRemovePendingRefreshedToken(twitchUserId, pending);
                     _logger.LogWarning(
-                        "Twitch rotation 後 token 寫入時授權 row 已撤銷或不存在，未覆寫較新的狀態 | TwitchUserId: {TwitchUserId}",
+                        "Twitch rotation 後 token 寫入時授權資料列已撤銷或不存在，未覆寫較新的狀態 | TwitchUserId: {TwitchUserId}",
                         twitchUserId);
                     return false;
                 }
@@ -1030,7 +1030,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
             {
                 _logger.LogWarning(
                     ex,
-                    "Twitch rotation 後 token 寫入 MySQL 已用完立即重試次數，轉交持續保存工作 | Attempt: {Attempt}/{MaxAttempts} | TwitchUserId: {TwitchUserId}",
+                    "Twitch rotation 後 token 寫入 MySQL 已用完立即重試次數，轉交持續寫入工作 | Attempt: {Attempt}/{MaxAttempts} | TwitchUserId: {TwitchUserId}",
                     attempt,
                     RefreshedTokenPersistenceAttempts,
                     twitchUserId);
@@ -1121,7 +1121,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         if (result.Status == TwitchOAuthRefreshLockOwnershipStatus.OwnershipLost)
         {
             _logger.LogWarning(
-                "Twitch OAuth refresh lock owner 已變更，停止寫入以避免 stale holder 覆寫 | Operation: {Operation} | TwitchUserId: {TwitchUserId}",
+                "Twitch OAuth refresh lock owner 已變更，停止寫入以避免過期持有者覆寫 | Operation: {Operation} | TwitchUserId: {TwitchUserId}",
                 operation,
                 twitchUserId);
         }
@@ -1129,7 +1129,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         {
             _logger.LogWarning(
                 result.Exception,
-                "Twitch OAuth refresh lock 無法確認 owner，停止寫入以避免 stale holder 覆寫 | Operation: {Operation} | TwitchUserId: {TwitchUserId}",
+                "Twitch OAuth refresh lock 無法確認 owner，停止寫入以避免過期持有者覆寫 | Operation: {Operation} | TwitchUserId: {TwitchUserId}",
                 operation,
                 twitchUserId);
         }
@@ -1161,7 +1161,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         }
     }
 
-    /// <summary>僅在 MySQL 目前狀態仍符合預期版本時發布授權事件，忽略 relink 後的 stale publication。</summary>
+    /// <summary>僅在 MySQL 目前狀態仍符合預期版本時發布授權事件，忽略 relink 後的過期發布。</summary>
     private async Task TryPublishAuthorizationChangedAsync(
         TwitchBroadcasterAuthorization expectedState,
         string status,
@@ -1174,7 +1174,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         if (!ShouldPublishAuthorizationChange(expectedState, currentState, status))
         {
             _logger.LogInformation(
-                "略過已過時的 Twitch authorization_changed publication | TwitchUserId: {TwitchUserId} | Status: {Status}",
+                "略過已過時的 Twitch authorization_changed 發布 | TwitchUserId: {TwitchUserId} | Status: {Status}",
                 expectedState.TwitchUserId,
                 status);
             return;
@@ -1240,7 +1240,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         if (affectedRows != 1)
         {
             throw new DbUpdateConcurrencyException(
-                $"Twitch authorization state changed during {operation}; stale write rejected for {twitchUserId}.");
+                $"Twitch 授權狀態在 {operation} 期間變更；已拒絕 {twitchUserId} 的過期寫入。");
         }
     }
 
@@ -1267,14 +1267,14 @@ public class TwitchAuthorizationService : IAsyncDisposable
         }
     }
 
-    /// <summary>停止接納新 refresh，等待執行中的 rotation 完成交接並 drain 所有 persistence task。</summary>
+    /// <summary>停止接受新的 refresh，等待進行中的 rotation 完成交接，再等待所有寫入工作結束。</summary>
     public Task StopAcceptingAndDrainAsync()
     {
         lock (_stopGate)
             return _stopTask ??= StopCoreAsync();
     }
 
-    /// <summary>執行 rotation lifecycle drain，定期記錄等待狀態並更新關機 persistence 指標。</summary>
+    /// <summary>執行 rotation lifecycle drain，定期記錄等待狀態並更新關機寫入指標。</summary>
     private async Task StopCoreAsync()
     {
         var stopwatch = Stopwatch.StartNew();
@@ -1285,7 +1285,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         if (isDraining)
         {
             _logger.LogWarning(
-                "Backend 正在等待已接受的 Twitch refresh rotation 保存完成 | Active: {ActiveCount} | Pending: {PendingCount}",
+                "後端正在等待已接受的 Twitch refresh rotation 寫入完成 | Active: {ActiveCount} | Pending: {PendingCount}",
                 _rotationLifecycle.ActiveOperationCount,
                 _rotationLifecycle.PendingPersistenceCount);
         }
@@ -1298,7 +1298,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
                 if (completed != drainTask)
                 {
                     _logger.LogWarning(
-                        "Backend 關閉仍在等待 Twitch refresh rotation 保存 | Active: {ActiveCount} | Pending: {PendingCount} | ElapsedSeconds: {ElapsedSeconds:F1}",
+                        "後端關閉仍在等待 Twitch refresh rotation 寫入 | Active: {ActiveCount} | Pending: {PendingCount} | ElapsedSeconds: {ElapsedSeconds:F1}",
                         _rotationLifecycle.ActiveOperationCount,
                         _rotationLifecycle.PendingPersistenceCount,
                         stopwatch.Elapsed.TotalSeconds);
@@ -1316,7 +1316,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         if (isDraining)
         {
             _logger.LogInformation(
-                "Backend 已保存全部接受的 Twitch refresh rotation | DrainSeconds: {DrainSeconds:F1}",
+                "後端已寫入全部接受的 Twitch refresh rotation | DrainSeconds: {DrainSeconds:F1}",
                 stopwatch.Elapsed.TotalSeconds);
         }
     }
@@ -1346,7 +1346,7 @@ public class TwitchAuthorizationService : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Twitch OAuth 帳號 metrics 更新失敗");
+            _logger.LogWarning(ex, "Twitch OAuth 帳號指標更新失敗");
         }
     }
 }

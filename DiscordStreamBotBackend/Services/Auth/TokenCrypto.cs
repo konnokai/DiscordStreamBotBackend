@@ -6,7 +6,7 @@ namespace DiscordStreamBotBackend.Services.Auth
 {
     public class TokenCrypto
     {
-        //產生 HMACSHA256 雜湊
+        // 計算 HMACSHA256 雜湊值。
         public static string ComputeHMACSHA256(string data, string key)
         {
             var keyBytes = Encoding.UTF8.GetBytes(key);
@@ -18,7 +18,7 @@ namespace DiscordStreamBotBackend.Services.Auth
             }
         }
 
-        //AES 加密
+        // 使用 AES 加密。
         public static string AESEncrypt(string data, string key, string iv)
         {
             var keyBytes = Encoding.UTF8.GetBytes(key);
@@ -37,7 +37,7 @@ namespace DiscordStreamBotBackend.Services.Auth
             }
         }
 
-        //AES 解密
+        // 使用 AES 解密。
         public static string AESDecrypt(string data, string key, string iv)
         {
             var keyBytes = Encoding.UTF8.GetBytes(key);

@@ -25,7 +25,7 @@ namespace DiscordStreamBotBackend.Controllers
 
             if (string.IsNullOrEmpty(_configuration["TwitCasting:WebHookSignature"]))
             {
-                _logger.LogError("TwitCasting WebHook Signature is not set in configuration! Please set it in appsettings.json or environment variables.\n");
+                _logger.LogError("未設定 TwitCasting Webhook 簽章，請在 appsettings.json 或環境變數中設定。");
             }
         }
 
@@ -39,17 +39,17 @@ namespace DiscordStreamBotBackend.Controllers
 
                 if (webHookJson == null)
                 {
-                    _logger.LogError("TwitCasting WebHook Is Null!\n");
+                    _logger.LogError("TwitCasting Webhook 內容為空。");
                     return new ContentResult { StatusCode = 400 };
                 }
 
                 if (webHookJson.Signature != _configuration["TwitCasting:WebHookSignature"])
                 {
-                    _logger.LogError("Invalid Signature from TwitCasting WebHook!\n");
+                    _logger.LogError("TwitCasting Webhook 簽章無效。");
                     return new ContentResult { StatusCode = 401 };
                 }
 
-                _logger.LogInformation("接收到 TwitCasting WebHook 資料: (Live: {IsLive}) {ChannelName} - {Title}",
+                _logger.LogInformation("收到 TwitCasting Webhook 資料：（Live：{IsLive}）{ChannelName} - {Title}",
                     webHookJson.Movie.IsLive, webHookJson.Broadcaster.Name, webHookJson.Movie.Title);
 
                 if (webHookJson.Movie.IsLive)
@@ -59,7 +59,7 @@ namespace DiscordStreamBotBackend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Read TwitCasting WebHook Error\n");
+                _logger.LogError(ex, "讀取 TwitCasting Webhook 資料失敗。");
                 return new ContentResult { StatusCode = 500 };
             }
 

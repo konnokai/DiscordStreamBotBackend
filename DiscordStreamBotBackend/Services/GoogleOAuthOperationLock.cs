@@ -47,8 +47,8 @@ public readonly record struct GoogleOAuthOperationLockAcquireResult(
 }
 
 /// <summary>
-/// Google OAuth 帳號 mutation 的跨程序 lease。callback、refresh 與 unlink 共用同一 key，
-/// 避免 provider revoke 視窗內有另一個程序落盤 replacement token。
+/// Google OAuth 帳號異動使用跨程序 lease。callback、refresh、unlink 共用同一個 key，
+/// 避免其他程序在 provider 撤銷期間寫入替代 Token。
 /// </summary>
 internal sealed class GoogleOAuthOperationLock : IGoogleOAuthOperationLock
 {
@@ -171,7 +171,7 @@ internal sealed class GoogleOAuthOperationLockLease : IGoogleOAuthOperationLockL
         }
         catch (Exception)
         {
-            // 釋放失敗時保留 owner key，由 TTL 收斂；不能無條件刪除可能已被接手的 lease。
+            // 釋放失敗時保留 owner key，讓 TTL 自然清除；不可直接刪除，避免誤刪已被其他程序接手的 lease。
         }
         try { _renewalCancellation.Dispose(); } catch (ObjectDisposedException) { }
     }

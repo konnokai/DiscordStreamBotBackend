@@ -8,11 +8,11 @@ namespace DiscordStreamBotBackend.Services.Auth
     public class TokenService
     {
         /// <summary>
-        /// 前後端傳輸金鑰
+        /// 前端工作階段 Token 的加密金鑰。
         /// </summary>
         private readonly string _key;
         /// <summary>
-        /// Provider token 加解密金鑰
+        /// Provider token 的加密與解密金鑰。
         /// </summary>
         private readonly string _providerTokenEncryptionKey;
 
@@ -23,21 +23,21 @@ namespace DiscordStreamBotBackend.Services.Auth
         }
 
         /// <summary>
-        /// 產生加密使用者資料
+        /// 建立給前端使用的加密 Token。
         /// </summary>
-        /// <param name="user">尚未加密的使用者資料</param>
-        /// <returns>已加密的使用者資料</returns>
+        /// <param name="data">要加密的資料。</param>
+        /// <returns>加密後的 Token。</returns>
         public string CreateToken(object data)
         {
             var json = JsonConvert.SerializeObject(data);
             var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
             var iv = Guid.NewGuid().ToString().Replace("-", "")[..16];
 
-            //使用 AES 加密 Payload
+            // 使用 AES 加密 payload。
             var encrypt = TokenCrypto
                 .AESEncrypt(base64, _key[..16], iv);
 
-            //取得簽章
+            // 計算簽章。
             var signature = TokenCrypto
                 .ComputeHMACSHA256(iv + "." + encrypt, _key[..64]);
 
@@ -45,21 +45,21 @@ namespace DiscordStreamBotBackend.Services.Auth
         }
 
         /// <summary>
-        /// 產生加密使用者資料
+        /// 建立 provider token 的加密資料。
         /// </summary>
-        /// <param name="user">尚未加密的使用者資料</param>
-        /// <returns>已加密的使用者資料</returns>
+        /// <param name="data">要加密的資料。</param>
+        /// <returns>加密後的 provider token。</returns>
         public string CreateTokenResponseToken(object data)
         {
             var json = JsonConvert.SerializeObject(data);
             var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
             var iv = Guid.NewGuid().ToString().Replace("-", "")[..16];
 
-            //使用 AES 加密 Payload
+            // 使用 AES 加密 payload。
             var encrypt = TokenCrypto
                 .AESEncrypt(base64, _providerTokenEncryptionKey[..16], iv);
 
-            //取得簽章
+            // 計算簽章。
             var signature = TokenCrypto
                 .ComputeHMACSHA256(iv + "." + encrypt, _providerTokenEncryptionKey[..64]);
 
@@ -67,10 +67,10 @@ namespace DiscordStreamBotBackend.Services.Auth
         }
 
         /// <summary>
-        /// 解密使用者資料
+        /// 解密前端 Token，還原使用者資料。
         /// </summary>
-        /// <param name="token">已加密的使用者資料</param>
-        /// <returns>未加密的使用者資料</returns>
+        /// <param name="token">加密後的 Token。</param>
+        /// <returns>解密後的使用者資料。</returns>
         public T GetUser<T>(string token)
         {
             if (string.IsNullOrWhiteSpace(token)) return default;
@@ -83,11 +83,11 @@ namespace DiscordStreamBotBackend.Services.Auth
             var encrypt = split[1];
             var signature = split[2];
 
-            //檢查簽章是否正確
+            // 確認簽章是否正確。
             if (signature != TokenCrypto.ComputeHMACSHA256(iv + "." + encrypt, _key[..64]))
                 return default;
 
-            //使用 AES 解密 Payload
+            // 使用 AES 解密 payload。
             var base64 = TokenCrypto.AESDecrypt(encrypt, _key[..16], iv);
             var json = Encoding.UTF8.GetString(Convert.FromBase64String(base64));
             var payload = JsonConvert.DeserializeObject<T>(json);
@@ -96,12 +96,12 @@ namespace DiscordStreamBotBackend.Services.Auth
         }
 
         /// <summary>
-        /// 解密 User Token Response 資料
+        /// 解密 provider token。
         /// </summary>
-        /// <param name="token">已加密的 User Token Response 資料</param>
-        /// <returns>未加密的 User Token Response 資料</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Token 格式錯誤</exception>
-        /// <exception cref="ArgumentException">簽章驗證失敗</exception>
+        /// <param name="token">加密後的 provider token。</param>
+        /// <returns>解密後的 provider token。</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Token 格式不正確。</exception>
+        /// <exception cref="ArgumentException">簽章驗證失敗。</exception>
         public T GetTokenResponseValue<T>(string token)
         {
             if (string.IsNullOrWhiteSpace(token)) return default;
@@ -115,7 +115,7 @@ namespace DiscordStreamBotBackend.Services.Auth
             var signature = split[2];
 
             if (signature != TokenCrypto.ComputeHMACSHA256(iv + "." + encrypt, _providerTokenEncryptionKey[..64]))
-                throw new ArgumentException("signature");
+                throw new ArgumentException("Token 簽章驗證失敗。");
 
             var base64 = TokenCrypto.AESDecrypt(encrypt, _providerTokenEncryptionKey[..16], iv);
             var json = Encoding.UTF8.GetString(Convert.FromBase64String(base64));

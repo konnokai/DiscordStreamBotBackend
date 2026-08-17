@@ -26,7 +26,7 @@ public sealed class TwitchOAuthContractTests
         var exception = Assert.Throws<InvalidOperationException>(
             () => RedisService.ValidateProviderStateDatabaseIndex(0));
 
-        Assert.Contains("logical database 1", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("Redis 邏輯資料庫 1", exception.Message, StringComparison.Ordinal);
     }
 
     [Fact]

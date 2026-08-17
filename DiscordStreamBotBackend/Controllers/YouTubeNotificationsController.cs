@@ -41,7 +41,7 @@ namespace DiscordStreamBotBackend.Controllers
             {
                 if (!Request.Headers.TryGetValue("User-Agent", out var userAgent) || !userAgent.ToString().StartsWith("FeedFetcher-Google;"))
                 {
-                    _logger.LogWarning("無 User-Agent 或標頭無效，略過處理");
+                    _logger.LogWarning("缺少 User-Agent 或標頭無效，略過這次請求。");
                     return new ContentResult { StatusCode = 400 };
                 }
 
@@ -51,13 +51,13 @@ namespace DiscordStreamBotBackend.Controllers
                     {
                         if (!Request.Headers.TryGetValue("X-Hub-Signature", out var signature) || !signature.ToString().Contains('='))
                         {
-                            _logger.LogWarning("無 X-Hub-Signature 或標頭無效，略過處理");
+                            _logger.LogWarning("缺少 X-Hub-Signature 或標頭無效，略過這次請求。");
                             return new ContentResult { StatusCode = 400 };
                         }
 
                         if (!Request.Headers.TryGetValue("Content-Type", out var contentType) || contentType != "application/atom+xml")
                         {
-                            _logger.LogWarning("無 Content-Type 或標頭無效，略過處理");
+                            _logger.LogWarning("缺少 Content-Type 或標頭無效，略過這次請求。");
                             return new ContentResult { StatusCode = 400 };
                         }
 
@@ -70,18 +70,13 @@ namespace DiscordStreamBotBackend.Controllers
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"NotificationCallback-ConvertAtomToClass 錯誤\n");
+                        _logger.LogError(ex, "NotificationCallback 解析 Atom 失敗。");
                         return new ContentResult { StatusCode = 500 };
                     }
                 }
                 else if (Request.Method == "GET")
                 {
-                    _logger.LogInformation("New Callback!\n"
-                        + "topic: {topic}\n"
-                        + "challenge: {challenge}\n"
-                        + "mode: {mode}\n"
-                        + "verifyToken: {verifyToken}\n"
-                        + "leaseSeconds: {leaseSeconds}",
+                    _logger.LogInformation("收到 YouTube PubSub callback。topic: {topic} | challenge: {challenge} | mode: {mode} | verifyToken: {verifyToken} | leaseSeconds: {leaseSeconds}",
                         topic, challenge, mode, verifyToken, leaseSeconds);
 
                     string channelId = new Regex(@"channel_id=(?'ChannelId'[\w\-\\_]{24})").Match(topic).Groups["ChannelId"].Value;
@@ -106,7 +101,7 @@ namespace DiscordStreamBotBackend.Controllers
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.LogError(ex, "設定 VerifyToken 錯誤\n");
+                                    _logger.LogError(ex, "設定 VerifyToken 失敗。");
                                     return new ContentResult { StatusCode = 500 };
                                 }
                             }
@@ -119,23 +114,23 @@ namespace DiscordStreamBotBackend.Controllers
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex, "UnSubscribe 錯誤\n");
+                                _logger.LogError(ex, "取消訂閱失敗。");
                                 return new ContentResult { StatusCode = 500 };
                             }
                         default:
-                            _logger.LogWarning("NotificationCallback 錯誤，未知的 mode: {Mode}", mode);
+                            _logger.LogWarning("NotificationCallback 收到未知的 mode：{Mode}", mode);
                             return new ContentResult { StatusCode = 400 };
                     }
                 }
                 else
                 {
-                    _logger.LogWarning($"NotificationCallback 錯誤，未知的標頭");
+                    _logger.LogWarning("NotificationCallback 收到不支援的 HTTP method。");
                     return new ContentResult { StatusCode = 400 };
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "NotificationCallback 錯誤\n");
+                _logger.LogError(ex, "NotificationCallback 處理失敗。");
                 return new ContentResult { StatusCode = 500 };
             }
         }
@@ -165,7 +160,7 @@ namespace DiscordStreamBotBackend.Controllers
                     var node = doc.GetElementsByTagName("at:deleted-entry")[0];
                     if (node == null)
                     {
-                        _logger.LogWarning($"無 at:deleted-entry 節點");
+                        _logger.LogWarning("找不到 at:deleted-entry 節點。");
                         return null;
                     }
 
@@ -177,14 +172,14 @@ namespace DiscordStreamBotBackend.Controllers
                 }
                 else
                 {
-                    _logger.LogWarning("未知的 Atom");
+                    _logger.LogWarning("收到無法辨識的 Atom 內容。");
                     _logger.LogWarning("{Atom}", xmlText);
                     return null;
                 }
 
                 if (!_redisService.RedisDb.KeyExists($"youtube.pubsub.HMACSecret:{youtubeNotification.ChannelId}"))
                 {
-                    _logger.LogWarning("Redis 無 {YoutubeChannelId} 的 HMACSecret 值", youtubeNotification.ChannelId);
+                    _logger.LogWarning("Redis 找不到 {YoutubeChannelId} 的 HMACSecret。", youtubeNotification.ChannelId);
                     _redisService.AddPubMessage("youtube.pubsub.NeedRegister", youtubeNotification.ChannelId);
                     return null;
                 }
@@ -193,7 +188,7 @@ namespace DiscordStreamBotBackend.Controllers
                 string HMACSHA1 = ConvertToHexadecimal(SignWithHmac(xmlText, HMACsecret));
                 if (HMACSHA1 != signature)
                 {
-                    _logger.LogWarning("HMACSHA1 比對失敗: {HMACSHA1} vs {Signature}", HMACSHA1, signature);
+                    _logger.LogWarning("HMACSHA1 驗證失敗，計算值：{HMACSHA1}，收到值：{Signature}", HMACSHA1, signature);
                     _redisService.AddPubMessage("youtube.pubsub.NeedRegister", youtubeNotification.ChannelId);
                     return null;
                 }
@@ -205,7 +200,7 @@ namespace DiscordStreamBotBackend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "ConvertAtomToClass 錯誤\n");
+                _logger.LogError(ex, "解析 Atom 失敗。");
                 return null;
             }
         }

@@ -26,14 +26,14 @@ public class PublicUrlService
     private static string ValidateDomain(string value, string name)
     {
         if (string.IsNullOrWhiteSpace(value) || value.EndsWith('/') || !Uri.TryCreate(value, UriKind.Absolute, out var uri))
-            throw new InvalidOperationException($"{name} 必須是沒有結尾斜線的 absolute URI。");
+            throw new InvalidOperationException($"{name} 必須是沒有結尾斜線的絕對 URI。");
 
         var isLocalhostHttp = uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback;
         if (uri.Scheme != Uri.UriSchemeHttps && !isLocalhostHttp)
-            throw new InvalidOperationException($"{name} 必須使用 HTTPS，本機開發僅允許 HTTP localhost。");
+            throw new InvalidOperationException($"{name} 必須使用 HTTPS；本機開發只允許 HTTP localhost。");
 
         if (string.IsNullOrWhiteSpace(uri.Host) || !string.IsNullOrEmpty(uri.UserInfo) || uri.AbsolutePath != "/" || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
-            throw new InvalidOperationException($"{name} 只能包含公開網域，不可包含路徑、query 或 fragment。");
+            throw new InvalidOperationException($"{name} 只能包含公開網域，不可包含路徑、查詢字串或片段。");
 
         return value;
     }

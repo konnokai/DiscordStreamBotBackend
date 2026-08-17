@@ -35,7 +35,7 @@ namespace DiscordStreamBotBackend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Redis Increment Error\n");
+                _logger.LogError(ex, "Redis 累加隨機影片點擊次數失敗。");
             }
 
             try
@@ -62,7 +62,7 @@ namespace DiscordStreamBotBackend.Controllers
                     randomVideoUrlList.AddRange(_redisService.NowRecordList.Select((x) => $"https://www.youtube.com/watch?v={x}"));
 
                 var index = RNG.Next(randomVideoUrlList.Count);
-                _logger.LogInformation("randomVideoUrlList.Count: {randomVideoUrlList.Count}, RNG.Next: {index}", randomVideoUrlList.Count, index);
+                _logger.LogInformation("隨機影片網址數量：{randomVideoUrlList.Count}，選取索引：{index}", randomVideoUrlList.Count, index);
 
                 string randomUrl = randomVideoUrlList[Math.Max(0, Math.Min(randomVideoUrlList.Count - 1, index))];
                 _logger.LogInformation(randomUrl);
@@ -71,7 +71,7 @@ namespace DiscordStreamBotBackend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "RandomVideo\n");
+                _logger.LogError(ex, "產生隨機影片網址失敗。");
                 return Redirect(_publicUrls.FrontendDomain);
             }
         }

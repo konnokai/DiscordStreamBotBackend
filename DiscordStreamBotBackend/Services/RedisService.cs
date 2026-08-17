@@ -47,11 +47,11 @@ namespace DiscordStreamBotBackend.Services
                 RedisDb = Redis.GetDatabase(ProviderStateDatabaseIndex);
                 ValidateProviderStateDatabaseIndex(RedisDb.Database);
                 RedisSub = Redis.GetSubscriber();
-                _logger.LogInformation("Redis 已連線");
+                _logger.LogInformation("Redis 連線成功。");
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, "Redis 連線錯誤，請確認伺服器是否已開啟\n");
+                _logger.LogError(exception, "Redis 連線失敗，請確認 Redis 服務是否已啟動。");
                 throw;
             }
 
@@ -65,7 +65,7 @@ namespace DiscordStreamBotBackend.Services
             if (databaseIndex != ProviderStateDatabaseIndex)
             {
                 throw new InvalidOperationException(
-                    $"Twitch OAuth shared state must use Redis logical database {ProviderStateDatabaseIndex}, but database {databaseIndex} was selected.");
+                    $"Twitch OAuth 共用狀態必須使用 Redis 邏輯資料庫 {ProviderStateDatabaseIndex}，目前使用的是資料庫 {databaseIndex}。");
             }
         }
 
@@ -128,12 +128,12 @@ namespace DiscordStreamBotBackend.Services
 
                 SavePendingMessage(message);
                 if (isLogWarning)
-                    _logger.LogWarning("通知訊息發送失敗，儲存到清單待命 | Channel: \"{Channel}\"", message.Key);
+                    _logger.LogWarning("通知訊息傳送失敗，已加入待重試清單 | Channel: \"{Channel}\"", message.Key);
             }
             catch (Exception ex)
             {
                 SavePendingMessage(message);
-                _logger.LogError(ex, "通知訊息發送錯誤 | Channel: \"{Channel}\"\n", message.Key);
+                _logger.LogError(ex, "傳送通知訊息時發生錯誤 | Channel: \"{Channel}\"", message.Key);
             }
 
             if (message.Key == RedisChannels.Member.RevokeToken)
@@ -147,7 +147,7 @@ namespace DiscordStreamBotBackend.Services
             if (_needRePublishMessageList.IsEmpty)
                 return;
 
-            _logger.LogWarning("嘗試重新發送通知訊息: {Count} 筆", _needRePublishMessageList.Count);
+            _logger.LogWarning("重新傳送通知訊息：{Count} 筆", _needRePublishMessageList.Count);
             var pending = _needRePublishMessageList.ToArray();
             foreach (var item in pending)
             {
@@ -157,7 +157,7 @@ namespace DiscordStreamBotBackend.Services
             }
 
             if (_needRePublishMessageList.IsEmpty)
-                _logger.LogInformation("已重新發送全部通知訊息");
+                _logger.LogInformation("通知訊息已全部重新傳送。");
         }
 
         private void SavePendingMessage(KeyValuePair<string, string> message)
@@ -184,11 +184,11 @@ namespace DiscordStreamBotBackend.Services
                     NowRecordList.AddRange(newNowRecordList);
                 }
 
-                _logger.LogInformation("重整現正直播的清單: {NowRecordCount} 個直播", NowRecordList.Count);
+                _logger.LogInformation("更新目前直播清單：{NowRecordCount} 個直播", NowRecordList.Count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "現正直播清單重整失敗\n");
+                _logger.LogError(ex, "更新目前直播清單失敗。");
                 NowRecordList = [];
             }
         }

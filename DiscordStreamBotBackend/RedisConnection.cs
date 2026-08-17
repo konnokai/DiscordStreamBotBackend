@@ -5,7 +5,7 @@ public sealed class RedisConnection
 {
     private static readonly Lazy<RedisConnection> lazy = new(() =>
     {
-        if (string.IsNullOrEmpty(_settingOption)) throw new InvalidOperationException("Please call Init() first.");
+        if (string.IsNullOrEmpty(_settingOption)) throw new InvalidOperationException("請先呼叫 Init()。");
         return new RedisConnection();
     });
 

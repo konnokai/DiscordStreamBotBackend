@@ -12,11 +12,11 @@ using System.Threading.Tasks;
 namespace DiscordStreamBotBackend.Services;
 
 /// <summary>
-/// 管理後台的 Redis 控制平面橋接；mutation 刻意直接發布且不進入一般通知重送佇列。
+/// 管理後台的 Redis 控制平面橋接；設定異動直接發布，不進一般通知重送佇列。
 /// </summary>
 public class AdminSettingsRedisService
 {
-    // 與既有 Notifier ClusterQueryService 的跨 shard request/reply 預算一致。
+    // 與既有 Notifier ClusterQueryService 使用相同的跨 shard request/reply 逾時預算。
     internal static readonly TimeSpan ReplyTimeout = TimeSpan.FromSeconds(2.5);
 
     private readonly ILogger<AdminSettingsRedisService> _logger;
@@ -47,7 +47,7 @@ public class AdminSettingsRedisService
                 }
                 catch (JsonException ex)
                 {
-                    _logger.LogWarning(ex, "忽略無法解析的 guild snapshot | Shard: {ShardId}", entry.Name.ToString());
+                    _logger.LogWarning(ex, "略過無法解析的 guild snapshot | Shard: {ShardId}", entry.Name.ToString());
                 }
             }
 
@@ -59,7 +59,7 @@ public class AdminSettingsRedisService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "讀取管理後台 guild snapshot 失敗");
+            _logger.LogWarning(ex, "讀取管理後台 guild snapshot 時失敗");
             return new HashSet<string>(StringComparer.Ordinal);
         }
     }
@@ -83,7 +83,7 @@ public class AdminSettingsRedisService
             .ToArray() ?? [];
     }
 
-    /// <summary>先訂閱 correlation reply 再發布，避免 owning shard 的快速回覆在訂閱完成前遺失。</summary>
+    /// <summary>先訂閱 correlation reply，再發布 request，避免負責該 shard 的 Notifier 在訂閱完成前就快速回覆，導致回覆遺失。</summary>
     private async Task<string> PublishAndWaitAsync(
         string requestChannelName,
         AdminSettingsRequestEnvelope envelope,
@@ -121,7 +121,7 @@ public class AdminSettingsRedisService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "管理後台 Redis request/reply 失敗 | CorrelationId: {CorrelationId}", envelope.CorrelationId);
+            _logger.LogWarning(ex, "管理後台 Redis request/reply 發生錯誤 | CorrelationId: {CorrelationId}", envelope.CorrelationId);
             return null;
         }
         finally

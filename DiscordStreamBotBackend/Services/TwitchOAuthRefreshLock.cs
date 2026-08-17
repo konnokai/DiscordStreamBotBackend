@@ -55,13 +55,13 @@ internal sealed class TwitchOAuthRefreshLock
         _database = database;
     }
 
-    /// <summary>依 Twitch user ID 嘗試取得跨 Bot/Backend 共用且可續租的 refresh lease。</summary>
+    /// <summary>依 Twitch user ID 嘗試取得 Bot 與後端共用、可續租的 refresh lease。</summary>
     public async Task<TwitchOAuthRefreshLockAcquireResult> TryAcquireAsync(
         string twitchUserId,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(twitchUserId))
-            throw new ArgumentException("Twitch user ID is required.", nameof(twitchUserId));
+            throw new ArgumentException("Twitch user ID 不可為空。", nameof(twitchUserId));
 
         cancellationToken.ThrowIfCancellationRequested();
         var key = GetKey(twitchUserId);
@@ -86,8 +86,8 @@ internal sealed class TwitchOAuthRefreshLock
 
 internal sealed class TwitchOAuthRefreshLockLease : IAsyncDisposable
 {
-    // TTL 到期後可能已有新 owner 接手；續租與釋放必須在 Redis 內原子比對 owner。
-    // 舊持有者不得延長或刪除其他程序重新取得的 lock。
+    // TTL 到期後可能已由新的 owner 接手，因此續租與釋放都必須在 Redis 內以原子操作比對 owner。
+    // 舊持有者不可延長或刪除其他程序重新取得的 lock。
     private const string RenewScript = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('pexpire', KEYS[1], ARGV[2]) else return 0 end";
     private const string ReleaseScript = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
     private readonly IDatabase _database;
@@ -112,7 +112,7 @@ internal sealed class TwitchOAuthRefreshLockLease : IAsyncDisposable
         _renewalTask = RenewUntilReleasedAsync(_renewalCancellation.Token);
     }
 
-    /// <summary>原子確認 owner 並延長 TTL；ownership lost 後禁止持有者再執行 authority-changing write。</summary>
+    /// <summary>以原子操作確認 owner 並延長 TTL；失去 ownership 後，持有者不得再寫入會改變授權狀態的資料。</summary>
     public async Task<(TwitchOAuthRefreshLockOwnershipStatus Status, Exception Exception)> EnsureOwnedAsync(
         CancellationToken cancellationToken)
     {
@@ -194,7 +194,7 @@ internal sealed class TwitchOAuthRefreshLockLease : IAsyncDisposable
         }
         catch (TimeoutException)
         {
-            // Redis call may still be completing. Renewal is cancelled and the lock is bounded by its TTL.
+            // Redis 呼叫可能仍在完成中。續租已取消，lock 最晚會在 TTL 到期時失效。
         }
 
         if (_renewalTask.IsCompleted)
