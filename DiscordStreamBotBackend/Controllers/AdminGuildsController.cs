@@ -51,13 +51,10 @@ public class AdminGuildsController : ControllerBase
     [HttpGet("{guildId}/settings")]
     public async Task<IActionResult> GetSettings(string guildId, CancellationToken cancellationToken)
     {
-        var authorization = await GetAuthorizationAsync(false, cancellationToken);
-        if (authorization.Error != null)
-            return authorization.Error;
-        if (!authorization.Guilds.Any(x => string.Equals(x.Id, guildId, StringComparison.Ordinal)))
-            return StatusCode(403, new { error = "guild_forbidden" });
+        if (!_bearerTokenService.TryGetDiscordSession(Request.Headers.Authorization.ToString(), out var session))
+            return Unauthorized(new { error = "invalid_discord_session" });
 
-        var envelope = CreateEnvelope(guildId, authorization.Session.DiscordUserId, "settings.snapshot", new JObject());
+        var envelope = CreateEnvelope(guildId, session.DiscordUserId, "settings.snapshot", new JObject());
         var reply = await _adminSettingsRedisService.RequestSnapshotAsync(envelope, cancellationToken);
         if (!TryReadSnapshotReply(reply, out var snapshot))
             return Unavailable(envelope.CorrelationId);
