@@ -10,23 +10,23 @@
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/BackendMetrics.cs": {
-    "mtime": 1785865563.7393546,
-    "ast_hash": "8e07c536b1f8053e87231359e1287edb",
+    "mtime": 1786951298.958218,
+    "ast_hash": "9a03f173bc582071990523d15e49c4cc",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Controllers/AccountLinksController.cs": {
-    "mtime": 1785868087.174783,
-    "ast_hash": "db1df2ad7cfb09993de738db61c41bdd",
+    "mtime": 1786950626.5261528,
+    "ast_hash": "0c0a9761b787cc7331f80d11b8558358",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Controllers/BililiveRecorderWebHookController.cs": {
-    "mtime": 1773579155.0,
-    "ast_hash": "5113c3b13f8de950bb3877e92857086e",
+    "mtime": 1786950626.5339425,
+    "ast_hash": "3f33416fb35cce6c04c5b0140a5637a9",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Controllers/DiscordOAuthController.cs": {
-    "mtime": 1786344447.9349017,
-    "ast_hash": "2852da419562d1ead754a5b932a18f66",
+    "mtime": 1786950626.5272894,
+    "ast_hash": "0d65e465e38e70384af109c410047666",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Controllers/GoogleOAuthController.cs": {
@@ -40,18 +40,18 @@
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Controllers/RandomVideoController.cs": {
-    "mtime": 1784522234.0,
-    "ast_hash": "524bf997e38409727ab4a6a34168a493",
+    "mtime": 1786950626.534977,
+    "ast_hash": "ccaa9c28c02e03211a5a82073588011d",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Controllers/StatusCheckController.cs": {
-    "mtime": 1773579155.0,
-    "ast_hash": "edb996c13b55543eefa8275da1e5673b",
+    "mtime": 1786950626.5359848,
+    "ast_hash": "5bdecb3bb5465586918da653c391c4b5",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Controllers/TwitCastingWebHookController.cs": {
-    "mtime": 1773579155.0,
-    "ast_hash": "68f59c7f36d4218a5a1403a37c5080d2",
+    "mtime": 1786950626.5339425,
+    "ast_hash": "6996d474063f869e5cd0183e4f766d28",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Controllers/TwitchOAuthController.cs": {
@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs": {
-    "mtime": 1773579155.0,
-    "ast_hash": "99c836037793a5723ac407045c0013e6",
+    "mtime": 1786950626.532441,
+    "ast_hash": "2c1a229e6e670ba8bf9861897c6ab576",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/DataBase/MainDbContext.cs": {
@@ -95,8 +95,8 @@
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Middleware/LogMiddleware.cs": {
-    "mtime": 1784551623.0,
-    "ast_hash": "6714674769d893f979ede5f0b7fef3de",
+    "mtime": 1786950626.5359848,
+    "ast_hash": "fa9897c7b30fe59bf9ac12dcbcd9602f",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Model/AccountLinks.cs": {
@@ -160,13 +160,13 @@
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/MySqlDataStore.cs": {
-    "mtime": 1786078221.3985474,
-    "ast_hash": "b233b13e82d01cc4ebc730e2559c362f",
+    "mtime": 1786950663.6506948,
+    "ast_hash": "1172b80b718b6419ce50294c411ca113",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Program.cs": {
-    "mtime": 1784455878.0,
-    "ast_hash": "b077f6684e304324cce3a9725ac1b134",
+    "mtime": 1786950663.649183,
+    "ast_hash": "d310f0b6bbd4cd4d98788025597cd375",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Properties/launchSettings.json": {
@@ -180,38 +180,38 @@
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/RedisConnection.cs": {
-    "mtime": 1773579155.0,
-    "ast_hash": "5170c4b320303c2dcc1ebf8fbb93bd4f",
+    "mtime": 1786950663.6496906,
+    "ast_hash": "53f83915fdd3c8393f989a1a3884fb91",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/Auth/RNG.cs": {
-    "mtime": 1773579155.0,
-    "ast_hash": "909b26b9f61b1998771e255d1bf84687",
+    "mtime": 1786950806.9476418,
+    "ast_hash": "268ffc24e7e2ef25a98bc66a31005bf9",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/Auth/TokenCrypto.cs": {
-    "mtime": 1773579155.0,
-    "ast_hash": "7a10d9d768cd4e72e986805eedb4939e",
+    "mtime": 1786950806.947043,
+    "ast_hash": "21e01ff88cc427a2c6fe3d0bcde45274",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/Auth/TokenService.cs": {
-    "mtime": 1785742795.3733516,
-    "ast_hash": "d72090a257b71abf6288ec8b5651fbcb",
+    "mtime": 1786950786.9645727,
+    "ast_hash": "e9b9e4c19fb730e8afc47755eb7fb383",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/BearerTokenService.cs": {
-    "mtime": 1786344543.1425958,
-    "ast_hash": "068aa9bac154a35527be638bb8d55d89",
+    "mtime": 1786950980.3453786,
+    "ast_hash": "05367abf3849290239e28e732cf3160d",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/EventSubHostedService.cs": {
-    "mtime": 1784519097.0,
-    "ast_hash": "36fba0eb37a54041e0d6a1246523f391",
+    "mtime": 1786950869.9081216,
+    "ast_hash": "28702fd2488f2b4ef1fe0ff86746d7f5",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/GoogleOAuthService.cs": {
-    "mtime": 1786078974.8719034,
-    "ast_hash": "32b5d53f08897fe05fc90f75037769ac",
+    "mtime": 1786950869.90962,
+    "ast_hash": "b590f8f3b1ceba6b279bd757490be983",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/OAuthStateService.cs": {
@@ -220,38 +220,38 @@
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/PublicUrlService.cs": {
-    "mtime": 1784522234.0,
-    "ast_hash": "ee82204074f4c08e50c0296846c7f1ba",
+    "mtime": 1786950980.3453786,
+    "ast_hash": "a7f4b046c1eec0a03bb40f91d19aefa7",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/RedisService.cs": {
-    "mtime": 1785865641.591022,
-    "ast_hash": "c779f0c17879fb9a7badfb14653e7c1e",
+    "mtime": 1786950869.9069655,
+    "ast_hash": "f93f5ab1905025f4a12ae9511ebc7427",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/StartupValidationHostedService.cs": {
-    "mtime": 1785825819.697031,
-    "ast_hash": "5c37357fa2dbf4c26f134381528e4be0",
+    "mtime": 1786950980.3442688,
+    "ast_hash": "c08d6e629807175752c356ff3e80ea63",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/TwitchAuthorizationService.cs": {
-    "mtime": 1785826039.1757736,
-    "ast_hash": "8f349c1a0585454eb5dd4a8fe27b7db9",
+    "mtime": 1786951298.9567163,
+    "ast_hash": "82b06a42984af500d9c2dad2f0e3b72b",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/TwitchTokenValidationHostedService.cs": {
-    "mtime": 1785824603.7615294,
-    "ast_hash": "882fd1baeb7621fc7f51ef7b4dfb893f",
+    "mtime": 1786951298.9504483,
+    "ast_hash": "43474770b9474ff97310e9354098375c",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Startup.cs": {
-    "mtime": 1786608352.3186195,
-    "ast_hash": "f86fcba0f03d8ec88e818756995cd21d",
+    "mtime": 1786950663.647681,
+    "ast_hash": "d650488e66e5bf399913233a31e23a72",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Utility.cs": {
-    "mtime": 1784551604.0,
-    "ast_hash": "5e5257c324f701ac268d8e39bf58a0c0",
+    "mtime": 1786950663.652286,
+    "ast_hash": "51fb2bd81d155e5296c7f3e4fb660310",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/appsettings.Development.json": {
@@ -275,8 +275,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1786344447.9354115,
-    "ast_hash": "bf1554ce2f625ed456c81822675b1857",
+    "mtime": 1786951298.958218,
+    "ast_hash": "c8d6331b4492a57a158c6c740281b322",
     "semantic_hash": ""
   },
   "docker-compose.yml": {
@@ -285,13 +285,13 @@
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/TwitchOAuthRefreshLock.cs": {
-    "mtime": 1785825819.6985326,
-    "ast_hash": "70c29a248565428f840a7eff0d5a07ce",
+    "mtime": 1786951298.9567163,
+    "ast_hash": "01b82facae2c4e39c6f87f5e5bb4681e",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/TwitchRefreshRotationLifecycle.cs": {
-    "mtime": 1785824577.9987428,
-    "ast_hash": "dd8e788557d557aa1f968ebf7861d7e4",
+    "mtime": 1786950991.386398,
+    "ast_hash": "b851f5a054190b8390d83b7ef9713a16",
     "semantic_hash": ""
   },
   "tests/DiscordStreamBotBackend.Tests/DiscordStreamBotBackend.Tests.csproj": {
@@ -300,8 +300,8 @@
     "semantic_hash": ""
   },
   "tests/DiscordStreamBotBackend.Tests/TwitchOAuthContractTests.cs": {
-    "mtime": 1786075514.0070512,
-    "ast_hash": "393096cbbabe61b9b97ade68788e8e98",
+    "mtime": 1786950806.948148,
+    "ast_hash": "d2301f48e5e1eede624aefcb747f0e62",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/DataBase/Table/GoogleOAuthUnlinkIntent.cs": {
@@ -310,18 +310,18 @@
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/GoogleAccountLinkService.cs": {
-    "mtime": 1786078316.3990297,
-    "ast_hash": "b105769153f4e9637cc6c16874cf24d6",
+    "mtime": 1786950869.9160554,
+    "ast_hash": "45a9a3da5b1a4d8c85e1d2845107094c",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/GoogleOAuthOperationLock.cs": {
-    "mtime": 1786078293.7459729,
-    "ast_hash": "d6e6e2711c3de551c2496ed1e3065adf",
+    "mtime": 1786950869.9160554,
+    "ast_hash": "cebdd4dd0a8acdbf39fe451181fe2550",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/NonPersistentGoogleDataStore.cs": {
-    "mtime": 1786078221.398167,
-    "ast_hash": "71613aee7f3659aefc2eb7e7fafa8535",
+    "mtime": 1786950869.9172611,
+    "ast_hash": "60cd09229f5a6d269d2988e3f0aa0354",
     "semantic_hash": ""
   },
   "tests/DiscordStreamBotBackend.Tests/GoogleAccountLinksContractTests.cs": {
@@ -330,8 +330,8 @@
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs": {
-    "mtime": 1786938135.6203134,
-    "ast_hash": "57bbc5eb6e08be6dfa2f1402d7111651",
+    "mtime": 1786952560.5711534,
+    "ast_hash": "75c2b89d556779768996f64c4c1e7cd5",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Model/AdminSettingsModels.cs": {
@@ -340,18 +340,18 @@
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs": {
-    "mtime": 1786346967.4067874,
-    "ast_hash": "ce3c7a239cf9d454bad3ded28e68e29b",
+    "mtime": 1786953215.065081,
+    "ast_hash": "bbfda17cfcbf3286e0d08fe6ed1162ee",
     "semantic_hash": ""
   },
   "DiscordStreamBotBackend/Services/DiscordGuildAuthorizationService.cs": {
-    "mtime": 1786608397.5455601,
-    "ast_hash": "a68f22a3b1f2d6a4f8c7f3a10217d021",
+    "mtime": 1786950980.346883,
+    "ast_hash": "eab85889a02a0d5e682f20b5fdbd013a",
     "semantic_hash": ""
   },
   "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs": {
-    "mtime": 1786938135.6322834,
-    "ast_hash": "550a6dd5ee5cd400195603b8f97b008f",
+    "mtime": 1786953215.065081,
+    "ast_hash": "7add3458837592add1b00e80f6a5c79b",
     "semantic_hash": ""
   }
 }

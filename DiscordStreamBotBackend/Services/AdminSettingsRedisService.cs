@@ -16,9 +16,6 @@ namespace DiscordStreamBotBackend.Services;
 /// </summary>
 public class AdminSettingsRedisService
 {
-    // 與既有 Notifier ClusterQueryService 使用相同的跨 shard request/reply 逾時預算。
-    internal static readonly TimeSpan ReplyTimeout = TimeSpan.FromSeconds(2.5);
-
     private readonly ILogger<AdminSettingsRedisService> _logger;
     private readonly RedisService _redisService;
 
@@ -109,11 +106,7 @@ public class AdminSettingsRedisService
             if (subscribers == 0)
                 return null;
 
-            return await reply.Task.WaitAsync(ReplyTimeout, cancellationToken);
-        }
-        catch (TimeoutException)
-        {
-            return null;
+            return await reply.Task.WaitAsync(cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

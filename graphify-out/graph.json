@@ -44,7 +44,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_backendmetrics",
       "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "backendmetrics.cs"
     },
     {
@@ -60,7 +60,7 @@
       "_origin": "ast",
       "id": "csharp_namespace:f8491212bc78b2e7",
       "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "discordstreambotbackend"
     },
     {
@@ -77,7 +77,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_backendmetrics_discordstreambotbackend_backendmetrics",
       "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "backendmetrics"
     },
     {
@@ -88,7 +88,7 @@
       "_origin": "ast",
       "id": "counter",
       "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "counter"
     },
     {
@@ -99,7 +99,7 @@
       "_origin": "ast",
       "id": "gauge",
       "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "gauge"
     },
     {
@@ -110,7 +110,7 @@
       "_origin": "ast",
       "id": "histogram",
       "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "histogram"
     },
     {
@@ -153,7 +153,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_accountlinkscontroller_discordstreambotbackend_controllers_accountlinkscontroller",
-      "community": 3,
+      "community": 40,
       "community_name": "AccountLinksController",
       "norm_label": "accountlinkscontroller"
     },
@@ -165,7 +165,7 @@
       "_origin": "ast",
       "id": "controllerbase",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "controllerbase"
     },
     {
@@ -181,7 +181,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_accountlinkscontroller_discordstreambotbackend_controllers_accountlinkscontroller_get",
-      "community": 3,
+      "community": 40,
       "community_name": "AccountLinksController",
       "norm_label": ".get()"
     },
@@ -192,7 +192,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_accountlinkscontroller_cs_cancellationtoken",
-      "community": 3,
+      "community": 40,
       "community_name": "AccountLinksController",
       "norm_label": "cancellationtoken"
     },
@@ -203,7 +203,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_accountlinkscontroller_cs_task",
-      "community": 3,
+      "community": 40,
       "community_name": "AccountLinksController",
       "norm_label": "task"
     },
@@ -214,7 +214,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_accountlinkscontroller_cs_iactionresult",
-      "community": 3,
+      "community": 40,
       "community_name": "AccountLinksController",
       "norm_label": "iactionresult"
     },
@@ -225,7 +225,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_accountlinkscontroller_cs_httpget",
-      "community": 3,
+      "community": 40,
       "community_name": "AccountLinksController",
       "norm_label": "httpget"
     },
@@ -242,7 +242,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_accountlinkscontroller_discordstreambotbackend_controllers_accountlinkscontroller_deletegoogle",
-      "community": 3,
+      "community": 40,
       "community_name": "AccountLinksController",
       "norm_label": ".deletegoogle()"
     },
@@ -253,7 +253,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "httpdelete",
-      "community": 3,
+      "community": 40,
       "community_name": "AccountLinksController",
       "norm_label": "httpdelete"
     },
@@ -270,7 +270,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_accountlinkscontroller_discordstreambotbackend_controllers_accountlinkscontroller_deletetwitch",
-      "community": 3,
+      "community": 40,
       "community_name": "AccountLinksController",
       "norm_label": ".deletetwitch()"
     },
@@ -287,7 +287,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_accountlinkscontroller_discordstreambotbackend_controllers_accountlinkscontroller_trygetdiscorduserid",
-      "community": 3,
+      "community": 40,
       "community_name": "AccountLinksController",
       "norm_label": ".trygetdiscorduserid()"
     },
@@ -304,7 +304,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_accountlinkscontroller_discordstreambotbackend_controllers_accountlinkscontroller_creategoogleunlinkresult",
-      "community": 3,
+      "community": 40,
       "community_name": "AccountLinksController",
       "norm_label": ".creategoogleunlinkresult()"
     },
@@ -418,7 +418,7 @@
       "label": ".SendCommand()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L68",
+      "source_location": "L65",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -446,7 +446,7 @@
       "label": ".CreateEnvelope()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L90",
+      "source_location": "L87",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -474,7 +474,7 @@
       "label": ".GetAuthorizationAsync()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L104",
+      "source_location": "L101",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -535,7 +535,7 @@
       "label": ".Unavailable()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L136",
+      "source_location": "L133",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -552,7 +552,7 @@
       "label": ".TryReadSnapshotReply()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L146",
+      "source_location": "L143",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -569,7 +569,7 @@
       "label": ".TryReadCommandReply()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L165",
+      "source_location": "L162",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -589,8 +589,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_bililiverecorderwebhookcontroller",
-      "community": 18,
-      "community_name": "BililiveRecorderWebHookController",
+      "community": 23,
+      "community_name": "DiscordStreamBotBackend.Services",
       "norm_label": "bililiverecorderwebhookcontroller.cs"
     },
     {
@@ -618,7 +618,7 @@
       "_origin": "ast",
       "id": "controller",
       "community": 33,
-      "community_name": "RandomVideoController",
+      "community_name": "TwitCastingWebHookController",
       "norm_label": "controller"
     },
     {
@@ -745,8 +745,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_discordoauthcontroller_discordstreambotbackend_controllers_discordoauthcontroller",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": "discordoauthcontroller"
     },
     {
@@ -756,8 +756,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_discordoauthcontroller_cs_iconfiguration",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": "iconfiguration"
     },
     {
@@ -767,8 +767,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_discordoauthcontroller_cs_httpclient",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": "httpclient"
     },
     {
@@ -778,8 +778,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_discordoauthcontroller_cs_ilogger",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": "ilogger"
     },
     {
@@ -795,8 +795,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_discordoauthcontroller_discordstreambotbackend_controllers_discordoauthcontroller_callback",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": ".callback()"
     },
     {
@@ -806,8 +806,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_discordoauthcontroller_cs_cancellationtoken",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": "cancellationtoken"
     },
     {
@@ -817,8 +817,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_discordoauthcontroller_cs_task",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": "task"
     },
     {
@@ -828,8 +828,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_discordoauthcontroller_cs_iactionresult",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": "iactionresult"
     },
     {
@@ -839,8 +839,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_discordoauthcontroller_cs_enablecors",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": "enablecors"
     },
     {
@@ -850,8 +850,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_discordoauthcontroller_cs_httppost",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": "httppost"
     },
     {
@@ -867,8 +867,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_discordoauthcontroller_discordstreambotbackend_controllers_discordoauthcontroller_istemporaryproviderfailure",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": ".istemporaryproviderfailure()"
     },
     {
@@ -878,8 +878,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "httpstatuscode",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": "httpstatuscode"
     },
     {
@@ -907,7 +907,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_googleoauthcontroller_discordstreambotbackend_controllers_googleoauthcontroller",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "googleoauthcontroller"
     },
     {
@@ -918,7 +918,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_googleoauthcontroller_cs_ilogger",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "ilogger"
     },
     {
@@ -935,7 +935,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_googleoauthcontroller_discordstreambotbackend_controllers_googleoauthcontroller_start",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".start()"
     },
     {
@@ -946,7 +946,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_googleoauthcontroller_cs_task",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "task"
     },
     {
@@ -957,7 +957,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_googleoauthcontroller_cs_iactionresult",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "iactionresult"
     },
     {
@@ -968,7 +968,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_googleoauthcontroller_cs_enablecors",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "enablecors"
     },
     {
@@ -979,7 +979,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_googleoauthcontroller_cs_httppost",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "httppost"
     },
     {
@@ -996,7 +996,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_googleoauthcontroller_discordstreambotbackend_controllers_googleoauthcontroller_callback",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".callback()"
     },
     {
@@ -1007,7 +1007,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_googleoauthcontroller_cs_cancellationtoken",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "cancellationtoken"
     },
     {
@@ -1018,7 +1018,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_googleoauthcontroller_cs_httpget",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "httpget"
     },
     {
@@ -1035,7 +1035,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_googleoauthcontroller_discordstreambotbackend_controllers_googleoauthcontroller_redirecterror",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".redirecterror()"
     },
     {
@@ -1063,7 +1063,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_indexcontroller_discordstreambotbackend_controllers_indexcontroller",
       "community": 33,
-      "community_name": "RandomVideoController",
+      "community_name": "TwitCastingWebHookController",
       "norm_label": "indexcontroller"
     },
     {
@@ -1080,7 +1080,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_indexcontroller_discordstreambotbackend_controllers_indexcontroller_index",
       "community": 33,
-      "community_name": "RandomVideoController",
+      "community_name": "TwitCastingWebHookController",
       "norm_label": ".index()"
     },
     {
@@ -1091,7 +1091,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_indexcontroller_cs_iactionresult",
       "community": 33,
-      "community_name": "RandomVideoController",
+      "community_name": "TwitCastingWebHookController",
       "norm_label": "iactionresult"
     },
     {
@@ -1102,7 +1102,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_indexcontroller_cs_enablecors",
       "community": 33,
-      "community_name": "RandomVideoController",
+      "community_name": "TwitCastingWebHookController",
       "norm_label": "enablecors"
     },
     {
@@ -1113,7 +1113,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_indexcontroller_cs_httpget",
       "community": 33,
-      "community_name": "RandomVideoController",
+      "community_name": "TwitCastingWebHookController",
       "norm_label": "httpget"
     },
     {
@@ -1140,7 +1140,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_randomvideocontroller_discordstreambotbackend_controllers_randomvideocontroller",
-      "community": 33,
+      "community": 29,
       "community_name": "RandomVideoController",
       "norm_label": "randomvideocontroller"
     },
@@ -1151,7 +1151,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_randomvideocontroller_cs_ilogger",
-      "community": 33,
+      "community": 29,
       "community_name": "RandomVideoController",
       "norm_label": "ilogger"
     },
@@ -1169,7 +1169,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_randomvideocontroller_discordstreambotbackend_controllers_randomvideocontroller_randomvideo",
       "community": 29,
-      "community_name": ".RandomVideo",
+      "community_name": "RandomVideoController",
       "norm_label": ".randomvideo()"
     },
     {
@@ -1180,7 +1180,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_randomvideocontroller_cs_task",
       "community": 29,
-      "community_name": ".RandomVideo",
+      "community_name": "RandomVideoController",
       "norm_label": "task"
     },
     {
@@ -1191,7 +1191,7 @@
       "_origin": "ast",
       "id": "redirectresult",
       "community": 29,
-      "community_name": ".RandomVideo",
+      "community_name": "RandomVideoController",
       "norm_label": "redirectresult"
     },
     {
@@ -1202,7 +1202,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_randomvideocontroller_cs_enablecors",
       "community": 29,
-      "community_name": ".RandomVideo",
+      "community_name": "RandomVideoController",
       "norm_label": "enablecors"
     },
     {
@@ -1213,7 +1213,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_randomvideocontroller_cs_httpget",
       "community": 29,
-      "community_name": ".RandomVideo",
+      "community_name": "RandomVideoController",
       "norm_label": "httpget"
     },
     {
@@ -1223,8 +1223,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_statuscheckcontroller",
-      "community": 36,
-      "community_name": ".StatusCheck",
+      "community": 33,
+      "community_name": "TwitCastingWebHookController",
       "norm_label": "statuscheckcontroller.cs"
     },
     {
@@ -1240,8 +1240,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_statuscheckcontroller_discordstreambotbackend_controllers_statuscheckcontroller",
-      "community": 36,
-      "community_name": ".StatusCheck",
+      "community": 33,
+      "community_name": "TwitCastingWebHookController",
       "norm_label": "statuscheckcontroller"
     },
     {
@@ -1257,8 +1257,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_statuscheckcontroller_discordstreambotbackend_controllers_statuscheckcontroller_statuscheck",
-      "community": 36,
-      "community_name": ".StatusCheck",
+      "community": 33,
+      "community_name": "TwitCastingWebHookController",
       "norm_label": ".statuscheck()"
     },
     {
@@ -1268,8 +1268,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_statuscheckcontroller_cs_contentresult",
-      "community": 36,
-      "community_name": ".StatusCheck",
+      "community": 33,
+      "community_name": "TwitCastingWebHookController",
       "norm_label": "contentresult"
     },
     {
@@ -1279,8 +1279,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_statuscheckcontroller_cs_enablecors",
-      "community": 36,
-      "community_name": ".StatusCheck",
+      "community": 33,
+      "community_name": "TwitCastingWebHookController",
       "norm_label": "enablecors"
     },
     {
@@ -1290,8 +1290,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_statuscheckcontroller_cs_httpget",
-      "community": 36,
-      "community_name": ".StatusCheck",
+      "community": 33,
+      "community_name": "TwitCastingWebHookController",
       "norm_label": "httpget"
     },
     {
@@ -1318,7 +1318,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitcastingwebhookcontroller_discordstreambotbackend_controllers_twitcastingwebhookcontroller",
-      "community": 31,
+      "community": 33,
       "community_name": "TwitCastingWebHookController",
       "norm_label": "twitcastingwebhookcontroller"
     },
@@ -1329,7 +1329,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitcastingwebhookcontroller_cs_ilogger",
-      "community": 31,
+      "community": 33,
       "community_name": "TwitCastingWebHookController",
       "norm_label": "ilogger"
     },
@@ -1340,7 +1340,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitcastingwebhookcontroller_cs_iconfiguration",
-      "community": 31,
+      "community": 33,
       "community_name": "TwitCastingWebHookController",
       "norm_label": "iconfiguration"
     },
@@ -1358,7 +1358,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitcastingwebhookcontroller_discordstreambotbackend_controllers_twitcastingwebhookcontroller_twitcastingwebhook",
       "community": 31,
-      "community_name": "TwitCastingWebHookController",
+      "community_name": ".AddPubMessageAsync",
       "norm_label": ".twitcastingwebhook()"
     },
     {
@@ -1369,7 +1369,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitcastingwebhookcontroller_cs_contentresult",
       "community": 31,
-      "community_name": "TwitCastingWebHookController",
+      "community_name": ".AddPubMessageAsync",
       "norm_label": "contentresult"
     },
     {
@@ -1380,7 +1380,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitcastingwebhookcontroller_cs_httppost",
       "community": 31,
-      "community_name": "TwitCastingWebHookController",
+      "community_name": ".AddPubMessageAsync",
       "norm_label": "httppost"
     },
     {
@@ -1408,7 +1408,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitchoauthcontroller_discordstreambotbackend_controllers_twitchoauthcontroller",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "twitchoauthcontroller"
     },
     {
@@ -1419,7 +1419,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitchoauthcontroller_cs_ilogger",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "ilogger"
     },
     {
@@ -1436,7 +1436,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitchoauthcontroller_discordstreambotbackend_controllers_twitchoauthcontroller_start",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".start()"
     },
     {
@@ -1447,7 +1447,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitchoauthcontroller_cs_task",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "task"
     },
     {
@@ -1458,7 +1458,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitchoauthcontroller_cs_iactionresult",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "iactionresult"
     },
     {
@@ -1469,7 +1469,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitchoauthcontroller_cs_enablecors",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "enablecors"
     },
     {
@@ -1480,7 +1480,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitchoauthcontroller_cs_httppost",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "httppost"
     },
     {
@@ -1497,7 +1497,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitchoauthcontroller_discordstreambotbackend_controllers_twitchoauthcontroller_callback",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".callback()"
     },
     {
@@ -1508,7 +1508,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitchoauthcontroller_cs_cancellationtoken",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "cancellationtoken"
     },
     {
@@ -1519,7 +1519,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitchoauthcontroller_cs_httpget",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "httpget"
     },
     {
@@ -1536,7 +1536,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_twitchoauthcontroller_discordstreambotbackend_controllers_twitchoauthcontroller_redirecterror",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".redirecterror()"
     },
     {
@@ -1546,8 +1546,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_youtubenotificationscontroller",
-      "community": 30,
-      "community_name": "YouTubeNotificationsController.cs",
+      "community": 23,
+      "community_name": "DiscordStreamBotBackend.Services",
       "norm_label": "youtubenotificationscontroller.cs"
     },
     {
@@ -1632,7 +1632,7 @@
       "label": ".ConvertAtomToClass()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L144",
+      "source_location": "L139",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -1660,7 +1660,7 @@
       "label": ".SignWithHmac()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L215",
+      "source_location": "L210",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -1677,7 +1677,7 @@
       "label": ".ConvertToHexadecimal()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L224",
+      "source_location": "L219",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -1705,7 +1705,7 @@
       "label": "YoutubePubSubNotification",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L236",
+      "source_location": "L231",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -1715,14 +1715,14 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_youtubepubsubnotification",
       "community": 30,
-      "community_name": "YouTubeNotificationsController.cs",
+      "community_name": "YoutubePubSubNotification",
       "norm_label": "youtubepubsubnotification"
     },
     {
       "label": "YTNotificationType",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L238",
+      "source_location": "L233",
       "metadata": {
         "is_nested_type": true,
         "namespace": "DiscordStreamBotBackend.Controllers",
@@ -1733,7 +1733,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_ytnotificationtype",
       "community": 30,
-      "community_name": "YouTubeNotificationsController.cs",
+      "community_name": "YoutubePubSubNotification",
       "norm_label": "ytnotificationtype"
     },
     {
@@ -1744,14 +1744,14 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_youtubenotificationscontroller_cs_datetime",
       "community": 30,
-      "community_name": "YouTubeNotificationsController.cs",
+      "community_name": "YoutubePubSubNotification",
       "norm_label": "datetime"
     },
     {
       "label": ".ToString()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L248",
+      "source_location": "L243",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -1761,14 +1761,14 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_youtubepubsubnotification_tostring",
       "community": 30,
-      "community_name": "YouTubeNotificationsController.cs",
+      "community_name": "YoutubePubSubNotification",
       "norm_label": ".tostring()"
     },
     {
       "label": "Ext",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L263",
+      "source_location": "L258",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -1778,14 +1778,14 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_ext",
       "community": 30,
-      "community_name": "YouTubeNotificationsController.cs",
+      "community_name": "YoutubePubSubNotification",
       "norm_label": "ext"
     },
     {
       "label": ".ConvertDateTime()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L265",
+      "source_location": "L260",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Controllers",
         "scope_chain": [
@@ -1795,7 +1795,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_ext_convertdatetime",
       "community": 30,
-      "community_name": "YouTubeNotificationsController.cs",
+      "community_name": "YoutubePubSubNotification",
       "norm_label": ".convertdatetime()"
     },
     {
@@ -1805,8 +1805,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_database_maindbcontext",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "maindbcontext.cs"
     },
     {
@@ -1822,7 +1822,7 @@
       "_origin": "ast",
       "id": "csharp_namespace:dfbdbbfc334fe0e2",
       "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community_name": "TwitchAuthorizationService.cs",
       "norm_label": "discordstreambotbackend.database"
     },
     {
@@ -1899,8 +1899,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_googleoauthunlinkintent",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "googleoauthunlinkintent.cs"
     },
     {
@@ -1915,8 +1915,8 @@
       },
       "_origin": "ast",
       "id": "csharp_namespace:abf5e8f69579fef9",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "discordstreambotbackend.database.table"
     },
     {
@@ -1932,8 +1932,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_googleoauthunlinkintent_discordstreambotbackend_database_table_googleoauthunlinkintent",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "googleoauthunlinkintent"
     },
     {
@@ -1943,8 +1943,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_googleoauthunlinkintent_cs_datetime",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "datetime"
     },
     {
@@ -1954,8 +1954,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_twitchbroadcasterauthorization",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "twitchbroadcasterauthorization.cs"
     },
     {
@@ -1993,8 +1993,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_youtubechannelspider",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "youtubechannelspider.cs"
     },
     {
@@ -2010,8 +2010,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_youtubechannelspider_discordstreambotbackend_database_table_youtubechannelspider",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "youtubechannelspider"
     },
     {
@@ -2021,8 +2021,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_youtubechannelspider_cs_datetime",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "datetime"
     },
     {
@@ -2032,8 +2032,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_youtubememberaccesstoken",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "youtubememberaccesstoken.cs"
     },
     {
@@ -2049,8 +2049,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_youtubememberaccesstoken_discordstreambotbackend_database_table_youtubememberaccesstoken",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "youtubememberaccesstoken"
     },
     {
@@ -2060,8 +2060,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_youtubememberaccesstoken_cs_datetime",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "datetime"
     },
     {
@@ -2071,8 +2071,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_youtubemembercheck",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "youtubemembercheck.cs"
     },
     {
@@ -2088,8 +2088,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_youtubemembercheck_discordstreambotbackend_database_table_youtubemembercheck",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "youtubemembercheck"
     },
     {
@@ -2099,8 +2099,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_database_table_youtubemembercheck_cs_datetime",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 38,
+      "community_name": "DiscordStreamBotBackend.DataBase.Table",
       "norm_label": "datetime"
     },
     {
@@ -2396,8 +2396,8 @@
       },
       "_origin": "ast",
       "id": "csharp_namespace:3a4857866bdc7f83",
-      "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community": 23,
+      "community_name": "DiscordStreamBotBackend.Services",
       "norm_label": "discordstreambotbackend.model"
     },
     {
@@ -2497,8 +2497,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_model_adminsettingsmodels",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 44,
+      "community_name": "AdminSettingsModels.cs",
       "norm_label": "adminsettingsmodels.cs"
     },
     {
@@ -2514,8 +2514,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_adminsettingsmodels_discordstreambotbackend_model_adminguild",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": "adminguild"
     },
     {
@@ -2531,8 +2531,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_adminsettingsmodels_discordstreambotbackend_model_adminsettingscommandrequest",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 44,
+      "community_name": "AdminSettingsModels.cs",
       "norm_label": "adminsettingscommandrequest"
     },
     {
@@ -2542,8 +2542,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_model_adminsettingsmodels_cs_jobject",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 44,
+      "community_name": "AdminSettingsModels.cs",
       "norm_label": "jobject"
     },
     {
@@ -2559,8 +2559,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_adminsettingsmodels_discordstreambotbackend_model_adminsettingsrequestenvelope",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
       "norm_label": "adminsettingsrequestenvelope"
     },
     {
@@ -2576,8 +2576,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_adminsettingsmodels_discordstreambotbackend_model_adminsettingscommandreply",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 44,
+      "community_name": "AdminSettingsModels.cs",
       "norm_label": "adminsettingscommandreply"
     },
     {
@@ -2593,8 +2593,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_adminsettingsmodels_discordstreambotbackend_model_adminsettingssnapshotreply",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 44,
+      "community_name": "AdminSettingsModels.cs",
       "norm_label": "adminsettingssnapshotreply"
     },
     {
@@ -2604,8 +2604,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_model_adminsettingsmodels_cs_list",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 44,
+      "community_name": "AdminSettingsModels.cs",
       "norm_label": "list"
     },
     {
@@ -2621,8 +2621,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_adminsettingsmodels_discordstreambotbackend_model_botguildsnapshot",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 44,
+      "community_name": "AdminSettingsModels.cs",
       "norm_label": "botguildsnapshot"
     },
     {
@@ -2638,8 +2638,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_adminsettingsmodels_discordstreambotbackend_model_botguildsnapshotenvelope",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 44,
+      "community_name": "AdminSettingsModels.cs",
       "norm_label": "botguildsnapshotenvelope"
     },
     {
@@ -2665,8 +2665,8 @@
       },
       "_origin": "ast",
       "id": "csharp_namespace:a10ef580bbffc56a",
-      "community": 18,
-      "community_name": "BililiveRecorderWebHookController",
+      "community": 8,
+      "community_name": "BiliBiliGetLiveUserInfoJson.cs",
       "norm_label": "discordstreambotbackend.model.bilibili"
     },
     {
@@ -2806,8 +2806,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_model_bilibili_bilibiligetroominfojson",
-      "community": 32,
-      "community_name": "BiliBiliGetRoomInfoJson.cs",
+      "community": 8,
+      "community_name": "BiliBiliGetLiveUserInfoJson.cs",
       "norm_label": "bilibiligetroominfojson.cs"
     },
     {
@@ -2823,8 +2823,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_bilibili_bilibiligetroominfojson_discordstreambotbackend_model_bilibili_badge",
-      "community": 32,
-      "community_name": "BiliBiliGetRoomInfoJson.cs",
+      "community": 8,
+      "community_name": "BiliBiliGetLiveUserInfoJson.cs",
       "norm_label": "badge"
     },
     {
@@ -2840,8 +2840,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_bilibili_bilibiligetroominfojson_discordstreambotbackend_model_bilibili_getroominfo",
-      "community": 32,
-      "community_name": "BiliBiliGetRoomInfoJson.cs",
+      "community": 8,
+      "community_name": "BiliBiliGetLiveUserInfoJson.cs",
       "norm_label": "getroominfo"
     },
     {
@@ -2851,8 +2851,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_model_bilibili_bilibiligetroominfojson_cs_list",
-      "community": 32,
-      "community_name": "BiliBiliGetRoomInfoJson.cs",
+      "community": 8,
+      "community_name": "BiliBiliGetLiveUserInfoJson.cs",
       "norm_label": "list"
     },
     {
@@ -2868,8 +2868,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_bilibili_bilibiligetroominfojson_discordstreambotbackend_model_bilibili_frame",
-      "community": 32,
-      "community_name": "BiliBiliGetRoomInfoJson.cs",
+      "community": 8,
+      "community_name": "BiliBiliGetLiveUserInfoJson.cs",
       "norm_label": "frame"
     },
     {
@@ -2885,8 +2885,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_bilibili_bilibiligetroominfojson_discordstreambotbackend_model_bilibili_mobileframe",
-      "community": 32,
-      "community_name": "BiliBiliGetRoomInfoJson.cs",
+      "community": 8,
+      "community_name": "BiliBiliGetLiveUserInfoJson.cs",
       "norm_label": "mobileframe"
     },
     {
@@ -2902,8 +2902,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_bilibili_bilibiligetroominfojson_discordstreambotbackend_model_bilibili_newpendants",
-      "community": 32,
-      "community_name": "BiliBiliGetRoomInfoJson.cs",
+      "community": 8,
+      "community_name": "BiliBiliGetLiveUserInfoJson.cs",
       "norm_label": "newpendants"
     },
     {
@@ -2919,8 +2919,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_bilibili_bilibiligetroominfojson_discordstreambotbackend_model_bilibili_bilibiligetroominfojson",
-      "community": 32,
-      "community_name": "BiliBiliGetRoomInfoJson.cs",
+      "community": 8,
+      "community_name": "BiliBiliGetLiveUserInfoJson.cs",
       "norm_label": "bilibiligetroominfojson"
     },
     {
@@ -2936,8 +2936,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_bilibili_bilibiligetroominfojson_discordstreambotbackend_model_bilibili_studioinfo",
-      "community": 32,
-      "community_name": "BiliBiliGetRoomInfoJson.cs",
+      "community": 8,
+      "community_name": "BiliBiliGetLiveUserInfoJson.cs",
       "norm_label": "studioinfo"
     },
     {
@@ -3003,8 +3003,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_model_discordaccesstokendata",
-      "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community": 23,
+      "community_name": "DiscordStreamBotBackend.Services",
       "norm_label": "discordaccesstokendata.cs"
     },
     {
@@ -3020,8 +3020,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_discordaccesstokendata_discordstreambotbackend_model_discordaccesstokendata",
-      "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community": 23,
+      "community_name": "DiscordStreamBotBackend.Services",
       "norm_label": "discordaccesstokendata"
     },
     {
@@ -3032,7 +3032,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_model_discordjson",
       "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "discordjson.cs"
     },
     {
@@ -3049,7 +3049,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_model_discordjson_discordstreambotbackend_discorduser",
       "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "discorduser"
     },
     {
@@ -3059,8 +3059,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_model_discordoauthcallbackrequest",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": "discordoauthcallbackrequest.cs"
     },
     {
@@ -3076,8 +3076,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_discordoauthcallbackrequest_discordstreambotbackend_model_discordoauthcallbackrequest",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 3,
+      "community_name": "GoogleOAuthController",
       "norm_label": "discordoauthcallbackrequest"
     },
     {
@@ -3087,8 +3087,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_model_discordsessionpayload",
-      "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community": 41,
+      "community_name": "BearerTokenService",
       "norm_label": "discordsessionpayload.cs"
     },
     {
@@ -3104,7 +3104,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_model_discordsessionpayload_discordstreambotbackend_model_discordsessionpayload",
-      "community": 25,
+      "community": 41,
       "community_name": "BearerTokenService",
       "norm_label": "discordsessionpayload"
     },
@@ -3115,7 +3115,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_model_discordsessionpayload_cs_datetime",
-      "community": 25,
+      "community": 41,
       "community_name": "BearerTokenService",
       "norm_label": "datetime"
     },
@@ -3296,7 +3296,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_model_oauthstatedata",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "oauthstatedata.cs"
     },
     {
@@ -3313,7 +3313,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_model_oauthstatedata_discordstreambotbackend_model_oauthstatedata",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "oauthstatedata"
     },
     {
@@ -3417,8 +3417,8 @@
       },
       "_origin": "ast",
       "id": "csharp_namespace:d8661997eb4d05c5",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 21,
+      "community_name": "TwitchAuthorizationService.cs",
       "norm_label": "discordstreambotbackend.model.twitch"
     },
     {
@@ -3513,8 +3513,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_mysqldatastore",
-      "community": 7,
-      "community_name": "MySqlDataStore",
+      "community": 28,
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "mysqldatastore.cs"
     },
     {
@@ -3530,8 +3530,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_mysqldatastore_discordstreambotbackend_providertokenloadstatus",
-      "community": 7,
-      "community_name": "MySqlDataStore",
+      "community": 28,
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "providertokenloadstatus"
     },
     {
@@ -3564,8 +3564,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_mysqldatastore_discordstreambotbackend_providertokenunreadableexception",
-      "community": 7,
-      "community_name": "MySqlDataStore",
+      "community": 28,
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "providertokenunreadableexception"
     },
     {
@@ -3575,8 +3575,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "exception",
-      "community": 7,
-      "community_name": "MySqlDataStore",
+      "community": 28,
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "exception"
     },
     {
@@ -3811,8 +3811,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_program",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 45,
+      "community_name": "Program",
       "norm_label": "program.cs"
     },
     {
@@ -3828,8 +3828,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_program_discordstreambotbackend_program",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 45,
+      "community_name": "Program",
       "norm_label": "program"
     },
     {
@@ -3845,8 +3845,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_program_discordstreambotbackend_program_main",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 45,
+      "community_name": "Program",
       "norm_label": ".main()"
     },
     {
@@ -3862,8 +3862,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_program_discordstreambotbackend_program_createhostbuilder",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 45,
+      "community_name": "Program",
       "norm_label": ".createhostbuilder()"
     },
     {
@@ -3873,8 +3873,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "ihostbuilder",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 45,
+      "community_name": "Program",
       "norm_label": "ihostbuilder"
     },
     {
@@ -3890,8 +3890,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_program_discordstreambotbackend_program_getlinkertime",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 45,
+      "community_name": "Program",
       "norm_label": ".getlinkertime()"
     },
     {
@@ -3901,8 +3901,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "assembly",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 45,
+      "community_name": "Program",
       "norm_label": "assembly"
     },
     {
@@ -3912,8 +3912,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_redischannels",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 42,
+      "community_name": "RedisChannels",
       "norm_label": "redischannels.cs"
     },
     {
@@ -3929,8 +3929,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_redischannels_discordstreambotbackend_redischannels",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 42,
+      "community_name": "RedisChannels",
       "norm_label": "redischannels"
     },
     {
@@ -3947,8 +3947,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_redischannels_discordstreambotbackend_member",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 42,
+      "community_name": "RedisChannels",
       "norm_label": "member"
     },
     {
@@ -3958,8 +3958,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_redischannels_cs_string",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 42,
+      "community_name": "RedisChannels",
       "norm_label": "string"
     },
     {
@@ -3976,8 +3976,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_redischannels_discordstreambotbackend_twitch",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 42,
+      "community_name": "RedisChannels",
       "norm_label": "twitch"
     },
     {
@@ -3994,8 +3994,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_redischannels_discordstreambotbackend_oauth",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 42,
+      "community_name": "RedisChannels",
       "norm_label": "oauth"
     },
     {
@@ -4011,8 +4011,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_redischannels_discordstreambotbackend_oauth_googleoperationlock",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 42,
+      "community_name": "RedisChannels",
       "norm_label": ".googleoperationlock()"
     },
     {
@@ -4029,8 +4029,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_redischannels_discordstreambotbackend_adminsettings",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 42,
+      "community_name": "RedisChannels",
       "norm_label": "adminsettings"
     },
     {
@@ -4046,8 +4046,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_redischannels_discordstreambotbackend_adminsettings_reply",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 42,
+      "community_name": "RedisChannels",
       "norm_label": ".reply()"
     },
     {
@@ -4123,8 +4123,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_adminsettingsredisservice",
-      "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community": 23,
+      "community_name": "DiscordStreamBotBackend.Services",
       "norm_label": "adminsettingsredisservice.cs"
     },
     {
@@ -4156,20 +4156,9 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
       "norm_label": "adminsettingsredisservice"
-    },
-    {
-      "label": "TimeSpan",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "id": "discordstreambotbackend_services_adminsettingsredisservice_cs_timespan",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
-      "norm_label": "timespan"
     },
     {
       "label": "ILogger",
@@ -4178,15 +4167,15 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_adminsettingsredisservice_cs_ilogger",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
       "norm_label": "ilogger"
     },
     {
       "label": ".GetInstalledGuildIdsAsync()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L33",
+      "source_location": "L30",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Services",
         "scope_chain": [
@@ -4195,8 +4184,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_getinstalledguildidsasync",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
       "norm_label": ".getinstalledguildidsasync()"
     },
     {
@@ -4206,8 +4195,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_adminsettingsredisservice_cs_cancellationtoken",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
       "norm_label": "cancellationtoken"
     },
     {
@@ -4217,8 +4206,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_adminsettingsredisservice_cs_task",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
       "norm_label": "task"
     },
     {
@@ -4228,12 +4217,29 @@
       "source_location": "",
       "_origin": "ast",
       "id": "hashset",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
       "norm_label": "hashset"
     },
     {
       "label": ".RequestSnapshotAsync()",
+      "file_type": "code",
+      "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
+      "source_location": "L64",
+      "metadata": {
+        "namespace": "DiscordStreamBotBackend.Services",
+        "scope_chain": [
+          "s273"
+        ]
+      },
+      "_origin": "ast",
+      "id": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_requestsnapshotasync",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
+      "norm_label": ".requestsnapshotasync()"
+    },
+    {
+      "label": ".SendCommandAsync()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
       "source_location": "L67",
@@ -4244,13 +4250,13 @@
         ]
       },
       "_origin": "ast",
-      "id": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_requestsnapshotasync",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
-      "norm_label": ".requestsnapshotasync()"
+      "id": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_sendcommandasync",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
+      "norm_label": ".sendcommandasync()"
     },
     {
-      "label": ".SendCommandAsync()",
+      "label": ".ParseGuildSnapshot()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
       "source_location": "L70",
@@ -4261,26 +4267,9 @@
         ]
       },
       "_origin": "ast",
-      "id": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_sendcommandasync",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
-      "norm_label": ".sendcommandasync()"
-    },
-    {
-      "label": ".ParseGuildSnapshot()",
-      "file_type": "code",
-      "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L73",
-      "metadata": {
-        "namespace": "DiscordStreamBotBackend.Services",
-        "scope_chain": [
-          "s273"
-        ]
-      },
-      "_origin": "ast",
       "id": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_parseguildsnapshot",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
       "norm_label": ".parseguildsnapshot()"
     },
     {
@@ -4290,15 +4279,15 @@
       "source_location": "",
       "_origin": "ast",
       "id": "ireadonlycollection",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
       "norm_label": "ireadonlycollection"
     },
     {
       "label": ".PublishAndWaitAsync()",
       "file_type": "code",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L87",
+      "source_location": "L84",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Services",
         "scope_chain": [
@@ -4307,8 +4296,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_publishandwaitasync",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
       "norm_label": ".publishandwaitasync()"
     },
     {
@@ -4319,7 +4308,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_auth_rng",
       "community": 29,
-      "community_name": ".RandomVideo",
+      "community_name": "RandomVideoController",
       "norm_label": "rng.cs"
     },
     {
@@ -4335,7 +4324,7 @@
       "_origin": "ast",
       "id": "csharp_namespace:ab84e53008fdeef0",
       "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community_name": "TwitchAuthorizationService.cs",
       "norm_label": "discordstreambotbackend.services.auth"
     },
     {
@@ -4352,7 +4341,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_auth_rng_discordstreambotbackend_services_auth_rng",
       "community": 29,
-      "community_name": ".RandomVideo",
+      "community_name": "RandomVideoController",
       "norm_label": "rng"
     },
     {
@@ -4363,7 +4352,7 @@
       "_origin": "ast",
       "id": "randomnumbergenerator",
       "community": 29,
-      "community_name": ".RandomVideo",
+      "community_name": "RandomVideoController",
       "norm_label": "randomnumbergenerator"
     },
     {
@@ -4374,7 +4363,7 @@
       "_origin": "ast",
       "id": "byte",
       "community": 29,
-      "community_name": ".RandomVideo",
+      "community_name": "RandomVideoController",
       "norm_label": "byte"
     },
     {
@@ -4391,7 +4380,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_auth_rng_discordstreambotbackend_services_auth_rng_next",
       "community": 29,
-      "community_name": ".RandomVideo",
+      "community_name": "RandomVideoController",
       "norm_label": ".next()"
     },
     {
@@ -4526,7 +4515,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_auth_tokenservice_discordstreambotbackend_services_auth_tokenservice_createtoken",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": ".createtoken()"
     },
     {
@@ -4588,7 +4577,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_bearertokenservice",
       "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community_name": "TwitchAuthorizationService.cs",
       "norm_label": "bearertokenservice.cs"
     },
     {
@@ -4604,7 +4593,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_bearertokenservice_discordstreambotbackend_services_bearertokenservice",
-      "community": 25,
+      "community": 41,
       "community_name": "BearerTokenService",
       "norm_label": "bearertokenservice"
     },
@@ -4615,7 +4604,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_bearertokenservice_cs_string",
-      "community": 25,
+      "community": 41,
       "community_name": "BearerTokenService",
       "norm_label": "string"
     },
@@ -4626,7 +4615,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_bearertokenservice_cs_int",
-      "community": 25,
+      "community": 41,
       "community_name": "BearerTokenService",
       "norm_label": "int"
     },
@@ -4637,7 +4626,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_bearertokenservice_cs_timespan",
-      "community": 25,
+      "community": 41,
       "community_name": "BearerTokenService",
       "norm_label": "timespan"
     },
@@ -4655,7 +4644,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_bearertokenservice_discordstreambotbackend_services_bearertokenservice_creatediscordsessiontoken",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": ".creatediscordsessiontoken()"
     },
     {
@@ -4671,7 +4660,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_bearertokenservice_discordstreambotbackend_services_bearertokenservice_trygetdiscorduserid",
-      "community": 25,
+      "community": 41,
       "community_name": "BearerTokenService",
       "norm_label": ".trygetdiscorduserid()"
     },
@@ -4688,7 +4677,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_bearertokenservice_discordstreambotbackend_services_bearertokenservice_trygetdiscorduseridfromtoken",
-      "community": 25,
+      "community": 41,
       "community_name": "BearerTokenService",
       "norm_label": ".trygetdiscorduseridfromtoken()"
     },
@@ -4706,7 +4695,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_bearertokenservice_discordstreambotbackend_services_bearertokenservice_trygetdiscordsession",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": ".trygetdiscordsession()"
     },
     {
@@ -4722,7 +4711,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_bearertokenservice_discordstreambotbackend_services_bearertokenservice_trygetdiscordsessionpayload",
-      "community": 25,
+      "community": 41,
       "community_name": "BearerTokenService",
       "norm_label": ".trygetdiscordsessionpayload()"
     },
@@ -4733,8 +4722,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_discordguildauthorizationservice",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 23,
+      "community_name": "DiscordStreamBotBackend.Services",
       "norm_label": "discordguildauthorizationservice.cs"
     },
     {
@@ -4750,8 +4739,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_discordguildauthorizationservice_discordstreambotbackend_services_discordguildauthorizationservice",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": "discordguildauthorizationservice"
     },
     {
@@ -4761,8 +4750,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_discordguildauthorizationservice_cs_ulong",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": "ulong"
     },
     {
@@ -4772,8 +4761,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_discordguildauthorizationservice_cs_httpclient",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": "httpclient"
     },
     {
@@ -4783,8 +4772,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "imemorycache",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": "imemorycache"
     },
     {
@@ -4800,8 +4789,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_discordguildauthorizationservice_discordstreambotbackend_services_discordguildauthorizationservice_getmanageableguildsasync",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": ".getmanageableguildsasync()"
     },
     {
@@ -4811,8 +4800,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_discordguildauthorizationservice_cs_datetime",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": "datetime"
     },
     {
@@ -4822,8 +4811,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_discordguildauthorizationservice_cs_cancellationtoken",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": "cancellationtoken"
     },
     {
@@ -4833,8 +4822,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_discordguildauthorizationservice_cs_task",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": "task"
     },
     {
@@ -4844,8 +4833,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_discordguildauthorizationservice_cs_list",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": "list"
     },
     {
@@ -4861,8 +4850,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_discordguildauthorizationservice_discordstreambotbackend_services_discordguildauthorizationservice_clone",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": ".clone()"
     },
     {
@@ -4872,8 +4861,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_discordguildauthorizationservice_cs_ienumerable",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": "ienumerable"
     },
     {
@@ -4889,8 +4878,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_discordguildauthorizationservice_discordstreambotbackend_services_discordguildauthorizationservice_canmanage",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": ".canmanage()"
     },
     {
@@ -4901,7 +4890,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_eventsubhostedservice",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": "eventsubhostedservice.cs"
     },
     {
@@ -4918,7 +4907,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_eventsubhostedservice_discordstreambotbackend_services_eventsubhostedservice",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": "eventsubhostedservice"
     },
     {
@@ -4928,7 +4917,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "ihostedservice",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": "ihostedservice"
     },
@@ -4940,7 +4929,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_eventsubhostedservice_cs_ilogger",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": "ilogger"
     },
     {
@@ -4951,7 +4940,7 @@
       "_origin": "ast",
       "id": "ieventsubwebhooks",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": "ieventsubwebhooks"
     },
     {
@@ -4968,7 +4957,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_eventsubhostedservice_discordstreambotbackend_services_eventsubhostedservice_startasync",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": ".startasync()"
     },
     {
@@ -4979,7 +4968,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_eventsubhostedservice_cs_cancellationtoken",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": "cancellationtoken"
     },
     {
@@ -4990,7 +4979,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_eventsubhostedservice_cs_task",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": "task"
     },
     {
@@ -5007,7 +4996,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_eventsubhostedservice_discordstreambotbackend_services_eventsubhostedservice_stopasync",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": ".stopasync()"
     },
     {
@@ -5024,7 +5013,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_eventsubhostedservice_discordstreambotbackend_services_eventsubhostedservice_onerror",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": ".onerror()"
     },
     {
@@ -5035,7 +5024,7 @@
       "_origin": "ast",
       "id": "onerrorargs",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": "onerrorargs"
     },
     {
@@ -5052,7 +5041,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_eventsubhostedservice_discordstreambotbackend_services_eventsubhostedservice_onstreamonline",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": ".onstreamonline()"
     },
     {
@@ -5063,7 +5052,7 @@
       "_origin": "ast",
       "id": "streamonlineargs",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": "streamonlineargs"
     },
     {
@@ -5080,7 +5069,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_eventsubhostedservice_discordstreambotbackend_services_eventsubhostedservice_eventsubwebhooks_onstreamoffline",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": "._eventsubwebhooks_onstreamoffline()"
     },
     {
@@ -5091,7 +5080,7 @@
       "_origin": "ast",
       "id": "streamofflineargs",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": "streamofflineargs"
     },
     {
@@ -5108,7 +5097,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_eventsubhostedservice_discordstreambotbackend_services_eventsubhostedservice_eventsubwebhooks_onchannelupdate",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": "._eventsubwebhooks_onchannelupdate()"
     },
     {
@@ -5119,7 +5108,7 @@
       "_origin": "ast",
       "id": "channelupdateargs",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": "channelupdateargs"
     },
     {
@@ -5136,7 +5125,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_eventsubhostedservice_discordstreambotbackend_services_eventsubhostedservice_publishasync",
       "community": 12,
-      "community_name": "StartupValidationHostedService",
+      "community_name": "EventSubHostedService",
       "norm_label": ".publishasync()"
     },
     {
@@ -6409,7 +6398,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_googleoauthservice",
       "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community_name": "TwitchAuthorizationService.cs",
       "norm_label": "googleoauthservice.cs"
     },
     {
@@ -6509,7 +6498,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_googleoauthservice_discordstreambotbackend_services_googleoauthservice_getauthorizationurl",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".getauthorizationurl()"
     },
     {
@@ -6795,8 +6784,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_oauthstateservice",
-      "community": 3,
-      "community_name": "AccountLinksController",
+      "community": 23,
+      "community_name": "DiscordStreamBotBackend.Services",
       "norm_label": "oauthstateservice.cs"
     },
     {
@@ -6813,7 +6802,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_oauthstateservice_discordstreambotbackend_services_oauthstateservice",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "oauthstateservice"
     },
     {
@@ -6824,7 +6813,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_oauthstateservice_cs_timespan",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "timespan"
     },
     {
@@ -6835,7 +6824,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_oauthstateservice_cs_string",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "string"
     },
     {
@@ -6852,7 +6841,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_oauthstateservice_discordstreambotbackend_services_oauthstateservice_createasync",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".createasync()"
     },
     {
@@ -6863,7 +6852,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_oauthstateservice_cs_task",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "task"
     },
     {
@@ -6880,7 +6869,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_oauthstateservice_discordstreambotbackend_services_oauthstateservice_consumeasync",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".consumeasync()"
     },
     {
@@ -6897,7 +6886,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_oauthstateservice_discordstreambotbackend_services_oauthstateservice_getkey",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".getkey()"
     },
     {
@@ -6908,7 +6897,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_publicurlservice",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "publicurlservice.cs"
     },
     {
@@ -6925,7 +6914,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_publicurlservice_discordstreambotbackend_services_publicurlservice",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": "publicurlservice"
     },
     {
@@ -6942,7 +6931,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_publicurlservice_discordstreambotbackend_services_publicurlservice_getfrontendreturnurl",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".getfrontendreturnurl()"
     },
     {
@@ -6959,7 +6948,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_publicurlservice_discordstreambotbackend_services_publicurlservice_validatedomain",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".validatedomain()"
     },
     {
@@ -7170,7 +7159,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_redisservice_discordstreambotbackend_services_redisservice_addpubmessage",
       "community": 31,
-      "community_name": "TwitCastingWebHookController",
+      "community_name": ".AddPubMessageAsync",
       "norm_label": ".addpubmessage()"
     },
     {
@@ -7187,7 +7176,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_redisservice_discordstreambotbackend_services_redisservice_addpubmessageasync",
       "community": 31,
-      "community_name": "TwitCastingWebHookController",
+      "community_name": ".AddPubMessageAsync",
       "norm_label": ".addpubmessageasync()"
     },
     {
@@ -7209,7 +7198,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_redisservice_cs_valuetask",
       "community": 31,
-      "community_name": "TwitCastingWebHookController",
+      "community_name": ".AddPubMessageAsync",
       "norm_label": "valuetask"
     },
     {
@@ -7226,7 +7215,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_redisservice_discordstreambotbackend_services_redisservice_addyoutubepubmessage",
       "community": 30,
-      "community_name": "YouTubeNotificationsController.cs",
+      "community_name": "YoutubePubSubNotification",
       "norm_label": ".addyoutubepubmessage()"
     },
     {
@@ -7243,7 +7232,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_redisservice_discordstreambotbackend_services_redisservice_getredischannelname",
       "community": 30,
-      "community_name": "YouTubeNotificationsController.cs",
+      "community_name": "YoutubePubSubNotification",
       "norm_label": ".getredischannelname()"
     },
     {
@@ -7254,7 +7243,7 @@
       "_origin": "ast",
       "id": "ytnotificationtype",
       "community": 30,
-      "community_name": "YouTubeNotificationsController.cs",
+      "community_name": "YoutubePubSubNotification",
       "norm_label": "ytnotificationtype"
     },
     {
@@ -7377,7 +7366,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": "startupvalidationhostedservice.cs"
     },
@@ -7394,7 +7383,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_discordstreambotbackend_services_startupvalidationhostedservice",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": "startupvalidationhostedservice"
     },
@@ -7405,7 +7394,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_cs_iconfiguration",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": "iconfiguration"
     },
@@ -7422,7 +7411,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_discordstreambotbackend_services_startupvalidationhostedservice_startasync",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": ".startasync()"
     },
@@ -7433,7 +7422,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_cs_cancellationtoken",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": "cancellationtoken"
     },
@@ -7444,7 +7433,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_cs_task",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": "task"
     },
@@ -7461,7 +7450,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_discordstreambotbackend_services_startupvalidationhostedservice_stopasync",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": ".stopasync()"
     },
@@ -7478,7 +7467,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_discordstreambotbackend_services_startupvalidationhostedservice_validateconfiguration",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": ".validateconfiguration()"
     },
@@ -7495,7 +7484,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_discordstreambotbackend_services_startupvalidationhostedservice_fixedtimeequals",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": ".fixedtimeequals()"
     },
@@ -7512,7 +7501,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_discordstreambotbackend_services_startupvalidationhostedservice_validateminimumlength",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": ".validateminimumlength()"
     },
@@ -7529,7 +7518,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_discordstreambotbackend_services_startupvalidationhostedservice_validaterequired",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": ".validaterequired()"
     },
@@ -7546,7 +7535,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_discordstreambotbackend_services_startupvalidationhostedservice_validateconnectionstring",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": ".validateconnectionstring()"
     },
@@ -7563,7 +7552,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_discordstreambotbackend_services_startupvalidationhostedservice_ismissingorplaceholder",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": ".ismissingorplaceholder()"
     },
@@ -7580,7 +7569,7 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_startupvalidationhostedservice_discordstreambotbackend_services_startupvalidationhostedservice_isplaceholder",
-      "community": 12,
+      "community": 32,
       "community_name": "StartupValidationHostedService",
       "norm_label": ".isplaceholder()"
     },
@@ -7591,8 +7580,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_services_twitchauthorizationservice",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 21,
+      "community_name": "TwitchAuthorizationService.cs",
       "norm_label": "twitchauthorizationservice.cs"
     },
     {
@@ -7608,8 +7597,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_twitchauthorizationservice_discordstreambotbackend_services_twitchunlinkresult",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 21,
+      "community_name": "TwitchAuthorizationService.cs",
       "norm_label": "twitchunlinkresult"
     },
     {
@@ -7731,7 +7720,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_services_twitchauthorizationservice_discordstreambotbackend_services_twitchauthorizationservice_getauthorizationurl",
       "community": 3,
-      "community_name": "AccountLinksController",
+      "community_name": "GoogleOAuthController",
       "norm_label": ".getauthorizationurl()"
     },
     {
@@ -8522,8 +8511,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_twitchauthorizationservice_discordstreambotbackend_services_twitchauthorizationchangedpayload",
-      "community": 0,
-      "community_name": "TwitchAuthorizationService",
+      "community": 21,
+      "community_name": "TwitchAuthorizationService.cs",
       "norm_label": "twitchauthorizationchangedpayload"
     },
     {
@@ -8916,8 +8905,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_services_twitchoauthrefreshlock_discordstreambotbackend_services_twitchoauthrefreshlock_getkey",
-      "community": 11,
-      "community_name": "TwitchOAuthRefreshLockLease",
+      "community": 4,
+      "community_name": "TwitchRefreshRotationLifecycle",
       "norm_label": ".getkey()"
     },
     {
@@ -9551,7 +9540,7 @@
       "_origin": "ast",
       "id": "discordstreambotbackend_startup",
       "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community_name": "MySqlDataStore.cs",
       "norm_label": "startup.cs"
     },
     {
@@ -9567,8 +9556,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_startup_discordstreambotbackend_startup",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 32,
+      "community_name": "StartupValidationHostedService",
       "norm_label": "startup"
     },
     {
@@ -9578,8 +9567,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_startup_cs_iconfiguration",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 32,
+      "community_name": "StartupValidationHostedService",
       "norm_label": "iconfiguration"
     },
     {
@@ -9595,8 +9584,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_startup_discordstreambotbackend_startup_configureservices",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 32,
+      "community_name": "StartupValidationHostedService",
       "norm_label": ".configureservices()"
     },
     {
@@ -9606,8 +9595,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "iservicecollection",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 32,
+      "community_name": "StartupValidationHostedService",
       "norm_label": "iservicecollection"
     },
     {
@@ -9623,8 +9612,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_startup_discordstreambotbackend_startup_configure",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 32,
+      "community_name": "StartupValidationHostedService",
       "norm_label": ".configure()"
     },
     {
@@ -9634,8 +9623,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "iapplicationbuilder",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 32,
+      "community_name": "StartupValidationHostedService",
       "norm_label": "iapplicationbuilder"
     },
     {
@@ -9645,8 +9634,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "iwebhostenvironment",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 32,
+      "community_name": "StartupValidationHostedService",
       "norm_label": "iwebhostenvironment"
     },
     {
@@ -9656,8 +9645,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discordstreambotbackend_utility",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 43,
+      "community_name": "Utility",
       "norm_label": "utility.cs"
     },
     {
@@ -9673,8 +9662,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_utility_discordstreambotbackend_utility",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 43,
+      "community_name": "Utility",
       "norm_label": "utility"
     },
     {
@@ -9684,8 +9673,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_utility_cs_string",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 43,
+      "community_name": "Utility",
       "norm_label": "string"
     },
     {
@@ -9701,8 +9690,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_utility_discordstreambotbackend_utility_urlencode",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 43,
+      "community_name": "Utility",
       "norm_label": ".urlencode()"
     },
     {
@@ -9718,8 +9707,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_utility_discordstreambotbackend_utility_getremoteipaddress",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 43,
+      "community_name": "Utility",
       "norm_label": ".getremoteipaddress()"
     },
     {
@@ -9729,8 +9718,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_utility_cs_httpcontext",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 43,
+      "community_name": "Utility",
       "norm_label": "httpcontext"
     },
     {
@@ -9740,8 +9729,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "ipaddress",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 43,
+      "community_name": "Utility",
       "norm_label": "ipaddress"
     },
     {
@@ -9757,8 +9746,8 @@
       },
       "_origin": "ast",
       "id": "discordstreambotbackend_utility_discordstreambotbackend_memberdata",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 43,
+      "community_name": "Utility",
       "norm_label": "memberdata"
     },
     {
@@ -9768,8 +9757,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "discordstreambotbackend_utility_cs_datetime",
-      "community": 28,
-      "community_name": "DiscordStreamBotBackend",
+      "community": 43,
+      "community_name": "Utility",
       "norm_label": "datetime"
     },
     {
@@ -9779,8 +9768,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests",
-      "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community": 23,
+      "community_name": "DiscordStreamBotBackend.Services",
       "norm_label": "adminsettingscontracttests.cs"
     },
     {
@@ -9796,7 +9785,7 @@
       "_origin": "ast",
       "id": "csharp_namespace:9207427078c86ee7",
       "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community_name": "TwitchAuthorizationService.cs",
       "norm_label": "discordstreambotbackend.tests"
     },
     {
@@ -9813,7 +9802,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": "adminsettingscontracttests"
     },
     {
@@ -9824,7 +9813,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_cs_ulong",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": "ulong"
     },
     {
@@ -9841,7 +9830,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_discordsessionkeepsaccesstokenandusesproviderexpirywhenearlier",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": ".discordsessionkeepsaccesstokenandusesproviderexpirywhenearlier()"
     },
     {
@@ -9852,7 +9841,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_cs_fact",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": "fact"
     },
     {
@@ -9869,7 +9858,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_discordsessionlifetimeiscappedattwelvehours",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": ".discordsessionlifetimeiscappedattwelvehours()"
     },
     {
@@ -9886,7 +9875,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_legacysessionstillsupportsexistingaccountlinkidentityonlyauth",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": ".legacysessionstillsupportsexistingaccountlinkidentityonlyauth()"
     },
     {
@@ -9902,8 +9891,8 @@
       },
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_onlyowneroradministratorcanmanage",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": ".onlyowneroradministratorcanmanage()"
     },
     {
@@ -9913,8 +9902,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_cs_theory",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": "theory"
     },
     {
@@ -9924,8 +9913,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_cs_inlinedata",
-      "community": 2,
-      "community_name": ".GetAuthorizationAsync",
+      "community": 36,
+      "community_name": ".GetManageableGuildsAsync",
       "norm_label": "inlinedata"
     },
     {
@@ -9942,7 +9931,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_guildlistcacheisperuserandreturnsindependentresults",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": ".guildlistcacheisperuserandreturnsindependentresults()"
     },
     {
@@ -9953,7 +9942,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_cs_task",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": "task"
     },
     {
@@ -9970,7 +9959,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_adminenvelopeusescamelcaseandsnowflakestrings",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": ".adminenvelopeusescamelcaseandsnowflakestrings()"
     },
     {
@@ -9987,7 +9976,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_redischannelsmatchadminsettingscontract",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": ".redischannelsmatchadminsettingscontract()"
     },
     {
@@ -10004,11 +9993,11 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_expandedsnapshotpassescrawlerandverificationdatathrough",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": ".expandedsnapshotpassescrawlerandverificationdatathrough()"
     },
     {
-      "label": ".AdminSettingsReplyUsesClusterRequestReplyBudget()",
+      "label": ".MissingAdminSettingsRepliesAreRejected()",
       "file_type": "code",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
       "source_location": "L151",
@@ -10019,33 +10008,16 @@
         ]
       },
       "_origin": "ast",
-      "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_adminsettingsreplyusesclusterrequestreplybudget",
-      "community": 25,
-      "community_name": "BearerTokenService",
-      "norm_label": ".adminsettingsreplyusesclusterrequestreplybudget()"
-    },
-    {
-      "label": ".MissingAdminSettingsRepliesAreRejected()",
-      "file_type": "code",
-      "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L157",
-      "metadata": {
-        "namespace": "DiscordStreamBotBackend.Tests",
-        "scope_chain": [
-          "s320"
-        ]
-      },
-      "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_missingadminsettingsrepliesarerejected",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 2,
+      "community_name": ".GetAuthorizationAsync",
       "norm_label": ".missingadminsettingsrepliesarerejected()"
     },
     {
       "label": ".RedisGuildSnapshotParserAcceptsLegacyArrayAndEnvelope()",
       "file_type": "code",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L164",
+      "source_location": "L158",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Tests",
         "scope_chain": [
@@ -10054,15 +10026,15 @@
       },
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_redisguildsnapshotparseracceptslegacyarrayandenvelope",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 39,
+      "community_name": "AdminSettingsRedisService",
       "norm_label": ".redisguildsnapshotparseracceptslegacyarrayandenvelope()"
     },
     {
       "label": ".CreateConfiguration()",
       "file_type": "code",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L176",
+      "source_location": "L170",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Tests",
         "scope_chain": [
@@ -10072,7 +10044,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_createconfiguration",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": ".createconfiguration()"
     },
     {
@@ -10083,14 +10055,14 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_cs_iconfiguration",
       "community": 25,
-      "community_name": "BearerTokenService",
+      "community_name": "AdminSettingsContractTests",
       "norm_label": "iconfiguration"
     },
     {
       "label": "GuildListHandler",
       "file_type": "code",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L183",
+      "source_location": "L177",
       "metadata": {
         "is_nested_type": true,
         "namespace": "DiscordStreamBotBackend.Tests",
@@ -10100,8 +10072,8 @@
       },
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_guildlisthandler",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 46,
+      "community_name": ".SendAsync",
       "norm_label": "guildlisthandler"
     },
     {
@@ -10111,15 +10083,15 @@
       "source_location": "",
       "_origin": "ast",
       "id": "httpmessagehandler",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 46,
+      "community_name": ".SendAsync",
       "norm_label": "httpmessagehandler"
     },
     {
       "label": ".SendAsync()",
       "file_type": "code",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L187",
+      "source_location": "L181",
       "metadata": {
         "namespace": "DiscordStreamBotBackend.Tests",
         "scope_chain": [
@@ -10128,8 +10100,8 @@
       },
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_guildlisthandler_sendasync",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 46,
+      "community_name": ".SendAsync",
       "norm_label": ".sendasync()"
     },
     {
@@ -10139,8 +10111,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "httprequestmessage",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 46,
+      "community_name": ".SendAsync",
       "norm_label": "httprequestmessage"
     },
     {
@@ -10150,8 +10122,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_adminsettingscontracttests_cs_cancellationtoken",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 46,
+      "community_name": ".SendAsync",
       "norm_label": "cancellationtoken"
     },
     {
@@ -10161,8 +10133,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "httpresponsemessage",
-      "community": 25,
-      "community_name": "BearerTokenService",
+      "community": 46,
+      "community_name": ".SendAsync",
       "norm_label": "httpresponsemessage"
     },
     {
@@ -10228,7 +10200,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_googleaccountlinkscontracttests",
       "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community_name": "TwitchAuthorizationService.cs",
       "norm_label": "googleaccountlinkscontracttests.cs"
     },
     {
@@ -11335,7 +11307,7 @@
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_twitchoauthcontracttests",
       "community": 21,
-      "community_name": "DiscordStreamBotBackend.Model",
+      "community_name": "TwitchAuthorizationService.cs",
       "norm_label": "twitchoauthcontracttests.cs"
     },
     {
@@ -11503,8 +11475,8 @@
       },
       "_origin": "ast",
       "id": "tests_discordstreambotbackend_tests_twitchoauthcontracttests_discordstreambotbackend_tests_twitchoauthcontracttests_tokennormalizationencryptsbotusableroundtrip",
-      "community": 4,
-      "community_name": "TwitchRefreshRotationLifecycle",
+      "community": 0,
+      "community_name": "TwitchAuthorizationService",
       "norm_label": ".tokennormalizationencryptsbotusableroundtrip()"
     },
     {
@@ -12934,7 +12906,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L90",
+      "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller",
@@ -12945,7 +12917,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L104",
+      "source_location": "L101",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller",
@@ -12978,7 +12950,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L68",
+      "source_location": "L65",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller",
@@ -12989,7 +12961,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L165",
+      "source_location": "L162",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller",
@@ -13000,7 +12972,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L146",
+      "source_location": "L143",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller",
@@ -13011,7 +12983,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L136",
+      "source_location": "L133",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller",
@@ -13151,7 +13123,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L104",
+      "source_location": "L101",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -13181,7 +13153,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L68",
+      "source_location": "L65",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -13196,7 +13168,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L104",
+      "source_location": "L101",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -13226,7 +13198,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L68",
+      "source_location": "L65",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -13241,7 +13213,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L104",
+      "source_location": "L101",
       "weight": 1.0,
       "context": "generic_arg",
       "metadata": {
@@ -13271,7 +13243,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L68",
+      "source_location": "L65",
       "weight": 1.0,
       "context": "generic_arg",
       "metadata": {
@@ -13286,7 +13258,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L136",
+      "source_location": "L133",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -13317,7 +13289,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L60",
+      "source_location": "L57",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_getsettings",
@@ -13329,19 +13301,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L54",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_getsettings",
-      "target": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_getauthorizationasync",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L62",
+      "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_getsettings",
@@ -13353,7 +13313,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L63",
+      "source_location": "L60",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_getsettings",
@@ -13366,17 +13326,29 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L61",
+      "source_location": "L58",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_getsettings",
       "target": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_requestsnapshotasync"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
+      "source_location": "L54",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_getsettings",
+      "target": "discordstreambotbackend_services_bearertokenservice_discordstreambotbackend_services_bearertokenservice_trygetdiscordsession"
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L68",
+      "source_location": "L65",
       "weight": 1.0,
       "context": "attribute",
       "metadata": {
@@ -13392,7 +13364,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L82",
+      "source_location": "L79",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_sendcommand",
@@ -13404,7 +13376,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L74",
+      "source_location": "L71",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_sendcommand",
@@ -13416,7 +13388,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L84",
+      "source_location": "L81",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_sendcommand",
@@ -13428,7 +13400,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L85",
+      "source_location": "L82",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_sendcommand",
@@ -13439,7 +13411,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L68",
+      "source_location": "L65",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -13456,7 +13428,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L83",
+      "source_location": "L80",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_sendcommand",
@@ -13466,7 +13438,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L90",
+      "source_location": "L87",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -13481,7 +13453,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L90",
+      "source_location": "L87",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -13508,7 +13480,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L104",
+      "source_location": "L101",
       "weight": 1.0,
       "context": "generic_arg",
       "metadata": {
@@ -13523,7 +13495,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L104",
+      "source_location": "L101",
       "weight": 1.0,
       "context": "generic_arg",
       "metadata": {
@@ -13538,7 +13510,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L104",
+      "source_location": "L101",
       "weight": 1.0,
       "context": "generic_arg",
       "metadata": {
@@ -13555,7 +13527,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L108",
+      "source_location": "L105",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_getauthorizationasync",
@@ -13567,7 +13539,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L113",
+      "source_location": "L110",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_adminguildscontroller_discordstreambotbackend_controllers_adminguildscontroller_getauthorizationasync",
@@ -13577,7 +13549,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L104",
+      "source_location": "L101",
       "weight": 1.0,
       "context": "generic_arg",
       "metadata": {
@@ -13592,7 +13564,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L104",
+      "source_location": "L101",
       "weight": 1.0,
       "context": "generic_arg",
       "metadata": {
@@ -13607,7 +13579,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L104",
+      "source_location": "L101",
       "weight": 1.0,
       "context": "generic_arg",
       "metadata": {
@@ -13622,7 +13594,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L146",
+      "source_location": "L143",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -13639,7 +13611,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L160",
+      "source_location": "L154",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_missingadminsettingsrepliesarerejected",
@@ -13649,7 +13621,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/AdminGuildsController.cs",
-      "source_location": "L165",
+      "source_location": "L162",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -13666,7 +13638,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L161",
+      "source_location": "L155",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_missingadminsettingsrepliesarerejected",
@@ -15466,7 +15438,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L263",
+      "source_location": "L258",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller",
@@ -15488,7 +15460,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L236",
+      "source_location": "L231",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller",
@@ -15524,7 +15496,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L144",
+      "source_location": "L139",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_youtubenotificationscontroller",
@@ -15535,7 +15507,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L224",
+      "source_location": "L219",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_youtubenotificationscontroller",
@@ -15557,7 +15529,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L215",
+      "source_location": "L210",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_youtubenotificationscontroller",
@@ -15656,7 +15628,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L159",
+      "source_location": "L154",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_youtubenotificationscontroller_convertatomtoclass",
@@ -15668,7 +15640,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L193",
+      "source_location": "L188",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_youtubenotificationscontroller_convertatomtoclass",
@@ -15680,7 +15652,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L193",
+      "source_location": "L188",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_youtubenotificationscontroller_convertatomtoclass",
@@ -15691,7 +15663,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L144",
+      "source_location": "L139",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -15708,7 +15680,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L188",
+      "source_location": "L183",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_youtubenotificationscontroller_convertatomtoclass",
@@ -15720,7 +15692,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L202",
+      "source_location": "L197",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_youtubenotificationscontroller_convertatomtoclass",
@@ -15730,7 +15702,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L144",
+      "source_location": "L139",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -15745,7 +15717,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L224",
+      "source_location": "L219",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -15760,7 +15732,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L246",
+      "source_location": "L241",
       "weight": 1.0,
       "context": "field",
       "metadata": {
@@ -15775,7 +15747,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L248",
+      "source_location": "L243",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_youtubepubsubnotification",
@@ -15786,7 +15758,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L238",
+      "source_location": "L233",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_youtubepubsubnotification",
@@ -15797,7 +15769,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L240",
+      "source_location": "L235",
       "weight": 1.0,
       "context": "field",
       "metadata": {
@@ -15827,7 +15799,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L265",
+      "source_location": "L260",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -15842,7 +15814,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Controllers/YouTubeNotificationsController.cs",
-      "source_location": "L265",
+      "source_location": "L260",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_controllers_youtubenotificationscontroller_discordstreambotbackend_controllers_ext",
@@ -17329,7 +17301,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L87",
+      "source_location": "L84",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -17344,7 +17316,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L67",
+      "source_location": "L64",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -17359,7 +17331,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L70",
+      "source_location": "L67",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -19660,7 +19632,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L22",
+      "source_location": "L19",
       "weight": 1.0,
       "context": "field",
       "metadata": {
@@ -19672,25 +19644,10 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L20",
-      "weight": 1.0,
-      "context": "field",
-      "metadata": {
-        "ref_token": "TimeSpan"
-      },
-      "_origin": "ast",
-      "source": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice",
-      "target": "discordstreambotbackend_services_adminsettingsredisservice_cs_timespan",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L33",
+      "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice",
@@ -19701,7 +19658,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L73",
+      "source_location": "L70",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice",
@@ -19712,7 +19669,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L87",
+      "source_location": "L84",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice",
@@ -19723,7 +19680,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L67",
+      "source_location": "L64",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice",
@@ -19734,7 +19691,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L70",
+      "source_location": "L67",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice",
@@ -19745,7 +19702,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L23",
+      "source_location": "L20",
       "weight": 1.0,
       "context": "field",
       "metadata": {
@@ -19760,7 +19717,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L33",
+      "source_location": "L30",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -19775,7 +19732,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L33",
+      "source_location": "L30",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -19791,7 +19748,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L46",
+      "source_location": "L43",
       "weight": 1.0,
       "_origin": "ast",
       "source": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_getinstalledguildidsasync",
@@ -19802,7 +19759,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L33",
+      "source_location": "L30",
       "weight": 1.0,
       "context": "generic_arg",
       "metadata": {
@@ -19817,7 +19774,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L87",
+      "source_location": "L84",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -19832,7 +19789,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L67",
+      "source_location": "L64",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -19847,7 +19804,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L70",
+      "source_location": "L67",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -19862,7 +19819,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L87",
+      "source_location": "L84",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -19877,7 +19834,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L67",
+      "source_location": "L64",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -19892,7 +19849,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L70",
+      "source_location": "L67",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -19901,6 +19858,18 @@
       "_origin": "ast",
       "source": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_sendcommandasync",
       "target": "discordstreambotbackend_services_adminsettingsredisservice_cs_task",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
+      "source_location": "L65",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_requestsnapshotasync",
+      "target": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_publishandwaitasync",
       "confidence_score": 1.0
     },
     {
@@ -19911,18 +19880,6 @@
       "source_location": "L68",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_requestsnapshotasync",
-      "target": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_publishandwaitasync",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L71",
-      "weight": 1.0,
-      "_origin": "ast",
       "source": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_sendcommandasync",
       "target": "discordstreambotbackend_services_adminsettingsredisservice_discordstreambotbackend_services_adminsettingsredisservice_publishandwaitasync",
       "confidence_score": 1.0
@@ -19931,7 +19888,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordStreamBotBackend/Services/AdminSettingsRedisService.cs",
-      "source_location": "L73",
+      "source_location": "L70",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -19948,7 +19905,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L167",
+      "source_location": "L161",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_redisguildsnapshotparseracceptslegacyarrayandenvelope",
@@ -31265,18 +31222,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L151",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests",
-      "target": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_adminsettingsreplyusesclusterrequestreplybudget",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L176",
+      "source_location": "L170",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests",
@@ -31342,7 +31288,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L157",
+      "source_location": "L151",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests",
@@ -31375,7 +31321,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L164",
+      "source_location": "L158",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests",
@@ -31386,7 +31332,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L183",
+      "source_location": "L177",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests",
@@ -31432,21 +31378,6 @@
       },
       "_origin": "ast",
       "source": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_adminenvelopeusescamelcaseandsnowflakestrings",
-      "target": "tests_discordstreambotbackend_tests_adminsettingscontracttests_cs_fact",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L151",
-      "weight": 1.0,
-      "context": "attribute",
-      "metadata": {
-        "ref_token": "Fact"
-      },
-      "_origin": "ast",
-      "source": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_adminsettingscontracttests_adminsettingsreplyusesclusterrequestreplybudget",
       "target": "tests_discordstreambotbackend_tests_adminsettingscontracttests_cs_fact",
       "confidence_score": 1.0
     },
@@ -31514,7 +31445,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L157",
+      "source_location": "L151",
       "weight": 1.0,
       "context": "attribute",
       "metadata": {
@@ -31544,7 +31475,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L164",
+      "source_location": "L158",
       "weight": 1.0,
       "context": "attribute",
       "metadata": {
@@ -31628,7 +31559,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L187",
+      "source_location": "L181",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -31643,7 +31574,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L176",
+      "source_location": "L170",
       "weight": 1.0,
       "context": "return_type",
       "metadata": {
@@ -31658,7 +31589,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L183",
+      "source_location": "L177",
       "weight": 1.0,
       "metadata": {
         "ref_token": "HttpMessageHandler"
@@ -31672,7 +31603,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L187",
+      "source_location": "L181",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_discordstreambotbackend_tests_adminsettingscontracttests_discordstreambotbackend_tests_guildlisthandler",
@@ -31683,7 +31614,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L187",
+      "source_location": "L181",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -31698,7 +31629,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L187",
+      "source_location": "L181",
       "weight": 1.0,
       "context": "generic_arg",
       "metadata": {
@@ -31713,7 +31644,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "tests/DiscordStreamBotBackend.Tests/AdminSettingsContractTests.cs",
-      "source_location": "L187",
+      "source_location": "L181",
       "weight": 1.0,
       "context": "parameter_type",
       "metadata": {
@@ -34632,5 +34563,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "3845e425d2b211d5412b819d84368833ac5ab48a"
+  "built_at_commit": "20859de3125add17494e0f5bc0da13491351d669"
 }

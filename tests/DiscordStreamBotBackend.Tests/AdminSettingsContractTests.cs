@@ -149,12 +149,6 @@ public sealed class AdminSettingsContractTests
     }
 
     [Fact]
-    public void AdminSettingsReplyUsesClusterRequestReplyBudget()
-    {
-        Assert.Equal(TimeSpan.FromSeconds(2.5), AdminSettingsRedisService.ReplyTimeout);
-    }
-
-    [Fact]
     public void MissingAdminSettingsRepliesAreRejected()
     {
         Assert.False(AdminGuildsController.TryReadSnapshotReply(null!, out _));
