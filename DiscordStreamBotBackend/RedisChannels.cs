@@ -20,4 +20,14 @@ public static class RedisChannels
         public static string GoogleOperationLock(ulong discordUserId)
             => $"google:oauth:operation-lock:{discordUserId}";
     }
+
+    public static class AdminSettings
+    {
+        public const string GuildSnapshotHash = "cluster:stats:guild_snapshot";
+        public const string SnapshotRequest = "cluster:admin-settings:snapshot:request";
+        public const string CommandRequest = "cluster:admin-settings:command:request";
+
+        public static string Reply(string correlationId)
+            => $"cluster:admin-settings:reply:{correlationId}";
+    }
 }

@@ -14,6 +14,12 @@ public class DiscordSessionPayload
     [JsonProperty("expiresAtUtc")]
     public DateTime ExpiresAtUtc { get; set; }
 
+    [JsonProperty("discordAccessToken")]
+    public string DiscordAccessToken { get; set; }
+
+    [JsonProperty("providerExpiresAtUtc")]
+    public DateTime ProviderExpiresAtUtc { get; set; }
+
     [JsonProperty("purpose")]
     public string Purpose { get; set; }
 

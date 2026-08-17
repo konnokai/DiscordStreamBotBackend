@@ -1,11 +1,12 @@
-﻿namespace DiscordStreamBotBackend.Model
+﻿using Newtonsoft.Json;
+
+namespace DiscordStreamBotBackend.Model;
+
+public class DiscordAccessTokenData
 {
-    public class DiscordAccessTokenData
-    {
-        public string access_token { get; set; }
-        public string refresh_token { get; set; }
-        public string expires_in { get; set; }
-        public string token_type { get; set; }
-        public string scope { get; set; }
-    }
+    [JsonProperty("access_token")]
+    public string AccessToken { get; set; }
+
+    [JsonProperty("expires_in")]
+    public int ExpiresIn { get; set; }
 }

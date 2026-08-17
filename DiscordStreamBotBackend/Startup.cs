@@ -40,6 +40,7 @@ namespace DiscordStreamBotBackend
             {
                 options.UseMemberCasing();
             });
+            services.AddMemoryCache();
 
             services.AddSingleton<RedisService>();
             services.AddSingleton<Services.Auth.TokenService>();
@@ -66,6 +67,8 @@ namespace DiscordStreamBotBackend
                 p.GetRequiredService<IGoogleUnlinkOperationCancellationFactory>(),
                 p.GetRequiredService<Microsoft.Extensions.Logging.ILogger<GoogleAccountLinkService>>()));
             services.AddSingleton<TwitchAuthorizationService>();
+            services.AddSingleton<AdminSettingsRedisService>();
+            services.AddTransient<DiscordGuildAuthorizationService>();
 
             var publicUrls = new PublicUrlService(Configuration);
             services.AddSingleton(publicUrls);

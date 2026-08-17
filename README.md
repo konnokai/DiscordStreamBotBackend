@@ -86,6 +86,8 @@ Linux 會由 Compose 的 `host-gateway` 映射解析 `host.docker.internal`；Do
 
 部署前須先套用 Bot repo 提供的 migration SQL。Twitch provider token 僅保存於 `twitch_broadcaster_authorization`，Backend 不讀寫 Redis token，也不提供舊版 Redis token 遷移流程。
 
+Discord 登入 scope 必須包含 `identify guilds`。新的 DT 加密 payload 會保留 Discord access token 與 provider 到期時間，但前端只能取得並回傳 opaque DT，不會取得 plaintext provider token。DT 到期時間取 12 小時與 Discord `expires_in` 的較早者，且不保存 Discord refresh token。管理 API 每次 GET／POST 都會重新呼叫 Discord `/users/@me/guilds`，只接受 guild owner 或 permissions 包含 `ADMINISTRATOR` (`8`) 的使用者；Redis guild snapshot 僅用於顯示 Bot 是否已加入，不作為授權依據。
+
 MySQL Twitch token 的定期 refresh、解除連結與 pending revocation 重試，會與 Bot 共用 Redis DB 1 的 `twitch:oauth:refresh-lock:{twitchUserId}` 分散式鎖。鎖使用唯一 owner、TTL、背景續租及 Lua owner check；每次 MySQL 狀態寫入前都會確認 owner，失去 ownership 的 stale holder 不得覆寫資料。取得鎖後會重新讀取 MySQL row 並驗證最新 access token。鎖競爭或 Redis 暫時錯誤只會延後處理並保留現有授權狀態，不會因此撤銷授權。
 
 refresh rotation 產生的新 token 會先以舊密文作 compare-and-set 條件寫回 MySQL，遇到暫時失敗會以 fresh DbContext 指數退避重試 6 次；仍失敗時，Backend 會在記憶體保留加密後的新 token、持續續租 refresh lock，並每 30 秒重試，成功保存後才釋放鎖。這避免正常運行中的短暫 MySQL 故障讓其他實例拿舊 refresh token 再次刷新。若 process 在 MySQL 故障期間同時崩潰，現有 schema 無法跨 Twitch 與 MySQL 做原子提交；要封閉這個剩餘窗口必須新增 MySQL recovery/outbox 欄位或資料表，不會把 provider token 重新存回 Redis。
@@ -106,6 +108,11 @@ OAuth 與帳號連結 API：
 | `GET` | `/account-links` | 查詢 Google 與 Twitch 連結狀態 |
 | `DELETE` | `/account-links/google` | 解除 Google 連結 |
 | `DELETE` | `/account-links/twitch` | 解除 Twitch 連結 |
+| `GET` | `/admin/guilds` | 列出目前可管理的 Discord guild 與 Bot 安裝狀態 |
+| `GET` | `/admin/guilds/{guildId}/settings` | 即時授權後向 owning Notifier 取得設定快照 |
+| `POST` | `/admin/guilds/{guildId}/commands` | 即時授權後提交單一設定命令；body 為 `{action,payload}` |
+
+上述管理 API 使用 `Authorization: Bearer <DT>`，並套用既有 `frontend` CORS policy（GET／POST、`Content-Type`、`Authorization`）。設定快照與命令直接使用 Redis request/reply channel，不會進入一般通知 retry queue；Backend 會先訂閱 correlation reply channel 再發布。沒有 subscriber、owning Notifier 未回覆或 reply 無效時回傳 HTTP 503 與 `state=unknown`、`code=settings.unavailable`，不得自動重送 mutation，只能重新取得快照確認結果。
 
 Google account-link response 的 `status` 只表示 OAuth 狀態，值維持 `linked | unlinked | invalid`。Discord 身分組清理狀態由 `cleanupPending` 與各 subscription 的 `pendingRoleRemoval` 分開表示。`guildId` 一律回傳十進位字串，Frontend 必須以 `string` 接收，不可轉成 JavaScript `number`：
 

@@ -64,11 +64,11 @@ public class DiscordOAuthController : ControllerBase
                     : BadRequest(new { error = "token_exchange_failed", message = "Discord 登入失敗，請重新嘗試。" });
 
             var tokenData = JsonConvert.DeserializeObject<DiscordAccessTokenData>(await response.Content.ReadAsStringAsync(cancellationToken));
-            if (string.IsNullOrWhiteSpace(tokenData?.access_token))
+            if (string.IsNullOrWhiteSpace(tokenData?.AccessToken) || tokenData.ExpiresIn <= 0)
                 return Unauthorized(new { error = "invalid_token", message = "Discord 認證失敗，請重新登入。" });
 
             using var userRequest = new HttpRequestMessage(HttpMethod.Get, "https://discord.com/api/v10/users/@me");
-            userRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenData.access_token);
+            userRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenData.AccessToken);
             using var userResponse = await _httpClient.SendAsync(userRequest, cancellationToken);
             if (!userResponse.IsSuccessStatusCode)
                 return IsTemporaryProviderFailure(userResponse.StatusCode)
@@ -82,7 +82,7 @@ public class DiscordOAuthController : ControllerBase
             _logger.LogInformation("Discord 使用者 OAuth 完成: {DiscordUsername} ({DiscordUserId})", discordUser.username, discordUser.id);
             return Ok(new
             {
-                token = _bearerTokenService.CreateDiscordSessionToken(discordUserId),
+                token = _bearerTokenService.CreateDiscordSessionToken(discordUserId, tokenData.AccessToken, tokenData.ExpiresIn),
                 discordData = discordUser
             });
         }

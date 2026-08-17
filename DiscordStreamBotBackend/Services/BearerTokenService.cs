@@ -16,14 +16,25 @@ public class BearerTokenService
         _tokenService = tokenService;
     }
 
-    public string CreateDiscordSessionToken(ulong discordUserId)
+    public string CreateDiscordSessionToken(ulong discordUserId, string discordAccessToken, int providerExpiresInSeconds)
     {
+        if (discordUserId == 0)
+            throw new ArgumentOutOfRangeException(nameof(discordUserId));
+        if (string.IsNullOrWhiteSpace(discordAccessToken))
+            throw new ArgumentException("Discord access token is required.", nameof(discordAccessToken));
+        if (providerExpiresInSeconds <= 0)
+            throw new ArgumentOutOfRangeException(nameof(providerExpiresInSeconds));
+
         var now = DateTime.UtcNow;
+        var sessionExpiresAtUtc = now.Add(SessionLifetime);
+        var providerExpiresAtUtc = now.AddSeconds(providerExpiresInSeconds);
         return _tokenService.CreateToken(new DiscordSessionPayload
         {
             DiscordUserId = discordUserId,
+            DiscordAccessToken = discordAccessToken,
             IssuedAtUtc = now,
-            ExpiresAtUtc = now.Add(SessionLifetime),
+            ExpiresAtUtc = providerExpiresAtUtc < sessionExpiresAtUtc ? providerExpiresAtUtc : sessionExpiresAtUtc,
+            ProviderExpiresAtUtc = providerExpiresAtUtc,
             Purpose = SessionPurpose,
             Version = SessionVersion
         });
@@ -45,9 +56,41 @@ public class BearerTokenService
     {
         discordUserId = 0;
 
+        if (!TryGetDiscordSessionPayload(token, out var payload))
+            return false;
+
+        discordUserId = payload.DiscordUserId;
+        return true;
+    }
+
+    public bool TryGetDiscordSession(string authorization, out DiscordSessionPayload session)
+    {
+        const string prefix = "Bearer ";
+        session = null;
+        if (string.IsNullOrWhiteSpace(authorization) || !authorization.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ||
+            !TryGetDiscordSessionPayload(authorization[prefix.Length..].Trim(), out var payload))
+        {
+            return false;
+        }
+
+        var now = DateTime.UtcNow;
+        if (string.IsNullOrWhiteSpace(payload.DiscordAccessToken) || payload.ProviderExpiresAtUtc <= now ||
+            payload.ExpiresAtUtc > payload.ProviderExpiresAtUtc)
+        {
+            return false;
+        }
+
+        session = payload;
+        return true;
+    }
+
+    private bool TryGetDiscordSessionPayload(string token, out DiscordSessionPayload payload)
+    {
+        payload = null;
+
         try
         {
-            var payload = _tokenService.GetUser<DiscordSessionPayload>(token);
+            payload = _tokenService.GetUser<DiscordSessionPayload>(token);
             var now = DateTime.UtcNow;
             if (payload == null || payload.DiscordUserId == 0 || payload.Purpose != SessionPurpose || payload.Version != SessionVersion ||
                 payload.IssuedAtUtc == default || payload.ExpiresAtUtc <= now || payload.ExpiresAtUtc <= payload.IssuedAtUtc ||
@@ -56,11 +99,11 @@ public class BearerTokenService
                 return false;
             }
 
-            discordUserId = payload.DiscordUserId;
             return true;
         }
         catch
         {
+            payload = null;
             return false;
         }
     }
