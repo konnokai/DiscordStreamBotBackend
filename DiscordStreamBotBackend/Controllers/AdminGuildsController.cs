@@ -20,6 +20,7 @@ namespace DiscordStreamBotBackend.Controllers;
 [EnableCors("frontend")]
 public class AdminGuildsController : ControllerBase
 {
+    private static readonly TimeSpan SettingsRequestTimeout = TimeSpan.FromSeconds(30);
     private readonly AdminSettingsRedisService _adminSettingsRedisService;
     private readonly BearerTokenService _bearerTokenService;
     private readonly DiscordGuildAuthorizationService _discordGuildAuthorizationService;
@@ -37,29 +38,74 @@ public class AdminGuildsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetGuilds(CancellationToken cancellationToken)
     {
-        var authorization = await GetAuthorizationAsync(true, cancellationToken);
-        if (authorization.Error != null)
-            return authorization.Error;
+        string correlationId = Guid.NewGuid().ToString("N");
+        DateTimeOffset deadline = DateTimeOffset.UtcNow.Add(SettingsRequestTimeout);
+        using var timeoutCancellation = new CancellationTokenSource(deadline - DateTimeOffset.UtcNow);
+        using var requestCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken, timeoutCancellation.Token);
+        try
+        {
+            var authorization = await GetAuthorizationAsync(true, requestCancellation.Token);
+            if (timeoutCancellation.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+                return Timeout(correlationId);
+            if (authorization.Error != null)
+                return authorization.Error;
 
-        var installedGuildIds = await _adminSettingsRedisService.GetInstalledGuildIdsAsync(cancellationToken);
-        foreach (var guild in authorization.Guilds)
-            guild.BotInstalled = installedGuildIds.Contains(guild.Id);
+            var installedGuilds = await _adminSettingsRedisService.GetInstalledGuildIdsAsync(
+                requestCancellation.Token, timeoutCancellation.Token, cancellationToken);
+            if (timeoutCancellation.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+                return Timeout(correlationId);
+            if (installedGuilds.Outcome != AdminSettingsRedisOutcome.Reply)
+                return RedisFailure(installedGuilds.Outcome, correlationId);
 
-        return Ok(authorization.Guilds);
+            foreach (var guild in authorization.Guilds)
+                guild.BotInstalled = installedGuilds.Value.Contains(guild.Id);
+
+            return Ok(authorization.Guilds);
+        }
+        catch (OperationCanceledException) when (
+            timeoutCancellation.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        {
+            return Timeout(correlationId);
+        }
     }
 
     [HttpGet("{guildId}/settings")]
     public async Task<IActionResult> GetSettings(string guildId, CancellationToken cancellationToken)
     {
-        if (!_bearerTokenService.TryGetDiscordSession(Request.Headers.Authorization.ToString(), out var session))
-            return Unauthorized(new { error = "invalid_discord_session" });
+        string correlationId = Guid.NewGuid().ToString("N");
+        DateTimeOffset deadline = DateTimeOffset.UtcNow.Add(SettingsRequestTimeout);
+        using var timeoutCancellation = new CancellationTokenSource(deadline - DateTimeOffset.UtcNow);
+        using var requestCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken, timeoutCancellation.Token);
+        try
+        {
+            if (!_bearerTokenService.TryGetDiscordSession(Request.Headers.Authorization.ToString(), out var session))
+                return Unauthorized(new { error = "invalid_discord_session" });
 
-        var envelope = CreateEnvelope(guildId, session.DiscordUserId, "settings.snapshot", new JObject());
-        var reply = await _adminSettingsRedisService.RequestSnapshotAsync(envelope, cancellationToken);
-        if (!TryReadSnapshotReply(reply, out var snapshot))
-            return Unavailable(envelope.CorrelationId);
+            var envelope = CreateEnvelope(
+                guildId,
+                session.DiscordUserId,
+                "settings.snapshot",
+                new JObject(),
+                deadline.ToUnixTimeMilliseconds(),
+                correlationId);
+            var redisResult = await _adminSettingsRedisService.RequestSnapshotAsync(
+                envelope, requestCancellation.Token, timeoutCancellation.Token, cancellationToken);
+            if (timeoutCancellation.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+                return Timeout(envelope.CorrelationId);
+            if (redisResult.Outcome != AdminSettingsRedisOutcome.Reply)
+                return RedisFailure(redisResult.Outcome, envelope.CorrelationId);
+            if (!TryReadSnapshotReply(redisResult.Value, out var snapshot))
+                return Unavailable(envelope.CorrelationId);
 
-        return Ok(snapshot);
+            return Ok(snapshot);
+        }
+        catch (OperationCanceledException) when (
+            timeoutCancellation.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        {
+            return Timeout(correlationId);
+        }
     }
 
     [HttpPost("{guildId}/commands")]
@@ -68,32 +114,61 @@ public class AdminGuildsController : ControllerBase
         [FromBody] AdminSettingsCommandRequest request,
         CancellationToken cancellationToken)
     {
-        var authorization = await GetAuthorizationAsync(false, cancellationToken);
-        if (authorization.Error != null)
-            return authorization.Error;
-        if (request == null || string.IsNullOrWhiteSpace(request.Action) || request.Payload == null)
-            return BadRequest(new { error = "invalid_command" });
-        if (!authorization.Guilds.Any(x => string.Equals(x.Id, guildId, StringComparison.Ordinal)))
-            return StatusCode(403, new { error = "guild_forbidden" });
+        string correlationId = Guid.NewGuid().ToString("N");
+        DateTimeOffset deadline = DateTimeOffset.UtcNow.Add(SettingsRequestTimeout);
+        using var timeoutCancellation = new CancellationTokenSource(deadline - DateTimeOffset.UtcNow);
+        using var requestCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken, timeoutCancellation.Token);
+        try
+        {
+            var authorization = await GetAuthorizationAsync(false, requestCancellation.Token);
+            if (timeoutCancellation.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+                return Timeout(correlationId);
+            if (authorization.Error != null)
+                return authorization.Error;
+            if (request == null || string.IsNullOrWhiteSpace(request.Action) || request.Payload == null)
+                return BadRequest(new { error = "invalid_command" });
+            if (!authorization.Guilds.Any(x => string.Equals(x.Id, guildId, StringComparison.Ordinal)))
+                return StatusCode(403, new { error = "guild_forbidden" });
 
-        var envelope = CreateEnvelope(guildId, authorization.Session.DiscordUserId, request.Action, request.Payload);
-        var reply = await _adminSettingsRedisService.SendCommandAsync(envelope, cancellationToken);
-        if (!TryReadCommandReply(reply, envelope.CorrelationId, out var commandReply))
-            return Unavailable(envelope.CorrelationId);
+            var envelope = CreateEnvelope(
+                guildId,
+                authorization.Session.DiscordUserId,
+                request.Action,
+                request.Payload,
+                deadline.ToUnixTimeMilliseconds(),
+                correlationId);
+            var redisResult = await _adminSettingsRedisService.SendCommandAsync(
+                envelope, requestCancellation.Token, timeoutCancellation.Token, cancellationToken);
+            if (timeoutCancellation.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+                return Timeout(envelope.CorrelationId);
+            if (redisResult.Outcome != AdminSettingsRedisOutcome.Reply)
+                return RedisFailure(redisResult.Outcome, envelope.CorrelationId);
+            if (!TryReadCommandReply(redisResult.Value, envelope.CorrelationId, out var commandReply))
+                return Unavailable(envelope.CorrelationId);
 
-        return Ok(commandReply);
+            return Ok(commandReply);
+        }
+        catch (OperationCanceledException) when (
+            timeoutCancellation.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        {
+            return Timeout(correlationId);
+        }
     }
 
     internal static AdminSettingsRequestEnvelope CreateEnvelope(
         string guildId,
         ulong actorUserId,
         string action,
-        JObject payload)
+        JObject payload,
+        long deadlineUnixMs,
+        string correlationId = null)
         => new()
         {
-            CorrelationId = Guid.NewGuid().ToString("N"),
+            CorrelationId = correlationId ?? Guid.NewGuid().ToString("N"),
             GuildId = guildId,
             ActorUserId = actorUserId.ToString(CultureInfo.InvariantCulture),
+            DeadlineUnixMs = deadlineUnixMs,
             Action = action,
             Payload = payload
         };
@@ -139,6 +214,21 @@ public class AdminGuildsController : ControllerBase
             Code = "settings.unavailable",
             Arguments = new JObject()
         });
+
+    private IActionResult Timeout(string correlationId)
+        => StatusCode(504, new AdminSettingsCommandReply
+        {
+            ContractVersion = 1,
+            CorrelationId = correlationId,
+            State = "timeout",
+            Code = "settings.timeout",
+            Arguments = new JObject()
+        });
+
+    private IActionResult RedisFailure(AdminSettingsRedisOutcome outcome, string correlationId)
+        => outcome == AdminSettingsRedisOutcome.DeadlineExceeded
+            ? Timeout(correlationId)
+            : Unavailable(correlationId);
 
     internal static bool TryReadSnapshotReply(string json, out AdminSettingsSnapshotReply reply)
     {

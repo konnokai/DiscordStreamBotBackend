@@ -1,28 +1,27 @@
-# Graph Report - DiscordStreamBotBackend  (2026-08-17)
+# Graph Report - DiscordStreamBotBackend  (2026-08-20)
 
 ## Corpus Check
-- 69 files · ~22,194 words
+- 69 files · ~22,603 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 821 nodes · 1719 edges · 47 communities
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 95 edges (avg confidence: 0.8)
+- 830 nodes · 1751 edges · 31 communities
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 95 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `20859de3`
+- Built from commit: `f70673a8`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - TwitchAuthorizationService
 - RedisService
-- .GetAuthorizationAsync
-- GoogleOAuthController
+- AdminGuildsController
+- AccountLinksController
 - TwitchRefreshRotationLifecycle
 - CancellationToken
 - GoogleOAuthService
-- MySqlDataStore
 - BiliBiliGetLiveUserInfoJson.cs
 - GoogleAccountLinkService.cs
 - DiscordStreamBotBackend.csproj
@@ -33,35 +32,20 @@
 - GoogleAccountLinkServiceTests
 - CancellationToken
 - GoogleOAuthOperationLockLease
-- BililiveRecorderWebHookController
+- PublicUrlService
 - RedisConnection
 - Discord Stream Bot Backend
-- TwitchAuthorizationService.cs
 - GoogleAccountOperationCoordinator
 - DiscordStreamBotBackend.Services
 - GoogleAccountLink
-- AdminSettingsContractTests
+- BearerTokenService
 - .SuccessfulRevokeTransitionsBeforePublish
 - YouTubeNotificationsController
-- MySqlDataStore.cs
-- RandomVideoController
-- YoutubePubSubNotification
-- .AddPubMessageAsync
-- StartupValidationHostedService
 - TwitCastingWebHookController
+- StartupValidationHostedService
 - LogMiddleware
 - .PublishAsync
-- .GetManageableGuildsAsync
-- TwitCastingWebHookJson.cs
-- DiscordStreamBotBackend.DataBase.Table
-- AdminSettingsRedisService
-- AccountLinksController
-- BearerTokenService
-- RedisChannels
-- Utility
-- AdminSettingsModels.cs
-- Program
-- .SendAsync
+- DiscordStreamBotBackend
 
 ## God Nodes (most connected - your core abstractions)
 1. `TwitchAuthorizationService` - 62 edges
@@ -72,8 +56,8 @@
 6. `TwitchOAuthRefreshLockLease` - 22 edges
 7. `DiscordStreamBotBackend.Model` - 20 edges
 8. `TwitchRefreshRotationLifecycle` - 20 edges
-9. `GoogleAccountLinkService` - 16 edges
-10. `BearerTokenService` - 15 edges
+9. `AdminGuildsController` - 16 edges
+10. `GoogleAccountLinkService` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `FakeGoogleAccountProvider` --implements--> `IGoogleAccountProvider`  [EXTRACTED]
@@ -90,39 +74,35 @@
 ## Import Cycles
 - None detected.
 
-## Communities (47 total, 0 thin omitted)
+## Communities (31 total, 0 thin omitted)
 
 ### Community 0 - "TwitchAuthorizationService"
 Cohesion: 0.08
 Nodes (28): DbContext, DbSet, MainDbContext, DateTime, TwitchBroadcasterAuthorization, TwitchAccessTokenData, TwitchTokenErrorData, TwitchUserData (+20 more)
 
 ### Community 1 - "RedisService"
-Cohesion: 0.15
-Nodes (11): Channel, CancellationTokenSource, ConcurrentDictionary, ConnectionMultiplexer, IDatabase, ILogger, int, List (+3 more)
+Cohesion: 0.13
+Nodes (12): Channel, CancellationTokenSource, ConcurrentDictionary, ConnectionMultiplexer, IDatabase, ILogger, int, List (+4 more)
 
-### Community 2 - ".GetAuthorizationAsync"
-Cohesion: 0.21
-Nodes (11): CancellationToken, HttpGet, HttpPost, IActionResult, JObject, List, Task, AdminGuildsController (+3 more)
+### Community 2 - "AdminGuildsController"
+Cohesion: 0.07
+Nodes (40): CancellationToken, HttpGet, HttpPost, IActionResult, JObject, List, Task, TimeSpan (+32 more)
 
-### Community 3 - "GoogleOAuthController"
-Cohesion: 0.06
-Nodes (34): ControllerBase, CancellationToken, EnableCors, HttpClient, HttpPost, IActionResult, IConfiguration, ILogger (+26 more)
+### Community 3 - "AccountLinksController"
+Cohesion: 0.07
+Nodes (28): ControllerBase, CancellationToken, HttpGet, IActionResult, Task, AccountLinksController, CancellationToken, EnableCors (+20 more)
 
 ### Community 4 - "TwitchRefreshRotationLifecycle"
 Cohesion: 0.08
 Nodes (21): Action, bool, Dictionary, int, object, Task, Lease, TwitchRefreshRotationLifecycle (+13 more)
 
 ### Community 5 - "CancellationToken"
-Cohesion: 0.15
-Nodes (13): GoogleProviderRevokeOutcome, GoogleProviderRevokeResult, Func, bool, CancellationToken, Exception, IReadOnlyList, List (+5 more)
+Cohesion: 0.13
+Nodes (15): GoogleProviderRevokeOutcome, GoogleProviderRevokeResult, Func, bool, CancellationToken, Exception, IReadOnlyList, List (+7 more)
 
 ### Community 6 - "GoogleOAuthService"
-Cohesion: 0.14
-Nodes (15): BackgroundService, CancellationToken, IDbContextFactory, IHttpClientFactory, ILogger, string, Task, GoogleOAuthService (+7 more)
-
-### Community 7 - "MySqlDataStore"
-Cohesion: 0.10
-Nodes (12): CancellationToken, IDbContextFactory, Logger, Task, MySqlDataStore, ProviderTokenLoadResult, TokenCrypto, string (+4 more)
+Cohesion: 0.06
+Nodes (29): BackgroundService, CancellationToken, IDbContextFactory, Logger, Task, MySqlDataStore, ProviderTokenLoadResult, ProviderTokenLoadStatus (+21 more)
 
 ### Community 8 - "BiliBiliGetLiveUserInfoJson.cs"
 Cohesion: 0.18
@@ -164,9 +144,9 @@ Nodes (8): CancellationToken, IDbContextFactory, IReadOnlyList, Task, GoogleAcco
 Cohesion: 0.11
 Nodes (23): CancellationToken, CancellationTokenSource, Exception, IDatabase, int, RedisKey, RedisValue, string (+15 more)
 
-### Community 18 - "BililiveRecorderWebHookController"
-Cohesion: 0.21
-Nodes (10): ContentResult, HttpClient, HttpPost, IConfiguration, ILogger, Task, BililiveRecorderWebHookController, DateTime (+2 more)
+### Community 18 - "PublicUrlService"
+Cohesion: 0.06
+Nodes (29): byte, Controller, ContentResult, HttpClient, HttpPost, IConfiguration, ILogger, Task (+21 more)
 
 ### Community 19 - "RedisConnection"
 Cohesion: 0.33
@@ -176,25 +156,21 @@ Nodes (4): ConnectionMultiplexer, string, RedisConnection, Lazy
 Cohesion: 0.33
 Nodes (5): Discord Stream Bot Backend, Docker Compose 部署, Prometheus, 公開網域與 OAuth URI, 直接執行
 
-### Community 21 - "TwitchAuthorizationService.cs"
-Cohesion: 0.25
-Nodes (6): DiscordStreamBotBackend.Tests, DiscordStreamBotBackend.Services.Auth, DiscordStreamBotBackend.Model.Twitch, DiscordStreamBotBackend.DataBase, TwitchAuthorizationChangedPayload, TwitchUnlinkResult
-
 ### Community 22 - "GoogleAccountOperationCoordinator"
 Cohesion: 0.21
 Nodes (9): Dictionary, IDisposable, object, SemaphoreSlim, ulong, GateEntry, GoogleAccountOperationCoordinator, Releaser (+1 more)
 
 ### Community 23 - "DiscordStreamBotBackend.Services"
-Cohesion: 0.18
-Nodes (4): DiscordStreamBotBackend.Model, DiscordStreamBotBackend.Controllers, DiscordStreamBotBackend.Services, DiscordAccessTokenData
+Cohesion: 0.06
+Nodes (27): DiscordStreamBotBackend.Model, DiscordStreamBotBackend.Model.TwitCasting, DiscordStreamBotBackend.Controllers, DiscordStreamBotBackend.Tests, DiscordStreamBotBackend.Services.Auth, DiscordStreamBotBackend.DataBase.Table, DiscordStreamBotBackend.Model.Twitch, DiscordStreamBotBackend.DataBase (+19 more)
 
 ### Community 24 - "GoogleAccountLink"
-Cohesion: 0.22
-Nodes (8): DateTime, IReadOnlyList, GoogleAccountLink, GoogleMemberSubscription, GoogleUnlinkResponse, TwitchAccountLink, string, FakeGoogleAccountProvider
+Cohesion: 0.33
+Nodes (6): DateTime, IReadOnlyList, GoogleAccountLink, GoogleMemberSubscription, GoogleUnlinkResponse, TwitchAccountLink
 
-### Community 25 - "AdminSettingsContractTests"
-Cohesion: 0.23
-Nodes (5): Fact, IConfiguration, Task, ulong, AdminSettingsContractTests
+### Community 25 - "BearerTokenService"
+Cohesion: 0.05
+Nodes (28): CancellationToken, EnableCors, HttpClient, HttpPost, IActionResult, IConfiguration, ILogger, Task (+20 more)
 
 ### Community 26 - ".SuccessfulRevokeTransitionsBeforePublish"
 Cohesion: 0.53
@@ -204,29 +180,13 @@ Nodes (3): GoogleUnlinkResult, InlineData, Theory
 Cohesion: 0.24
 Nodes (7): ContentResult, HttpGet, HttpPost, IEnumerable, ILogger, YouTubeNotificationsController, Stream
 
-### Community 28 - "MySqlDataStore.cs"
-Cohesion: 0.15
-Nodes (9): Counter, DiscordStreamBotBackend, BackendMetrics, DiscordUser, ProviderTokenLoadStatus, ProviderTokenUnreadableException, Exception, Gauge (+1 more)
-
-### Community 29 - "RandomVideoController"
-Cohesion: 0.17
-Nodes (9): byte, EnableCors, HttpGet, ILogger, Task, RandomVideoController, RNG, RandomNumberGenerator (+1 more)
-
-### Community 30 - "YoutubePubSubNotification"
-Cohesion: 0.25
-Nodes (5): DateTime, Ext, YoutubePubSubNotification, YTNotificationType, YTNotificationType
-
-### Community 31 - ".AddPubMessageAsync"
-Cohesion: 0.33
-Nodes (3): ContentResult, HttpPost, ValueTask
+### Community 31 - "TwitCastingWebHookController"
+Cohesion: 0.22
+Nodes (6): ContentResult, HttpPost, IConfiguration, ILogger, TwitCastingWebHookController, ValueTask
 
 ### Community 32 - "StartupValidationHostedService"
 Cohesion: 0.16
 Nodes (10): CancellationToken, IConfiguration, Task, StartupValidationHostedService, IConfiguration, Startup, IApplicationBuilder, IHostedService (+2 more)
-
-### Community 33 - "TwitCastingWebHookController"
-Cohesion: 0.13
-Nodes (12): Controller, EnableCors, HttpGet, IActionResult, IndexController, ContentResult, EnableCors, HttpGet (+4 more)
 
 ### Community 34 - "LogMiddleware"
 Cohesion: 0.25
@@ -236,49 +196,9 @@ Nodes (6): DiscordStreamBotBackend.Middleware, HttpContext, Logger, Task, LogMid
 Cohesion: 0.46
 Nodes (3): CancellationToken, Task, KeyValuePair
 
-### Community 36 - ".GetManageableGuildsAsync"
-Cohesion: 0.16
-Nodes (12): AdminGuild, CancellationToken, DateTime, HttpClient, IEnumerable, List, Task, ulong (+4 more)
-
-### Community 37 - "TwitCastingWebHookJson.cs"
-Cohesion: 0.60
-Nodes (4): DiscordStreamBotBackend.Model.TwitCasting, Broadcaster, Movie, TwitCastingWebHookJson
-
-### Community 38 - "DiscordStreamBotBackend.DataBase.Table"
-Cohesion: 0.13
-Nodes (9): DiscordStreamBotBackend.DataBase.Table, DateTime, GoogleOAuthUnlinkIntent, DateTime, YoutubeChannelSpider, DateTime, YoutubeMemberAccessToken, DateTime (+1 more)
-
-### Community 39 - "AdminSettingsRedisService"
-Cohesion: 0.29
-Nodes (7): AdminSettingsRequestEnvelope, CancellationToken, ILogger, Task, AdminSettingsRedisService, HashSet, IReadOnlyCollection
-
-### Community 40 - "AccountLinksController"
-Cohesion: 0.38
-Nodes (6): CancellationToken, HttpGet, IActionResult, Task, AccountLinksController, HttpDelete
-
-### Community 41 - "BearerTokenService"
-Cohesion: 0.24
-Nodes (6): DateTime, DiscordSessionPayload, int, string, TimeSpan, BearerTokenService
-
-### Community 42 - "RedisChannels"
-Cohesion: 0.31
-Nodes (6): string, AdminSettings, Member, OAuth, RedisChannels, Twitch
-
-### Community 43 - "Utility"
-Cohesion: 0.22
-Nodes (6): DateTime, HttpContext, string, MemberData, Utility, IPAddress
-
-### Community 44 - "AdminSettingsModels.cs"
-Cohesion: 0.39
-Nodes (7): JObject, List, AdminSettingsCommandReply, AdminSettingsCommandRequest, AdminSettingsSnapshotReply, BotGuildSnapshot, BotGuildSnapshotEnvelope
-
-### Community 45 - "Program"
-Cohesion: 0.33
-Nodes (3): Assembly, Program, IHostBuilder
-
-### Community 46 - ".SendAsync"
-Cohesion: 0.33
-Nodes (5): HttpMessageHandler, HttpRequestMessage, HttpResponseMessage, CancellationToken, GuildListHandler
+### Community 42 - "DiscordStreamBotBackend"
+Cohesion: 0.07
+Nodes (21): Assembly, Counter, DiscordStreamBotBackend, BackendMetrics, DiscordUser, Program, string, AdminSettings (+13 more)
 
 ## Knowledge Gaps
 - **31 isolated node(s):** `net8.0`, `Discord.Net.Webhook (3.19.0)`, `EFCore.NamingConventions (9.0.0)`, `Google.Apis.Oauth2.v2 (1.68.0.1869)`, `Microsoft.AspNetCore.Mvc.NewtonsoftJson (8.0.24)` (+26 more)
@@ -287,17 +207,17 @@ Nodes (5): HttpMessageHandler, HttpRequestMessage, HttpResponseMessage, Cancella
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `TwitchAuthorizationService` connect `TwitchAuthorizationService` to `RedisService`, `GoogleOAuthController`, `TwitchRefreshRotationLifecycle`, `GoogleOAuthService`, `MySqlDataStore`, `AccountLinksController`, `TwitchOAuthRefreshLockLease`, `GoogleOAuthOperationLockLease`, `TwitchAuthorizationService.cs`?**
-  _High betweenness centrality (0.223) - this node is a cross-community bridge._
-- **Why does `DiscordStreamBotBackend.Services` connect `DiscordStreamBotBackend.Services` to `StartupValidationHostedService`, `LogMiddleware`, `GoogleOAuthController`, `TwitchRefreshRotationLifecycle`, `GoogleOAuthService`, `MySqlDataStore`, `GoogleAccountLinkService.cs`, `TwitchOAuthRefreshLockLease`, `EventSubHostedService`, `GoogleOAuthOperationLockLease`, `TwitchAuthorizationService.cs`, `MySqlDataStore.cs`?**
-  _High betweenness centrality (0.202) - this node is a cross-community bridge._
-- **Why does `RedisService` connect `RedisService` to `StartupValidationHostedService`, `TwitCastingWebHookController`, `LogMiddleware`, `GoogleOAuthController`, `.PublishAsync`, `TwitchRefreshRotationLifecycle`, `TwitchAuthorizationService`, `AdminSettingsRedisService`, `EventSubHostedService`, `GoogleAccountLinksContractTests`, `DiscordStreamBotBackend.Services`, `YouTubeNotificationsController`, `RandomVideoController`, `YoutubePubSubNotification`, `.AddPubMessageAsync`?**
+- **Why does `TwitchAuthorizationService` connect `TwitchAuthorizationService` to `RedisService`, `AccountLinksController`, `TwitchRefreshRotationLifecycle`, `GoogleOAuthService`, `TwitchOAuthRefreshLockLease`, `GoogleOAuthOperationLockLease`, `PublicUrlService`, `DiscordStreamBotBackend.Services`?**
+  _High betweenness centrality (0.220) - this node is a cross-community bridge._
+- **Why does `DiscordStreamBotBackend.Services` connect `DiscordStreamBotBackend.Services` to `StartupValidationHostedService`, `LogMiddleware`, `AdminGuildsController`, `TwitchRefreshRotationLifecycle`, `GoogleOAuthService`, `GoogleAccountLinkService.cs`, `TwitchOAuthRefreshLockLease`, `EventSubHostedService`, `GoogleOAuthOperationLockLease`, `PublicUrlService`?**
+  _High betweenness centrality (0.205) - this node is a cross-community bridge._
+- **Why does `RedisService` connect `RedisService` to `StartupValidationHostedService`, `TwitchAuthorizationService`, `AdminGuildsController`, `LogMiddleware`, `AccountLinksController`, `.PublishAsync`, `TwitchRefreshRotationLifecycle`, `EventSubHostedService`, `GoogleAccountLinksContractTests`, `PublicUrlService`, `DiscordStreamBotBackend.Services`, `YouTubeNotificationsController`, `TwitCastingWebHookController`?**
   _High betweenness centrality (0.159) - this node is a cross-community bridge._
 - **What connects `net8.0`, `Discord.Net.Webhook (3.19.0)`, `EFCore.NamingConventions (9.0.0)` to the rest of the system?**
   _31 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `TwitchAuthorizationService` be split into smaller, more focused modules?**
-  _Cohesion score 0.08146705615060046 - nodes in this community are weakly interconnected._
-- **Should `GoogleOAuthController` be split into smaller, more focused modules?**
-  _Cohesion score 0.05580693815987934 - nodes in this community are weakly interconnected._
-- **Should `TwitchRefreshRotationLifecycle` be split into smaller, more focused modules?**
-  _Cohesion score 0.07686274509803921 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08069620253164557 - nodes in this community are weakly interconnected._
+- **Should `RedisService` be split into smaller, more focused modules?**
+  _Cohesion score 0.13333333333333333 - nodes in this community are weakly interconnected._
+- **Should `AdminGuildsController` be split into smaller, more focused modules?**
+  _Cohesion score 0.06646825396825397 - nodes in this community are weakly interconnected._

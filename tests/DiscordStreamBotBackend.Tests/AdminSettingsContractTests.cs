@@ -108,7 +108,8 @@ public sealed class AdminSettingsContractTests
             DiscordUserId.ToString(),
             DiscordUserId,
             "youtube-notification.remove",
-            JObject.FromObject(new { sourceId = "UC123" }));
+            JObject.FromObject(new { sourceId = "UC123" }),
+            1780000000000);
         var json = JObject.Parse(JsonConvert.SerializeObject(envelope));
 
         Assert.Equal(1, json.Value<int>("contractVersion"));
@@ -117,11 +118,26 @@ public sealed class AdminSettingsContractTests
         Assert.Equal(DiscordUserId.ToString(), json.Value<string>("guildId"));
         Assert.Equal(JTokenType.String, json["actorUserId"]!.Type);
         Assert.Equal(DiscordUserId.ToString(), json.Value<string>("actorUserId"));
+        Assert.Equal(1780000000000, json.Value<long>("deadlineUnixMs"));
         Assert.Equal("youtube-notification.remove", json.Value<string>("action"));
         Assert.Equal("UC123", json["payload"]!.Value<string>("sourceId"));
         Assert.Equal(
-            ["action", "actorUserId", "contractVersion", "correlationId", "guildId", "payload"],
+            ["action", "actorUserId", "contractVersion", "correlationId", "deadlineUnixMs", "guildId", "payload"],
             json.Properties().Select(x => x.Name).OrderBy(x => x, StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public void RedisTransportOutcomesDoNotCollapseIntoOneState()
+    {
+        Assert.Equal(
+            AdminSettingsRedisOutcome.Reply,
+            AdminSettingsRedisResult<string>.FromReply("reply").Outcome);
+        Assert.Equal(
+            AdminSettingsRedisOutcome.Unavailable,
+            AdminSettingsRedisResult<string>.Unavailable().Outcome);
+        Assert.Equal(
+            AdminSettingsRedisOutcome.DeadlineExceeded,
+            AdminSettingsRedisResult<string>.DeadlineExceeded().Outcome);
     }
 
     [Fact]
