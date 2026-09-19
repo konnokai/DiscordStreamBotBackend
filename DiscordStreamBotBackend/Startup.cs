@@ -43,6 +43,8 @@ namespace DiscordStreamBotBackend
             services.AddMemoryCache();
 
             services.AddSingleton<RedisService>();
+            // WebSub 共享狀態與 Bot 使用同一個 Redis logical database（DB 1）。
+            services.AddSingleton(p => new YoutubeWebSub.YoutubeWebSubStateStore(p.GetRequiredService<RedisService>().RedisDb));
             services.AddSingleton<Services.Auth.TokenService>();
             services.AddSingleton<BearerTokenService>();
             services.AddSingleton<OAuthStateService>();

@@ -41,9 +41,15 @@ namespace DiscordStreamBotBackend.Middleware
                 string rngReqRedisKey = $"server.rngvideocount:{remoteIpText.Replace(":", "-").Replace(".", "-")}";
                 bool isRedisError = false;
 
+                // YouTube WebSub 的 challenge／通知全部來自 Hub 的同一個 IP，一次大量續訂會產生連續的 404；
+                // 若把這些算進 bad request，授權正確的 challenge 會被 429 擋在 controller 之前而持續失敗。
+                // 該端點本身只做嚴格驗證且快速回應，因此不套用通用的 bad request 節流。
+                bool isYoutubeCallback = requestPath.Equals("/NotificationCallback", StringComparison.OrdinalIgnoreCase);
+
                 try
                 {
-                    if (!context.Request.Headers.TryGetValue("Content-Type", out var contentType) || contentType != "application/atom+xml")
+                    // 以 media type 判斷：`application/atom+xml; charset=utf-8` 是合法通知，不可算成 bad request。
+                    if (!isYoutubeCallback && !YoutubeWebSub.YoutubeWebSubContract.IsAtomContentType(context.Request.Headers.ContentType.ToString()))
                     {
                         var badCount = await _redisService.RedisDb.StringGetAsync(badReqRedisKey);
                         if (badCount.HasValue && int.Parse(badCount.ToString()) >= 5)
@@ -102,7 +108,7 @@ namespace DiscordStreamBotBackend.Middleware
 
                 if (!isRedisError)
                 {
-                    if (context.Response.StatusCode >= 400 && context.Response.StatusCode < 500)
+                    if (!isYoutubeCallback && context.Response.StatusCode >= 400 && context.Response.StatusCode < 500)
                     {
                         await _redisService.RedisDb.StringIncrementAsync(badReqRedisKey);
                         await _redisService.RedisDb.KeyExpireAsync(badReqRedisKey, TimeSpan.FromHours(1));

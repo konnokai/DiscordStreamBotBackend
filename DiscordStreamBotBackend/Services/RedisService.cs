@@ -1,4 +1,4 @@
-using DiscordStreamBotBackend.Controllers;
+using DiscordStreamBotBackend.YoutubeWebSub;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -98,10 +98,9 @@ namespace DiscordStreamBotBackend.Services
             throw new InvalidOperationException("Redis 發布佇列已滿或正在關閉。");
         }
 
-        public void AddYouTubePubMessage(YoutubePubSubNotification youtubeNotification)
-        {
-            AddPubMessage(GetRedisChannelName(youtubeNotification.NotificationType), JsonConvert.SerializeObject(youtubeNotification));
-        }
+        /// <summary>轉發 WebSub 通知到既有 Redis channel；實際發布與重試由既有佇列處理，不讓 Hub request 等待。</summary>
+        public ValueTask AddYouTubePubMessageAsync(YoutubePubSubNotification youtubeNotification)
+            => AddPubMessageAsync(GetRedisChannelName(youtubeNotification.NotificationType), JsonConvert.SerializeObject(youtubeNotification));
 
         private static string GetRedisChannelName(YoutubePubSubNotification.YTNotificationType notificationType)
             => notificationType == YoutubePubSubNotification.YTNotificationType.CreateOrUpdated ? "youtube.pubsub.CreateOrUpdate" : "youtube.pubsub.Deleted";
@@ -160,14 +159,26 @@ namespace DiscordStreamBotBackend.Services
                 _logger.LogInformation("通知訊息已全部重新傳送。");
         }
 
+        /// <summary>
+        /// 待重試訊息的識別 key。WebSub 通知（CreateOrUpdate／Deleted）以 videoId 去重；
+        /// 其餘訊息（例如 <c>youtube.pubsub.NeedRegister</c> 的裸 channel ID）用 channel + payload 的完整字串，
+        /// 不可用雜湊值，否則不同頻道的訊息會互相覆蓋。
+        /// </summary>
         private void SavePendingMessage(KeyValuePair<string, string> message)
         {
-            var saveKey = message.GetHashCode().ToString();
-            if (message.Key.StartsWith("youtube.pubsub", StringComparison.Ordinal))
+            var saveKey = $"{message.Key}|{message.Value}";
+            if (message.Key is "youtube.pubsub.CreateOrUpdate" or "youtube.pubsub.Deleted")
             {
-                var youtubeData = JsonConvert.DeserializeObject<YoutubePubSubNotification>(message.Value);
-                if (!string.IsNullOrWhiteSpace(youtubeData?.VideoId))
-                    saveKey = youtubeData.VideoId;
+                try
+                {
+                    var youtubeData = JsonConvert.DeserializeObject<YoutubePubSubNotification>(message.Value);
+                    if (!string.IsNullOrWhiteSpace(youtubeData?.VideoId))
+                        saveKey = youtubeData.VideoId;
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogWarning(ex, "待重試的 YouTube 通知無法解析，改用訊息內容作為識別 | Channel: \"{Channel}\"", message.Key);
+                }
             }
 
             _needRePublishMessageList.AddOrUpdate(saveKey, message, (_, _) => message);
