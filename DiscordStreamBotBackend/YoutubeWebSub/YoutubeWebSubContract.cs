@@ -14,8 +14,12 @@ namespace DiscordStreamBotBackend.YoutubeWebSub;
 /// </summary>
 public static class YoutubeWebSubContract
 {
-    /// <summary>canonical topic 前綴；官方文件為 <c>https://www.youtube.com/feeds/videos.xml?channel_id=</c>。</summary>
-    public const string TopicPrefix = "https://www.youtube.com/feeds/videos.xml?channel_id=";
+    /// <summary>
+    /// canonical topic 前綴，必須與 Bot 相同。官方文件寫的是 <c>/feeds/videos.xml</c>，但 YouTube 送推播時寫死用
+    /// <c>/xml/feeds/videos.xml</c>，Hub 又是逐字比對 topic；訂 <c>/feeds/</c> 雖然驗證會過，卻永遠收不到通知。
+    /// 見 https://issuetracker.google.com/issues/566069563
+    /// </summary>
+    public const string TopicPrefix = "https://www.youtube.com/xml/feeds/videos.xml?channel_id=";
 
     public const string ModeSubscribe = "subscribe";
     public const string ModeUnsubscribe = "unsubscribe";

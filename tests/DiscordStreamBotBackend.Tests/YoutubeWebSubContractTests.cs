@@ -37,11 +37,12 @@ public sealed class YoutubeWebSubContractTests
     public void TopicExtractionRequiresCanonicalUrl()
     {
         Assert.Equal(ChannelId, YoutubeWebSubContract.ExtractChannelIdFromTopic(
-            "https://www.youtube.com/feeds/videos.xml?channel_id=" + ChannelId));
-        Assert.Equal(ChannelId, YoutubeWebSubContract.ExtractChannelIdFromTopic(
-            "https://www.youtube.com/feeds/videos.xml?channel_id=" + ChannelId + "&x=1"));
-        Assert.Null(YoutubeWebSubContract.ExtractChannelIdFromTopic(
             "https://www.youtube.com/xml/feeds/videos.xml?channel_id=" + ChannelId));
+        Assert.Equal(ChannelId, YoutubeWebSubContract.ExtractChannelIdFromTopic(
+            "https://www.youtube.com/xml/feeds/videos.xml?channel_id=" + ChannelId + "&x=1"));
+        // 官方文件的 /feeds/ 收不到 YouTube 的推播（issue 566069563），不可當成 canonical topic。
+        Assert.Null(YoutubeWebSubContract.ExtractChannelIdFromTopic(
+            "https://www.youtube.com/feeds/videos.xml?channel_id=" + ChannelId));
         Assert.Null(YoutubeWebSubContract.ExtractChannelIdFromTopic("https://example.com/?channel_id=" + ChannelId));
         Assert.Null(YoutubeWebSubContract.ExtractChannelIdFromTopic(null!));
     }
