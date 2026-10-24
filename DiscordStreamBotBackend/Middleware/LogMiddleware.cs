@@ -1,8 +1,8 @@
 ﻿using DiscordStreamBotBackend.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using NLog;
 using StackExchange.Redis;
 using System;
 using System.Text;
@@ -14,12 +14,13 @@ namespace DiscordStreamBotBackend.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly RedisService _redisService;
-        private Logger logger = LogManager.GetLogger("ACCE");
+        private readonly ILogger<LogMiddleware> logger;
 
-        public LogMiddleware(RequestDelegate next, RedisService redisService)
+        public LogMiddleware(RequestDelegate next, RedisService redisService, ILogger<LogMiddleware> logger)
         {
             _next = next;
             _redisService = redisService;
+            this.logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
@@ -90,12 +91,12 @@ namespace DiscordStreamBotBackend.Middleware
                 }
                 catch (RedisConnectionException redisEx)
                 {
-                    logger.Error(redisEx, "Redis 連線中斷。");
+                    logger.LogError(redisEx, "Redis 連線中斷。");
                     isRedisError = true;
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, "Middleware 處理失敗。");
+                    logger.LogError(ex, "Middleware 處理失敗。");
                 }
 
                 await _next(context);
@@ -104,7 +105,8 @@ namespace DiscordStreamBotBackend.Middleware
                 if (route != null && route == "statuscheck" && context.Response.StatusCode == 200)
                     return;
 
-                logger.Info($"{remoteIpText} | {context.Request.Method} | {context.Response.StatusCode} | {requestPath}");
+                logger.LogInformation("{RemoteIp} | {Method} | {StatusCode} | {Path}",
+                    remoteIpText, context.Request.Method, context.Response.StatusCode, requestPath);
 
                 if (!isRedisError)
                 {
@@ -122,7 +124,7 @@ namespace DiscordStreamBotBackend.Middleware
             }
             catch (Exception e)
             {
-                logger.Error(e);
+                logger.LogError(e, "請求處理失敗。");
 
                 if (context.Response.HasStarted)
                     throw;

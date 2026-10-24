@@ -39,6 +39,7 @@ public class GoogleOAuthService : IGoogleAccountProvider, IGoogleProviderRevoker
         IDbContextFactory<MainDbContext> dbContextFactory,
         IHttpClientFactory httpClientFactory,
         ILogger<GoogleOAuthService> logger,
+        ILogger<MySqlDataStore> dataStoreLogger,
         PublicUrlService publicUrls,
         TokenService tokenService,
         GoogleAccountOperationCoordinator coordinator,
@@ -51,7 +52,7 @@ public class GoogleOAuthService : IGoogleAccountProvider, IGoogleProviderRevoker
         _logger = logger;
         _publicUrls = publicUrls;
         _clientId = configuration["Google:ClientId"];
-        _dataStore = new MySqlDataStore(dbContextFactory, tokenService);
+        _dataStore = new MySqlDataStore(dbContextFactory, tokenService, dataStoreLogger);
         _flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
         {
             ClientSecrets = new ClientSecrets

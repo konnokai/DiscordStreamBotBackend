@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using NLog;
-using NLog.Web;
+using Serilog;
+using Serilog.Debugging;
 using System;
 using System.Reflection;
 
@@ -27,8 +26,11 @@ namespace DiscordStreamBotBackend
             Console.WriteLine("Debugger attached");
 #endif
 
-            var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
-            logger.Info(VERSION + " 正在初始化");
+            // 讀到設定檔前先用只有 console 的 bootstrap logger，Host 建好後再換成含 Loki 的完整設定。
+            // sink 內部錯誤（例如 Loki DNS 失敗）只會寫到 SelfLog，不開的話 Loki 沒資料時查不到原因。
+            SelfLog.Enable(Console.Error);
+            Log.Logger = BackendLogging.Configure(new LoggerConfiguration(), lokiUrl: null).CreateBootstrapLogger();
+            Log.Information("{Version} 正在初始化", VERSION);
 
             try
             {
@@ -36,13 +38,12 @@ namespace DiscordStreamBotBackend
             }
             catch (Exception exception)
             {
-                // NLog：攔截啟動設定錯誤。
-                logger.Error(exception, "程式因例外而停止。");
+                Log.Fatal(exception, "程式因例外而停止。");
             }
             finally
             {
-                // 結束程式前先寫完 log，並停止內部計時器與執行緒，避免 Linux 發生 segmentation fault。
-                LogManager.Shutdown();
+                // Loki sink 在背景批次推送，結束前要 flush，否則最後幾筆（通常就是停止原因）會遺失。
+                BackendLogging.CloseAndFlush(TimeSpan.FromSeconds(3));
             }
         }
 
@@ -53,12 +54,8 @@ namespace DiscordStreamBotBackend
                 {
                     webBuilder.UseStartup<Startup>();
                 })
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
-                })
-                .UseNLog();
+                .UseSerilog((context, _, configuration) =>
+                    BackendLogging.Configure(configuration, context.Configuration["LokiUrl"]));
         }
 
         public static string GetLinkerTime(Assembly assembly)

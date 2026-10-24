@@ -41,6 +41,7 @@ cp config/appsettings.Production.example.json config/appsettings.Production.json
 | `TwitCasting:WebHookSignature` | 啟用 TwitCasting webhook 時使用的簽章 |
 | `Token:Frontend` | 簽發前端 session 的金鑰，至少 64 個字元 |
 | `Token:ProviderTokenEncryptionKey` | 加密 provider token 的金鑰，至少 64 個字元，必須與 Bot 相同 |
+| `LokiUrl` | 選填。Loki endpoint，例如 `http://host.docker.internal:3100`；留空只輸出 console |
 
 設定檔已被 Git 忽略。不要提交 OAuth Secret、資料庫密碼或 token 金鑰。
 
@@ -91,6 +92,31 @@ docker compose up -d --build
 ```sh
 docker compose restart backend
 ```
+
+## Log 與 Loki
+
+Console log 與 Bot 使用同一種首行格式，exception 接在首行之後：
+
+```text
+[2026/07/21 15:04:05] [backend] [INFO] | 1.2.3.4 | GET | 200 | /account-links
+```
+
+INFO／WARN 寫 stdout，ERROR／CRITICAL 寫 stderr。`Microsoft.*` 與 `System.Net.Http.HttpClient.*` 只輸出 WARN 以上。
+
+在 `config/appsettings.Production.json` 設定 `LokiUrl` 後，後端會在背景批次推送 log 到 Loki。完整 push endpoint（`.../loki/api/v1/push`）與 base URL 都可以用。留空時只輸出 console；網址無效時 stderr 會出現一行 WARN，然後只輸出 console。
+
+```json
+"LokiUrl": "http://host.docker.internal:3100"
+```
+
+改完執行 `docker compose restart backend` 生效。
+
+- 每次推送最多等 5 秒。網路錯誤、HTTP 408／429／5xx 由 Serilog 在背景重試，最多 10 分鐘；其他 4xx 直接丟掉該批，避免卡住後面的 log。
+- 推送失敗與恢復時，stderr 各出現一行 WARN。
+- 程式結束前最多等 3 秒把剩下的 log 送出。
+- 啟動時設定檢查失敗（例如缺少 `Token:Frontend`）發生在讀取 `LokiUrl` 之前，這類錯誤只會出現在 console。
+
+Loki stream labels 與 Bot 相同：`app="discord-stream-notify-bot"`、`service="backend"`、`role="backend"`、`level`（`TRACE`／`DEBUG`／`INFO`／`WARN`／`ERROR`／`CRITICAL`）。所以 Bot 儲存庫的 `deploy/grafana/dashboards/logs-loki.json` 選 Service `backend` 就能查後端 log。logger 名稱放在 JSON body 的 `SourceContext`，不是 label。
 
 正式環境應在後端前方放置反向代理並啟用 HTTPS。對外連接埠只允許可信任的反向代理存取，避免使用者偽造 forwarded header。
 

@@ -14,7 +14,7 @@ Single-context：根目錄一份 `CONTEXT.md`，ADR 放在 `docs/adr/`。See `do
 
 ### 定期驗證維持每小時一次
 
-`TwitchTokenValidationHostedService` 每小時呼叫一次 `/oauth2/validate`，這是 Twitch 的硬性規定：「啟動時驗證一次，之後每小時驗證一次」（https://dev.twitch.tv/docs/authentication/validate-tokens/）。Twitch 會抽查，不照做可能被撤銷 API key。log 太多的問題用 `nlog.config` 處理，週期維持不變。
+`TwitchTokenValidationHostedService` 每小時呼叫一次 `/oauth2/validate`，這是 Twitch 的硬性規定：「啟動時驗證一次，之後每小時驗證一次」（https://dev.twitch.tv/docs/authentication/validate-tokens/）。Twitch 會抽查，不照做可能被撤銷 API key。log 太多的問題用 `BackendLogging.cs` 的 `MinimumLevel.Override` 處理，週期維持不變。
 
 ### revoked 資料列保留在資料庫
 

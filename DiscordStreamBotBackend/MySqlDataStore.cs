@@ -4,8 +4,7 @@ using DiscordStreamBotBackend.Services.Auth;
 using Google.Apis.Util.Store;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using NLog;
-using NLog.Web;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Data;
 using System.Linq;
@@ -43,12 +42,13 @@ namespace DiscordStreamBotBackend
     {
         private readonly IDbContextFactory<MainDbContext> _dbContextFactory;
         private readonly TokenService _tokenService;
-        private readonly Logger _logger = LogManager.Setup().LoadConfigurationFromAppSettings(AppContext.BaseDirectory).GetCurrentClassLogger();
+        private readonly ILogger<MySqlDataStore> _logger;
 
-        public MySqlDataStore(IDbContextFactory<MainDbContext> dbContextFactory, TokenService tokenService)
+        public MySqlDataStore(IDbContextFactory<MainDbContext> dbContextFactory, TokenService tokenService, ILogger<MySqlDataStore> logger)
         {
             _dbContextFactory = dbContextFactory;
             _tokenService = tokenService;
+            _logger = logger;
         }
 
         public Task ClearAsync()
@@ -160,7 +160,7 @@ WHERE `discord_user_id` = {discordUserId}
             var result = DecodeStoredToken<T>(encryptedPayload, _tokenService);
 
             if (result.Status == ProviderTokenLoadStatus.Unreadable)
-                _logger.Error(result.Error, $"MySqlDataStore-LoadAsync ({key}): token 解密或反序列化失敗。");
+                _logger.LogError(result.Error, "MySqlDataStore-LoadAsync ({Key}): token 解密或反序列化失敗。", key);
 
             return result;
         }
