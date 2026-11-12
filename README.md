@@ -67,7 +67,7 @@ redis-cli -n 0 SET twitch:webhook_secret "你的 Twitch webhook secret"
 
 ## 資料庫
 
-資料表與 migration 由 Bot 儲存庫管理。先在 Bot 儲存庫匯入 `migrate_sql/all.sql`，再啟動後端。
+資料表與 migration 由 Bot 儲存庫管理。先啟動 Bot（會自動套用 migration 建立／更新資料表），再啟動後端。
 
 後端只映射既有 schema，不會自動建立或更新資料表。Bot 與後端必須使用相同的 `ProviderTokenEncryptionKey`，才能讀取彼此寫入的 OAuth token。
 
