@@ -109,6 +109,7 @@ public class AdminGuildsController : ControllerBase
     }
 
     [HttpPost("{guildId}/commands")]
+    [RequestSizeLimit(2_000_000)]
     public async Task<IActionResult> SendCommand(
         string guildId,
         [FromBody] AdminSettingsCommandRequest request,
